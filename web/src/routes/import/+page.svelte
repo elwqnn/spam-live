@@ -249,7 +249,14 @@
 
 				<div class="grid gap-1 rounded-xl bg-muted p-3">
 					<p>{m.import_keep_10()}</p>
-					<p class="text-muted-foreground">{m.import_app_soon()}</p>
+					<p class="text-muted-foreground">
+						{m.import_app()}
+						<a
+							class="underline underline-offset-4 hover:text-foreground"
+							href="https://github.com/elwqnn/spam-tcg/releases/latest"
+							rel="external">{m.import_app_download()}</a
+						>
+					</p>
 				</div>
 			</section>
 		{/if}

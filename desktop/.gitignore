@@ -1,0 +1,13 @@
+node_modules
+
+/.svelte-kit
+/build
+/src-tauri/target/
+/src-tauri/gen/schemas/
+
+.DS_Store
+Thumbs.db
+
+vite.config.ts.timestamp-*
+src/lib/paraglide
+project.inlang/cache/

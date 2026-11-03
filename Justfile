@@ -33,6 +33,9 @@ dev-api:
 dev-web:
     cd web && bun run dev
 
+dev-desktop:
+    cd desktop && SPAM_SITE_URL="${SPAM_SITE_URL:-http://localhost:5173}" bun tauri dev
+
 dev-session admin="":
     #!/usr/bin/env bash
     set -euo pipefail
@@ -56,9 +59,14 @@ api-types:
 check:
     cd api && cargo clippy --all-targets -- -D warnings
     cd web && bun run check && bun run lint
+    cd desktop/src-tauri && cargo clippy --all-targets -- -D warnings
+    cd desktop && bun run check && bun run lint
 
-test *args: && test-web
+test *args: && test-web test-desktop
     cd api && DATABASE_URL="${DATABASE_URL:-$(just db-url)}" cargo test {{args}}
 
 test-web:
     cd web && bun run test
+
+test-desktop:
+    cd desktop/src-tauri && cargo test
