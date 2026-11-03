@@ -1,0 +1,6 @@
+**
+!api/Cargo.toml
+!api/Cargo.lock
+!api/src
+!api/migrations
+!catalog/*.json
