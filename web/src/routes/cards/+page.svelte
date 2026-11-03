@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { fold, href, queryHref } from '#lib';
-	import ElementBadge, { ELEMENTS } from '#lib/components/ElementBadge.svelte';
-	import RarityBadge, { RARITIES } from '#lib/components/RarityBadge.svelte';
+	import { fold, queryHref } from '#lib';
+	import CardTile from '#lib/components/CardTile.svelte';
+	import { ELEMENTS } from '#lib/components/ElementBadge.svelte';
+	import { RARITIES } from '#lib/components/RarityBadge.svelte';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import * as NativeSelect from '#lib/components/ui/native-select/index.js';
-	import * as Table from '#lib/components/ui/table/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import type { PageProps } from './$types';
@@ -44,8 +44,8 @@
 	<title>{m.cards_title()} · {m.site_name()}</title>
 </svelte:head>
 
-<div class="grid gap-4">
-	<h1 class="font-heading text-2xl font-semibold">{m.cards_title()}</h1>
+<div class="grid gap-6">
+	<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.cards_title()}</h1>
 
 	<div class="flex flex-wrap gap-2">
 		<Input
@@ -72,7 +72,7 @@
 			onchange={(e) => set('rarity', e.currentTarget.value)}
 		>
 			<NativeSelect.Option value="">{m.all_rarities()}</NativeSelect.Option>
-			{#each Object.entries(RARITIES) as [key, [name]] (key)}
+			{#each Object.entries(RARITIES) as [key, name] (key)}
 				<NativeSelect.Option value={key.replace('rarity-', '')}>{name()}</NativeSelect.Option>
 			{/each}
 		</NativeSelect.Root>
@@ -88,32 +88,13 @@
 	</div>
 
 	{#if cards.length}
-		<Table.Root>
-			<Table.Header>
-				<Table.Row>
-					<Table.Head>{m.sort_name()}</Table.Head>
-					<Table.Head>{m.filter_element()}</Table.Head>
-					<Table.Head class="hidden sm:table-cell">{m.filter_rarity()}</Table.Head>
-					<Table.Head class="text-right">{m.hp()}</Table.Head>
-				</Table.Row>
-			</Table.Header>
-			<Table.Body>
-				{#each cards as card (card.id)}
-					<Table.Row>
-						<Table.Cell class="whitespace-normal">
-							<a class="font-medium hover:underline" href={href(`/cards/${card.id}`)}
-								>{card.name ?? card.id}</a
-							>
-						</Table.Cell>
-						<Table.Cell><ElementBadge element={card.element} /></Table.Cell>
-						<Table.Cell class="hidden sm:table-cell"
-							><RarityBadge rarity={card.rarity} /></Table.Cell
-						>
-						<Table.Cell class="text-right tabular-nums">{card.hp}</Table.Cell>
-					</Table.Row>
-				{/each}
-			</Table.Body>
-		</Table.Root>
+		<ul
+			class="grid grid-cols-2 gap-3 rounded-2xl border board p-3 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] sm:gap-4 sm:p-5"
+		>
+			{#each cards as card, i (card.id)}
+				<li><CardTile {card} index={i} /></li>
+			{/each}
+		</ul>
 	{:else}
 		<p class="text-sm text-muted-foreground">{m.no_cards()}</p>
 	{/if}

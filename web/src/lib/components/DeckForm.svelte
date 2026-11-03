@@ -121,8 +121,9 @@
 	}}
 >
 	<section class="grid gap-3" aria-labelledby="slots-title">
-		<h2 id="slots-title" class="font-heading text-lg font-semibold">
-			{m.your_cards()} <span class="text-muted-foreground tabular-nums">{picked.length}/4</span>
+		<h2 id="slots-title" class="font-heading text-2xl font-medium tracking-tight">
+			{m.your_cards()}
+			<span class="font-mono text-muted-foreground tabular-nums">{picked.length}/4</span>
 		</h2>
 		<ol class="grid gap-3 md:grid-cols-2">
 			{#each slots as slot, i (i)}
@@ -130,7 +131,7 @@
 				{@const detail = slot && details[slot.id]}
 				<li
 					class={[
-						'grid content-start gap-3 rounded-xl border p-3',
+						'grid content-start gap-3 rounded-xl border bg-card p-4',
 						!slot && 'border-dashed',
 						target === i && 'ring-2 ring-ring'
 					]}
@@ -144,7 +145,9 @@
 							{#if card}
 								<ElementBadge element={card.element} />
 								<RarityBadge rarity={card.rarity} />
-								<span class="text-xs text-muted-foreground tabular-nums">{m.hp()} {card.hp}</span>
+								<span class="font-mono text-xs text-muted-foreground tabular-nums"
+									>{m.hp()} {card.hp}</span
+								>
 							{/if}
 						</div>
 						<div class="flex flex-wrap gap-2">
@@ -162,7 +165,7 @@
 								{#each detail.talents as t, ti (t.id)}
 									{@const tid = `talent-${i}-${ti}`}
 									<div
-										class="flex gap-2 rounded-lg border p-2 has-checked:border-ring has-checked:bg-muted/50 has-focus-visible:ring-[3px] has-focus-visible:ring-ring/50"
+										class="flex gap-2 rounded-sm border p-2 has-checked:border-ring has-checked:bg-row has-focus-visible:ring-1 has-focus-visible:ring-ring"
 									>
 										<input
 											type="radio"
@@ -195,7 +198,9 @@
 	</section>
 
 	<section class="grid gap-3" aria-labelledby="picker-title">
-		<h2 id="picker-title" class="font-heading text-lg font-semibold">{m.pick_cards()}</h2>
+		<h2 id="picker-title" class="font-heading text-2xl font-medium tracking-tight">
+			{m.pick_cards()}
+		</h2>
 		<p class="text-sm text-muted-foreground" aria-live="polite">
 			{target !== null ? m.picker_replace({ n: target + 1 }) : full ? m.picker_full() : ''}
 		</p>
@@ -215,12 +220,12 @@
 			</NativeSelect.Root>
 			<NativeSelect.Root aria-label={m.filter_rarity()} bind:value={rarity}>
 				<NativeSelect.Option value="">{m.all_rarities()}</NativeSelect.Option>
-				{#each Object.entries(RARITIES) as [key, [label]] (key)}
+				{#each Object.entries(RARITIES) as [key, label] (key)}
 					<NativeSelect.Option value={key}>{label()}</NativeSelect.Option>
 				{/each}
 			</NativeSelect.Root>
 		</div>
-		<ul class="max-h-96 divide-y overflow-y-auto rounded-xl border">
+		<ul class="max-h-96 divide-y overflow-y-auto rounded-xl border bg-card">
 			{#each filtered as card (card.id)}
 				{@const chosen = slots.some((s) => s?.id === card.id)}
 				{@const action = chosen ? m.picked() : target !== null ? m.replace() : m.add()}
@@ -228,7 +233,9 @@
 					<span class="text-sm font-medium">{card.name ?? card.id}</span>
 					<ElementBadge element={card.element} />
 					<RarityBadge rarity={card.rarity} />
-					<span class="text-xs text-muted-foreground tabular-nums">{m.hp()} {card.hp}</span>
+					<span class="font-mono text-xs text-muted-foreground tabular-nums"
+						>{m.hp()} {card.hp}</span
+					>
 					<Button
 						variant="outline"
 						size="xs"
@@ -245,7 +252,9 @@
 	</section>
 
 	<section class="grid gap-4" aria-labelledby="details-title">
-		<h2 id="details-title" class="font-heading text-lg font-semibold">{m.deck_details()}</h2>
+		<h2 id="details-title" class="font-heading text-2xl font-medium tracking-tight">
+			{m.deck_details()}
+		</h2>
 		<div class="grid gap-1.5">
 			<label for="deck-name" class="text-sm font-medium">{m.deck_name()}</label>
 			<Input id="deck-name" name="name" required bind:value={name} />
@@ -297,7 +306,7 @@
 				role="tabpanel"
 				aria-labelledby="tab-preview"
 				hidden={tab !== 'preview'}
-				class="min-h-72 rounded-xl border p-4"
+				class="min-h-72 rounded-xl border bg-card p-4"
 			>
 				{#if preview?.error}
 					<p role="alert" class="text-sm text-destructive">{preview.error}</p>

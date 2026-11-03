@@ -3,16 +3,14 @@
 	import { page } from '$app/state';
 	import { closeAfter, entryName, href, loginHref, percent } from '#lib';
 	import Author from '#lib/components/Author.svelte';
+	import DeckCards from '#lib/components/DeckCards.svelte';
 	import Description from '#lib/components/Description.svelte';
 	import Dialog from '#lib/components/Dialog.svelte';
-	import ElementBadge from '#lib/components/ElementBadge.svelte';
 	import Guide from '#lib/components/Guide.svelte';
-	import RarityBadge from '#lib/components/RarityBadge.svelte';
 	import Report from '#lib/components/Report.svelte';
 	import Time from '#lib/components/Time.svelte';
 	import { Badge } from '#lib/components/ui/badge/index.js';
 	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
-	import * as Card from '#lib/components/ui/card/index.js';
 	import { Textarea } from '#lib/components/ui/textarea/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
@@ -23,6 +21,7 @@
 	const me = $derived(data.me);
 	const author = $derived(me?.id === deck.authorId);
 	const open = $derived(deck.status === 'public');
+	const catalog = $derived(new Map(data.cards.flatMap((c) => (c ? [[c.id, c] as const] : []))));
 	const error = (key: string) => (form?.key === key ? form.error : null);
 	const stats = $derived([
 		[m.version_label({ version: deck.stats.version }), deck.stats.current],
@@ -38,17 +37,23 @@
 	{#if error(key)}<p role="alert" class="text-sm text-destructive">{error(key)}</p>{/if}
 {/snippet}
 
-<div class="grid gap-6">
+<div class="grid gap-8">
 	<div class="grid gap-3">
-		<a class="text-sm text-muted-foreground hover:underline" href={href('/decks')}
-			>{m.all_decks()}</a
+		<a class="mono-label text-muted-foreground hover:text-foreground" href={href('/decks')}
+			><span aria-hidden="true">←</span> {m.all_decks()}</a
 		>
 		<div class="flex flex-wrap items-center gap-2">
-			<h1 class="font-heading text-2xl font-semibold wrap-anywhere">{deck.name}</h1>
+			<h1 class="font-heading text-3xl font-medium tracking-tight wrap-anywhere sm:text-4xl">
+				{deck.name}
+			</h1>
 			{#if !open}<Badge variant="secondary">{m.draft()}</Badge>{/if}
 		</div>
-		<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-			<Author name={deck.authorName} avatar={deck.authorAvatar} />
+		<div
+			class="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-muted-foreground"
+		>
+			<span class="flex min-w-0 font-sans text-sm text-foreground">
+				<Author name={deck.authorName} avatar={deck.authorAvatar} />
+			</span>
 			<span>{m.version_label({ version: deck.appVersion })}</span>
 			<span>{m.created_on()} <Time iso={deck.createdAt} /></span>
 			{#if deck.publishedAt && open}
@@ -77,7 +82,7 @@
 					</Button>
 				</form>
 			{:else}
-				<span class="text-sm tabular-nums">{m.votes()}: {deck.votes}</span>
+				<span class="font-mono text-sm tabular-nums">{m.votes()}: {deck.votes}</span>
 			{/if}
 			{#if me && open && !author}<Report type="deck" id={deck.id} />{/if}
 			{#if author}
@@ -113,70 +118,51 @@
 	</div>
 
 	<section class="grid gap-3">
-		<h2 class="font-heading text-lg font-semibold">{m.cards_title()}</h2>
-		<div class="grid gap-3 md:grid-cols-2">
-			{#each deck.cards as id, i (id)}
-				{@const card = data.cards[i]}
-				{@const talent = card?.talents[deck.talents[i]]}
-				<Card.Root size="sm">
-					<Card.Header>
-						<Card.Title>
-							{#if card}
-								<a class="hover:underline" href={href(`/cards/${id}`)}>{card.name ?? id}</a>
-							{:else}
-								<span class="text-muted-foreground">{m.unknown_card()} {id.slice(0, 8)}</span>
-							{/if}
-						</Card.Title>
-						{#if card}
-							<Card.Description class="flex flex-wrap items-center gap-2">
-								<ElementBadge element={card.element} />
-								<RarityBadge rarity={card.rarity} />
-								<span class="tabular-nums">{m.hp()} {card.hp}</span>
-							</Card.Description>
-						{/if}
-					</Card.Header>
-					<Card.Content class="grid gap-1">
-						<p class="text-xs text-muted-foreground">{m.talent()}</p>
-						{#if talent}
-							<p class="font-medium">{entryName(talent)}</p>
-							<Description text={talent.description} entry={talent} />
-						{:else}
-							<p>{m.talent_n({ n: deck.talents[i] + 1 })}</p>
-						{/if}
-					</Card.Content>
-				</Card.Root>
-			{/each}
-		</div>
+		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.cards_title()}</h2>
+		<DeckCards tiles cards={deck.cards} {catalog}>
+			{#snippet below(i)}
+				{@const talent = data.cards[i]?.talents[deck.talents[i]]}
+				<div class="grid gap-1">
+					<p class="mono-label text-[10px] text-muted-foreground">{m.talent()}</p>
+					{#if talent}
+						<p class="text-sm font-semibold">{entryName(talent)}</p>
+						<Description text={talent.description} entry={talent} />
+					{:else}
+						<p class="text-sm">{m.talent_n({ n: deck.talents[i] + 1 })}</p>
+					{/if}
+				</div>
+			{/snippet}
+		</DeckCards>
 	</section>
 
 	{#if deck.guideHtml.trim()}
 		<section class="grid gap-3">
-			<h2 class="font-heading text-lg font-semibold">{m.guide()}</h2>
+			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.guide()}</h2>
 			<Guide html={deck.guideHtml} />
 		</section>
 	{/if}
 
 	<section class="grid gap-3">
 		<div class="grid gap-1">
-			<h2 class="font-heading text-lg font-semibold">{m.live_stats()}</h2>
+			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.live_stats()}</h2>
 			<p class="text-sm text-muted-foreground">{m.live_stats_text()}</p>
 		</div>
 		<div class="grid gap-3 sm:grid-cols-2">
 			{#each stats as [label, s] (label)}
-				<div class="grid gap-2 rounded-xl border p-3">
-					<h3 class="text-sm font-medium">{label}</h3>
+				<div class="grid gap-3 rounded-xl border bg-card p-4">
+					<h3 class="mono-label text-muted-foreground">{label}</h3>
 					<dl class="grid grid-cols-3 gap-2">
-						<div>
-							<dt class="text-xs text-muted-foreground">{m.games()}</dt>
-							<dd class="text-lg font-semibold tabular-nums">{s.games}</dd>
+						<div class="grid gap-0.5">
+							<dt class="mono-label text-[10px] text-muted-foreground">{m.games()}</dt>
+							<dd class="font-mono text-2xl tabular-nums">{s.games}</dd>
 						</div>
-						<div>
-							<dt class="text-xs text-muted-foreground">{m.wins()}</dt>
-							<dd class="text-lg font-semibold tabular-nums">{s.wins}</dd>
+						<div class="grid gap-0.5">
+							<dt class="mono-label text-[10px] text-muted-foreground">{m.wins()}</dt>
+							<dd class="font-mono text-2xl tabular-nums">{s.wins}</dd>
 						</div>
-						<div>
-							<dt class="text-xs text-muted-foreground">{m.win_rate()}</dt>
-							<dd class="text-lg font-semibold tabular-nums">{percent(s.winRate)}</dd>
+						<div class="grid gap-0.5">
+							<dt class="mono-label text-[10px] text-muted-foreground">{m.win_rate()}</dt>
+							<dd class="font-mono text-2xl tabular-nums">{percent(s.winRate)}</dd>
 						</div>
 					</dl>
 				</div>
@@ -186,14 +172,14 @@
 
 	{#if open}
 		<section class="grid gap-3">
-			<h2 class="font-heading text-lg font-semibold">
+			<h2 class="font-heading text-2xl font-medium tracking-tight">
 				{m.comments()}
-				<span class="text-muted-foreground tabular-nums">{data.comments.length}</span>
+				<span class="font-mono text-muted-foreground tabular-nums">{data.comments.length}</span>
 			</h2>
 			{#if data.comments.length}
 				<ul class="grid gap-3">
 					{#each data.comments as c (c.id)}
-						<li class="grid gap-2 rounded-xl border p-3">
+						<li class="grid gap-2 rounded-xl border bg-card p-4">
 							<div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
 								<Author name={c.authorName} avatar={c.authorAvatar} />
 								<Time iso={c.createdAt} class="text-xs text-muted-foreground" />

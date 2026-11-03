@@ -11,7 +11,7 @@
 </script>
 
 <label class="flex items-center gap-2 text-sm">
-	<span class="text-muted-foreground">{m.version()}</span>
+	<span class="mono-label text-muted-foreground">{m.version()}</span>
 	<NativeSelect.Root
 		{value}
 		onchange={(e) =>

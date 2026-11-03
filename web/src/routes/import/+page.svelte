@@ -101,12 +101,12 @@
 
 <div class="grid max-w-3xl gap-6">
 	<div class="grid gap-2">
-		<h1 class="font-heading text-2xl font-semibold">{m.import_title()}</h1>
+		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.import_title()}</h1>
 		<p class="text-muted-foreground">{m.import_intro()}</p>
 	</div>
 
 	<section class="grid gap-2 text-sm">
-		<h2 class="font-heading text-lg font-semibold">{m.import_folder_title()}</h2>
+		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.import_folder_title()}</h2>
 		<dl class="grid gap-x-3 gap-y-1 sm:grid-cols-[auto_1fr]">
 			{#each FOLDERS as [os, path] (os)}
 				<dt class="font-medium">{os}</dt>
@@ -117,7 +117,7 @@
 	</section>
 
 	<section class="grid gap-2 text-sm">
-		<h2 class="font-heading text-lg font-semibold">{m.import_sent_title()}</h2>
+		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.import_sent_title()}</h2>
 		<p>{m.import_sent_text()}</p>
 		<ul class="grid list-disc gap-1 pl-5">
 			<li>{m.import_sent_replays()}</li>
@@ -127,7 +127,7 @@
 	</section>
 
 	{#if !data.me}
-		<section class="grid gap-3 rounded-xl border p-4 text-sm">
+		<section class="grid gap-3 rounded-xl border bg-card p-4 text-sm">
 			<p>{m.import_login()}</p>
 			<Button href={loginHref(page.url)} rel="external" class="justify-self-start"
 				>{m.login_steam()}</Button
@@ -135,10 +135,10 @@
 		</section>
 	{:else}
 		<noscript>
-			<p class="rounded-xl border p-4 text-sm">{m.import_needs_js()}</p>
+			<p class="rounded-xl border bg-card p-4 text-sm">{m.import_needs_js()}</p>
 		</noscript>
 		{#if ready}
-			<section class="grid gap-3 rounded-xl border p-4 text-sm">
+			<section class="grid gap-3 rounded-xl border bg-card p-4 text-sm">
 				<label class="grid gap-1.5">
 					<span class="font-medium">{m.import_pick()}</span>
 					<Input
@@ -178,7 +178,7 @@
 		{#if done}
 			<section class="grid gap-3 text-sm" aria-live="polite">
 				{#each uploads as upload (upload.accountId)}
-					<div class="grid gap-2 rounded-xl border p-3">
+					<div class="grid gap-2 rounded-xl border bg-card p-4">
 						<h2 class="font-medium wrap-anywhere">{m.import_account({ id: upload.accountId })}</h2>
 						{#if upload.error}
 							<p role="alert" class="text-destructive">{upload.error}</p>
@@ -219,7 +219,7 @@
 					</div>
 				{/each}
 
-				<div class="grid gap-2 rounded-xl border p-3">
+				<div class="grid gap-2 rounded-xl border bg-card p-4">
 					<h2 class="font-medium">{m.decks_title()}</h2>
 					{#if !decks}
 						<p class="text-muted-foreground">{m.import_no_deck_lines()}</p>

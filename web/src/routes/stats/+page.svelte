@@ -4,6 +4,7 @@
 	import DeckCards from '#lib/components/DeckCards.svelte';
 	import ElementBadge from '#lib/components/ElementBadge.svelte';
 	import VersionSelect from '#lib/components/VersionSelect.svelte';
+	import WinRate from '#lib/components/WinRate.svelte';
 	import { buttonVariants } from '#lib/components/ui/button/index.js';
 	import * as Table from '#lib/components/ui/table/index.js';
 	import { m } from '#lib/paraglide/messages.js';
@@ -23,7 +24,7 @@
 
 <div class="grid gap-4">
 	<div class="grid gap-1">
-		<h1 class="font-heading text-2xl font-semibold">{m.stats_title()}</h1>
+		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.stats_title()}</h1>
 		<p class="text-sm text-muted-foreground">{m.stats_intro()}</p>
 	</div>
 
@@ -44,8 +45,8 @@
 	</div>
 
 	{#if tab === 'decks'}
-		<div class="flex items-center gap-1 text-sm">
-			<span class="text-muted-foreground">{m.sort()}:</span>
+		<div class="flex flex-wrap items-center gap-1">
+			<span class="mr-1 mono-label text-muted-foreground">{m.sort()}</span>
 			<a
 				class={link(data.sort === 'winrate')}
 				href={queryHref(page.url, { sort: null })}
@@ -58,62 +59,79 @@
 			>
 		</div>
 		{#if data.decks.length}
-			<Table.Root>
-				<Table.Header>
-					<Table.Row>
-						<Table.Head>{m.deck()}</Table.Head>
-						<Table.Head class="text-right">{m.games()}</Table.Head>
-						<Table.Head class="text-right">{m.win_rate()}</Table.Head>
-					</Table.Row>
-				</Table.Header>
-				<Table.Body>
-					{#each data.decks as deck (deck.cards.join())}
+			<div class="overflow-hidden rounded-xl border bg-card">
+				<Table.Root>
+					<Table.Header>
 						<Table.Row>
-							<Table.Cell class="min-w-48 whitespace-normal">
-								<DeckCards cards={deck.cards} {catalog} />
-							</Table.Cell>
-							<Table.Cell class="text-right tabular-nums">{deck.games}</Table.Cell>
-							<Table.Cell class="text-right tabular-nums">{percent(deck.winRate)}</Table.Cell>
+							<Table.Head class="pl-4 sm:pl-5">{m.deck()}</Table.Head>
+							<Table.Head class="text-right whitespace-normal">{m.games()}</Table.Head>
+							<Table.Head class="pr-4 text-right whitespace-normal sm:pr-5"
+								>{m.win_rate()}</Table.Head
+							>
 						</Table.Row>
-					{/each}
-				</Table.Body>
-			</Table.Root>
+					</Table.Header>
+					<Table.Body>
+						{#each data.decks as deck (deck.cards.join())}
+							<Table.Row>
+								<Table.Cell class="min-w-40 py-3.5 pl-4 whitespace-normal sm:min-w-48 sm:pl-5">
+									<DeckCards cards={deck.cards} {catalog} />
+								</Table.Cell>
+								<Table.Cell class="text-right font-mono text-[13px] tabular-nums"
+									>{deck.games}</Table.Cell
+								>
+								<Table.Cell class="pr-4 sm:pr-5"><WinRate value={deck.winRate} /></Table.Cell>
+							</Table.Row>
+						{/each}
+					</Table.Body>
+				</Table.Root>
+			</div>
 		{:else}
 			<p class="text-sm text-muted-foreground">{m.no_stats()}</p>
 		{/if}
 	{:else if data.cardStats.length}
-		<Table.Root>
-			<Table.Header>
-				<Table.Row>
-					<Table.Head>{m.card()}</Table.Head>
-					<Table.Head class="text-right">{m.games()}</Table.Head>
-					<Table.Head class="text-right">{m.play_rate()}</Table.Head>
-					<Table.Head class="text-right">{m.win_rate()}</Table.Head>
-				</Table.Row>
-			</Table.Header>
-			<Table.Body>
-				{#each data.cardStats as row (row.card)}
-					{@const card = catalog.get(row.card)}
+		<div class="overflow-hidden rounded-xl border bg-card">
+			<Table.Root>
+				<Table.Header>
 					<Table.Row>
-						<Table.Cell class="whitespace-normal">
-							{#if card}
-								<span class="flex items-center gap-1.5">
-									<ElementBadge element={card.element} />
-									<a class="hover:underline" href={href(`/cards/${row.card}`)}
-										>{card.name ?? card.id}</a
-									>
-								</span>
-							{:else}
-								<span class="text-muted-foreground">{m.unknown_card()} {row.card.slice(0, 8)}</span>
-							{/if}
-						</Table.Cell>
-						<Table.Cell class="text-right tabular-nums">{row.games}</Table.Cell>
-						<Table.Cell class="text-right tabular-nums">{percent(row.playRate)}</Table.Cell>
-						<Table.Cell class="text-right tabular-nums">{percent(row.winRate)}</Table.Cell>
+						<Table.Head class="pl-4 sm:pl-5">{m.card()}</Table.Head>
+						<Table.Head class="text-right whitespace-normal">{m.games()}</Table.Head>
+						<Table.Head class="hidden text-right sm:table-cell">{m.play_rate()}</Table.Head>
+						<Table.Head class="pr-4 text-right whitespace-normal sm:pr-5">{m.win_rate()}</Table.Head
+						>
 					</Table.Row>
-				{/each}
-			</Table.Body>
-		</Table.Root>
+				</Table.Header>
+				<Table.Body>
+					{#each data.cardStats as row (row.card)}
+						{@const card = catalog.get(row.card)}
+						<Table.Row>
+							<Table.Cell class="pl-4 whitespace-normal sm:pl-5">
+								{#if card}
+									<span class="flex items-center gap-1.5">
+										<ElementBadge element={card.element} />
+										<a class="hover:underline" href={href(`/cards/${row.card}`)}
+											>{card.name ?? card.id}</a
+										>
+									</span>
+								{:else}
+									<span class="text-muted-foreground"
+										>{m.unknown_card()} {row.card.slice(0, 8)}</span
+									>
+								{/if}
+							</Table.Cell>
+							<Table.Cell class="text-right font-mono text-[13px] tabular-nums"
+								>{row.games}</Table.Cell
+							>
+							<Table.Cell class="hidden text-right font-mono text-[13px] tabular-nums sm:table-cell"
+								>{percent(row.playRate)}</Table.Cell
+							>
+							<Table.Cell class="pr-4 sm:pr-5"
+								><WinRate value={row.winRate} element={card?.element} /></Table.Cell
+							>
+						</Table.Row>
+					{/each}
+				</Table.Body>
+			</Table.Root>
+		</div>
 	{:else}
 		<p class="text-sm text-muted-foreground">{m.no_stats()}</p>
 	{/if}

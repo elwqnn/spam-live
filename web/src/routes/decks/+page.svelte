@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { href, percent, queryHref } from '#lib';
+	import { href, queryHref } from '#lib';
 	import Author from '#lib/components/Author.svelte';
 	import DeckCards from '#lib/components/DeckCards.svelte';
+	import WinRate from '#lib/components/WinRate.svelte';
 	import { Badge } from '#lib/components/ui/badge/index.js';
 	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
 	import * as NativeSelect from '#lib/components/ui/native-select/index.js';
@@ -31,9 +32,9 @@
 	<title>{m.decks_title()} · {m.site_name()}</title>
 </svelte:head>
 
-<div class="grid gap-4">
+<div class="grid gap-6">
 	<div class="flex flex-wrap items-center justify-between gap-2">
-		<h1 class="font-heading text-2xl font-semibold">{m.decks_title()}</h1>
+		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.decks_title()}</h1>
 		<Button href={href('/decks/new')}>{m.new_deck()}</Button>
 	</div>
 
@@ -53,8 +54,8 @@
 	{/if}
 
 	<div class="flex flex-wrap items-center justify-between gap-2">
-		<div class="flex flex-wrap items-center gap-1 text-sm">
-			<span class="text-muted-foreground">{m.sort()}:</span>
+		<div class="flex flex-wrap items-center gap-1">
+			<span class="mr-1 mono-label text-muted-foreground">{m.sort()}</span>
 			{#each sorts as [key, label] (key)}
 				<a
 					class={link(data.sort === key)}
@@ -64,8 +65,8 @@
 				>
 			{/each}
 		</div>
-		<label class="flex min-w-0 items-center gap-2 text-sm">
-			<span class="text-muted-foreground">{m.card()}</span>
+		<label class="flex min-w-0 items-center gap-2">
+			<span class="mono-label text-muted-foreground">{m.card()}</span>
 			<NativeSelect.Root
 				class="max-w-56"
 				value={data.card ?? ''}
@@ -83,22 +84,42 @@
 	</div>
 
 	{#if data.decks.length}
-		<ul class="grid gap-3">
+		<ul class="divide-y overflow-hidden rounded-xl border bg-card">
 			{#each data.decks as deck (deck.id)}
-				<li class="grid gap-2 rounded-xl border p-3">
-					<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-						<a class="font-medium wrap-anywhere hover:underline" href={href(`/decks/${deck.id}`)}
-							>{deck.name}</a
-						>
-						{#if deck.status === 'draft'}<Badge variant="secondary">{m.draft()}</Badge>{/if}
-						<span class="flex min-w-0 text-sm text-muted-foreground">
-							<Author name={deck.authorName} avatar={deck.authorAvatar} />
-						</span>
+				<li
+					class="grid gap-x-6 gap-y-3 px-5 py-4 transition-colors hover:bg-row md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+				>
+					<div class="grid min-w-0 gap-2.5">
+						<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+							<a
+								class="text-[15px] font-medium wrap-anywhere hover:underline"
+								href={href(`/decks/${deck.id}`)}>{deck.name}</a
+							>
+							{#if deck.status === 'draft'}<Badge variant="secondary">{m.draft()}</Badge>{/if}
+							<span class="flex min-w-0 text-sm text-muted-foreground">
+								<Author name={deck.authorName} avatar={deck.authorAvatar} />
+							</span>
+						</div>
+						<DeckCards cards={deck.cards} {catalog} />
 					</div>
-					<DeckCards cards={deck.cards} {catalog} />
-					<p class="text-xs text-muted-foreground tabular-nums">
-						{m.votes()}: {deck.votes} · {m.win_rate()}: {percent(deck.winRate)} · {m.games()}: {deck.games}
-					</p>
+					<dl
+						class="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[13px] tabular-nums md:justify-end"
+					>
+						<div class="grid gap-0.5">
+							<dt class="mono-label text-[10px] text-muted-foreground">{m.votes()}</dt>
+							<dd>{deck.votes}</dd>
+						</div>
+						<div class="grid gap-0.5">
+							<dt class="mono-label text-[10px] text-muted-foreground">{m.games()}</dt>
+							<dd>{deck.games}</dd>
+						</div>
+						<div class="grid gap-0.5">
+							<dt class="text-right mono-label text-[10px] text-muted-foreground">
+								{m.win_rate()}
+							</dt>
+							<dd><WinRate value={deck.winRate} /></dd>
+						</div>
+					</dl>
 				</li>
 			{/each}
 		</ul>

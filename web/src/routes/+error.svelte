@@ -8,8 +8,12 @@
 	<title>{page.status} · {m.site_name()}</title>
 </svelte:head>
 
-<div class="grid gap-2 py-12 text-center">
-	<p class="text-4xl font-semibold tabular-nums">{page.status}</p>
-	<h1 class="text-lg">{page.status === 404 ? m.error_not_found() : m.error_generic()}</h1>
-	<a class="text-sm text-muted-foreground hover:underline" href={href('/')}>{m.back_home()}</a>
+<div class="grid justify-items-center gap-3 py-16 text-center">
+	<p class="font-mono text-5xl tabular-nums">{page.status}</p>
+	<h1 class="font-heading text-3xl font-medium tracking-tight">
+		{page.status === 404 ? m.error_not_found() : m.error_generic()}
+	</h1>
+	<a class="mono-label text-muted-foreground hover:text-foreground" href={href('/')}
+		>{m.back_home()}</a
+	>
 </div>

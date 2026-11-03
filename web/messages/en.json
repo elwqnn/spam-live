@@ -269,5 +269,14 @@
 	"privacy_delete_matches": "The match rows stay in the stats, but without any link to you.",
 	"privacy_delete_ban": "If you are banned, your SteamID stays in a ban list, so that you cannot come back with a new account.",
 	"privacy_cookies_title": "Cookies",
-	"privacy_cookies_text": "The site uses one session cookie to keep you logged in, and one short cookie during the Steam login. It uses no tracking or advertising cookie."
+	"privacy_cookies_text": "The site uses one session cookie to keep you logged in, and one short cookie during the Steam login. It uses no tracking or advertising cookie.",
+	"income": "Income",
+	"home_title": "The SPAM meta, from real matches.",
+	"home_subtitle": "Decks, cards and win rates from the ranked matches that players upload.",
+	"home_patch": "Patch {version} · {count} cards",
+	"home_search": "Search {count} cards",
+	"home_browse_decks": "Browse decks",
+	"home_meta": "Meta",
+	"home_community": "Community",
+	"home_contribute": "Contribute"
 }

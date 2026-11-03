@@ -11,12 +11,12 @@
 	<title>{m.new_deck()} · {m.site_name()}</title>
 </svelte:head>
 
-<div class="grid gap-4">
+<div class="grid gap-6">
 	<div class="grid gap-2">
-		<a class="text-sm text-muted-foreground hover:underline" href={href('/decks')}
-			>{m.all_decks()}</a
+		<a class="mono-label text-muted-foreground hover:text-foreground" href={href('/decks')}
+			><span aria-hidden="true">←</span> {m.all_decks()}</a
 		>
-		<h1 class="font-heading text-2xl font-semibold">{m.new_deck()}</h1>
+		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.new_deck()}</h1>
 		<p class="text-sm text-muted-foreground">{m.new_deck_text()}</p>
 	</div>
 	<DeckForm cards={data.cards} error={form?.error} />

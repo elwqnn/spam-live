@@ -16,12 +16,12 @@
 
 <div class="grid max-w-md gap-4">
 	<div class="grid gap-2">
-		<h1 class="font-heading text-2xl font-semibold">{m.link_title()}</h1>
+		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.link_title()}</h1>
 		<p class="text-sm text-muted-foreground">{m.link_text()}</p>
 	</div>
 
 	{#if form && !form.error}
-		<p role="status" class="rounded-xl border p-3 text-sm">{m.link_done()}</p>
+		<p role="status" class="rounded-xl border bg-card p-4 text-sm">{m.link_done()}</p>
 	{:else if data.me}
 		<form method="POST" use:enhance class="grid gap-3">
 			<label class="grid gap-1.5 text-sm">

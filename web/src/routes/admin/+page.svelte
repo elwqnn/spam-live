@@ -30,7 +30,7 @@
 </svelte:head>
 
 <div class="grid gap-4">
-	<h1 class="font-heading text-2xl font-semibold">{m.admin_title()}</h1>
+	<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.admin_title()}</h1>
 
 	<nav class="flex flex-wrap gap-1">
 		{#each tabs as [key, label] (key)}
@@ -52,7 +52,7 @@
 		{#if data.reports.length}
 			<ul class="grid gap-3">
 				{#each data.reports as r (r.id)}
-					<li class="grid gap-2 rounded-xl border p-3 text-sm">
+					<li class="grid gap-2 rounded-xl border bg-card p-4 text-sm">
 						<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
 							<Badge variant="outline">
 								{r.targetType === 'deck' ? m.admin_deck() : m.admin_comment()}
@@ -159,7 +159,7 @@
 		{#if data.disputed.length}
 			<ul class="grid gap-3">
 				{#each data.disputed as d (d.gameUid)}
-					<li class="grid gap-2 rounded-xl border p-3 text-sm">
+					<li class="grid gap-2 rounded-xl border bg-card p-4 text-sm">
 						<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
 							<code class="font-medium">{d.gameUid}</code>
 							<span class="font-medium">{modeName(d.gameMode)}</span>
@@ -203,7 +203,7 @@
 					<Table.Row>
 						<Table.Cell class="font-mono text-xs break-all whitespace-normal">{c.cardId}</Table.Cell
 						>
-						<Table.Cell class="text-right tabular-nums">{c.seenCount}</Table.Cell>
+						<Table.Cell class="text-right font-mono tabular-nums">{c.seenCount}</Table.Cell>
 						<Table.Cell><Time iso={c.firstSeen} /></Table.Cell>
 						<Table.Cell><Time iso={c.lastSeen} /></Table.Cell>
 					</Table.Row>

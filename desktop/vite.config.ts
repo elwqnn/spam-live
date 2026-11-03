@@ -21,6 +21,7 @@ export default defineConfig({
 			strategy: ['localStorage', 'preferredLanguage', 'baseLocale']
 		})
 	],
+	build: { assetsInlineLimit: 0 },
 	clearScreen: false,
 	server: {
 		port: 1420,

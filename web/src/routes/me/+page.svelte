@@ -42,7 +42,9 @@
 	<section class="flex flex-wrap items-center gap-4">
 		{#if me.avatarUrl}<img src={me.avatarUrl} alt="" class="size-16 rounded-full" />{/if}
 		<div class="grid min-w-0 flex-1 gap-1">
-			<h1 class="font-heading text-2xl font-semibold wrap-anywhere">{me.displayName}</h1>
+			<h1 class="font-heading text-3xl font-medium tracking-tight wrap-anywhere sm:text-4xl">
+				{me.displayName}
+			</h1>
 			<p class="text-sm text-muted-foreground">
 				{m.me_spam_account()}:
 				{#if me.spamAccountId}
@@ -58,18 +60,20 @@
 	</section>
 
 	<section class="grid gap-3">
-		<h2 class="font-heading text-lg font-semibold">{m.me_matches()}</h2>
+		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.me_matches()}</h2>
 		{#if data.matches.length}
 			<ul class="grid gap-3">
 				{#each data.matches as match (match.gameUid)}
 					{@const [label, variant] = results[match.result]}
-					<li class="grid gap-2 rounded-xl border p-3">
+					<li class="grid gap-2 rounded-xl border bg-card p-4">
 						<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
 							<Badge {variant}>{label()}</Badge>
 							<span class="font-medium">{modeName(match.gameMode)}</span>
 							{#if match.isAi}<Badge variant="outline">{m.ai()}</Badge>{/if}
 							{#if match.disputed}<Badge variant="destructive">{m.disputed()}</Badge>{/if}
-							<span class="flex flex-wrap gap-x-3 text-muted-foreground tabular-nums">
+							<span
+								class="flex flex-wrap gap-x-3 font-mono text-xs text-muted-foreground tabular-nums"
+							>
 								<Time iso={match.startUtc} />
 								<span>{m.version_label({ version: match.appVersion })}</span>
 								<span>{m.duration({ time: duration(match.durationMs) })}</span>
@@ -107,7 +111,7 @@
 
 	<section class="grid gap-3">
 		<div class="flex flex-wrap items-center justify-between gap-2">
-			<h2 class="font-heading text-lg font-semibold">{m.my_decks()}</h2>
+			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.my_decks()}</h2>
 			<a class="text-sm hover:underline" href={href('/decks?tab=mine')}>{m.me_all_decks()}</a>
 		</div>
 		{#if data.decks.length}
@@ -131,13 +135,15 @@
 
 	<section class="grid gap-3">
 		<div class="grid gap-1">
-			<h2 class="font-heading text-lg font-semibold">{m.devices()}</h2>
+			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.devices()}</h2>
 			<p class="text-sm text-muted-foreground">{m.devices_text()}</p>
 		</div>
 		{#if data.devices.length}
 			<ul class="grid gap-2">
 				{#each data.devices as device (device.id)}
-					<li class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border p-3 text-sm">
+					<li
+						class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border bg-card p-4 text-sm"
+					>
 						<span class="font-medium">{m.device_n({ id: device.id })}</span>
 						<span class="text-muted-foreground"
 							>{m.device_linked()} <Time iso={device.createdAt} /></span
@@ -164,7 +170,7 @@
 
 	<section class="grid gap-3">
 		<div class="grid gap-1">
-			<h2 class="font-heading text-lg font-semibold">{m.delete_account()}</h2>
+			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.delete_account()}</h2>
 			<p class="text-sm text-muted-foreground">{m.delete_account_text()}</p>
 		</div>
 		<div>

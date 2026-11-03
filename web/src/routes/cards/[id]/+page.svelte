@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { entryName, href, percent } from '#lib';
+	import CardArt from '#lib/components/CardArt.svelte';
 	import Description from '#lib/components/Description.svelte';
 	import ElementBadge from '#lib/components/ElementBadge.svelte';
 	import RarityBadge from '#lib/components/RarityBadge.svelte';
@@ -19,75 +20,75 @@
 	{#if card.description}<meta name="description" content={card.description} />{/if}
 </svelte:head>
 
-<div class="grid gap-6">
-	<div class="grid gap-2">
-		<a class="text-sm text-muted-foreground hover:underline" href={href('/cards')}
-			>{m.all_cards()}</a
-		>
-		<h1 class="font-heading text-2xl font-semibold">{card.name ?? card.id}</h1>
-		<div class="flex flex-wrap items-center gap-2">
-			<ElementBadge element={card.element} />
-			<RarityBadge rarity={card.rarity} />
+{#snippet stat(label: string, value: string | number)}
+	<div class="grid gap-1 rounded-xl border bg-card p-4">
+		<dt class="mono-label text-muted-foreground">{label}</dt>
+		<dd class="font-mono text-2xl tabular-nums">{value}</dd>
+	</div>
+{/snippet}
+
+<div class="grid gap-10">
+	<div class="grid gap-6 sm:grid-cols-[16rem_minmax(0,1fr)] sm:items-start md:gap-10">
+		<CardArt
+			element={card.element}
+			rarity={card.rarity}
+			class="aspect-5/7 w-full max-w-64 rounded-lg border"
+		/>
+		<div class="grid content-start gap-6">
+			<div class="grid gap-3">
+				<a class="mono-label text-muted-foreground hover:text-foreground" href={href('/cards')}
+					><span aria-hidden="true">←</span> {m.all_cards()}</a
+				>
+				<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">
+					{card.name ?? card.id}
+				</h1>
+				<div class="flex flex-wrap items-center gap-2">
+					<ElementBadge element={card.element} />
+					<RarityBadge rarity={card.rarity} />
+				</div>
+			</div>
+
+			<dl class="grid grid-cols-2 gap-3 lg:max-w-md">
+				{@render stat(m.hp(), card.hp)}
+				{@render stat(m.gold_income(), card.goldIncome)}
+			</dl>
+
+			<section class="grid gap-3">
+				<h2 class="font-heading text-2xl font-medium tracking-tight">{m.resistances()}</h2>
+				<ul class="flex flex-wrap gap-2">
+					{#each resistances as [element, value] (element)}
+						<li>
+							<ElementBadge {element}
+								><span class="tabular-nums">{value > 0 ? `+${value}` : value}</span></ElementBadge
+							>
+						</li>
+					{/each}
+				</ul>
+			</section>
 		</div>
 	</div>
 
-	<dl class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-		<div class="rounded-xl border p-3">
-			<dt class="text-xs text-muted-foreground">{m.hp()}</dt>
-			<dd class="text-lg font-semibold tabular-nums">{card.hp}</dd>
-		</div>
-		<div class="rounded-xl border p-3">
-			<dt class="text-xs text-muted-foreground">{m.gold_income()}</dt>
-			<dd class="text-lg font-semibold tabular-nums">{card.goldIncome}</dd>
-		</div>
-	</dl>
-
-	<section class="grid gap-2">
-		<h2 class="font-heading text-lg font-semibold">{m.resistances()}</h2>
-		<ul class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6">
-			{#each resistances as [element, value] (element)}
-				<li class="flex items-center justify-between gap-2 rounded-xl border px-3 py-2">
-					<ElementBadge {element} />
-					<span
-						class={[
-							'font-semibold tabular-nums',
-							value > 0 && 'text-green-700 dark:text-green-400',
-							value < 0 && 'text-red-700 dark:text-red-400'
-						]}>{value > 0 ? `+${value}` : value}</span
-					>
-				</li>
-			{/each}
-		</ul>
-	</section>
-
 	<section class="grid gap-3">
 		<div class="flex flex-wrap items-center justify-between gap-2">
-			<h2 class="font-heading text-lg font-semibold">{m.stats()}</h2>
+			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.stats()}</h2>
 			<VersionSelect versions={data.versions} />
 		</div>
 		<dl class="grid grid-cols-3 gap-3">
-			<div class="rounded-xl border p-3">
-				<dt class="text-xs text-muted-foreground">{m.games()}</dt>
-				<dd class="text-lg font-semibold tabular-nums">{data.stats?.games ?? 0}</dd>
-			</div>
-			<div class="rounded-xl border p-3">
-				<dt class="text-xs text-muted-foreground">{m.play_rate()}</dt>
-				<dd class="text-lg font-semibold tabular-nums">{percent(data.stats?.playRate)}</dd>
-			</div>
-			<div class="rounded-xl border p-3">
-				<dt class="text-xs text-muted-foreground">{m.win_rate()}</dt>
-				<dd class="text-lg font-semibold tabular-nums">{percent(data.stats?.winRate)}</dd>
-			</div>
+			{@render stat(m.games(), data.stats?.games ?? 0)}
+			{@render stat(m.play_rate(), percent(data.stats?.playRate))}
+			{@render stat(m.win_rate(), percent(data.stats?.winRate))}
 		</dl>
 	</section>
 
 	<section class="grid gap-3">
-		<h2 class="font-heading text-lg font-semibold">{m.abilities()}</h2>
+		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.abilities()}</h2>
 		{#each card.abilities as { ability, cooldown } (ability.id)}
 			<Card.Root size="sm">
 				<Card.Header>
 					<Card.Title>{entryName(ability)}</Card.Title>
-					<Card.Description>{m.cooldown({ turns: cooldown })}</Card.Description>
+					<Card.Description class="mono-label text-[11px]"
+						>{m.cooldown({ turns: cooldown })}</Card.Description
+					>
 				</Card.Header>
 				<Card.Content><Description text={ability.description} entry={ability} /></Card.Content>
 			</Card.Root>
@@ -96,7 +97,7 @@
 
 	{#if card.tox.length}
 		<section class="grid gap-3">
-			<h2 class="font-heading text-lg font-semibold">{m.tox()}</h2>
+			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.tox()}</h2>
 			{#each card.tox as tox (tox.id)}
 				<Card.Root size="sm">
 					<Card.Header><Card.Title>{entryName(tox)}</Card.Title></Card.Header>
@@ -109,7 +110,7 @@
 	{/if}
 
 	<section class="grid gap-3">
-		<h2 class="font-heading text-lg font-semibold">{m.talents()}</h2>
+		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.talents()}</h2>
 		<div class="grid gap-3 md:grid-cols-3">
 			{#each card.talents as talent (talent.id)}
 				<Card.Root size="sm">
@@ -122,7 +123,7 @@
 
 	{#if card.description}
 		<section class="grid gap-2">
-			<h2 class="font-heading text-lg font-semibold">{m.lore()}</h2>
+			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.lore()}</h2>
 			<p class="text-sm leading-6 whitespace-pre-line text-muted-foreground">{card.description}</p>
 		</section>
 	{/if}
