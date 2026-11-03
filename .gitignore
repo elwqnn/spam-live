@@ -4,5 +4,5 @@ samples/
 /.claude/
 /.agents/
 
-deploy/.env
+.env
 deploy/backups/
