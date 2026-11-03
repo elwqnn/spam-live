@@ -163,6 +163,7 @@ async fn openapi_lists_routes() {
         "/api/device/token",
         "/api/me/matches",
         "/api/decks/import",
+        "/api/decks/preview",
         "/api/decks/{id}/vote",
         "/api/comments/{id}",
         "/api/reports",
@@ -171,5 +172,31 @@ async fn openapi_lists_routes() {
         "/api/admin/reports/{id}/resolve",
     ] {
         assert!(doc["paths"].get(path).is_some(), "{path}");
+    }
+}
+
+fn refs<'a>(v: &'a Value, out: &mut Vec<&'a str>) {
+    match v {
+        Value::Object(m) => {
+            if let Some(Value::String(r)) = m.get("$ref") {
+                out.push(r);
+            }
+            m.values().for_each(|v| refs(v, out));
+        }
+        Value::Array(a) => a.iter().for_each(|v| refs(v, out)),
+        _ => {}
+    }
+}
+
+#[tokio::test]
+async fn openapi_refs_resolve() {
+    let app = api::router(state_with(lazy_pool(), "https://steamcommunity.com/openid/login", real_catalog()));
+    let doc = send(&app, get("/api/openapi.json", "")).await.body;
+    let mut list = Vec::new();
+    refs(&doc, &mut list);
+    assert!(!list.is_empty());
+    for r in list {
+        let name = r.strip_prefix("#/components/schemas/").unwrap_or(r);
+        assert!(doc["components"]["schemas"].get(name).is_some(), "{r}");
     }
 }

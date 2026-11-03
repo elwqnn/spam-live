@@ -64,6 +64,7 @@ async fn import_new_unchanged_updated(pool: PgPool) {
     let res = import(&app, &cookie, std::slice::from_ref(&first)).await;
     assert_eq!(res.status, StatusCode::OK, "{}", res.body);
     assert_eq!(results(&res), [(G1.to_string(), "new".to_string())]);
+    assert_eq!(res.body["decks"][0]["name"], "My deck");
     let id = res.body["decks"][0]["deckId"].clone();
     let d = deck(&app, &cookie, &id).await.body;
     assert_eq!(d["name"], "My deck");
@@ -127,6 +128,7 @@ async fn import_skips_invalid_decks(pool: PgPool) {
     for i in 0..3 {
         assert_eq!(res.body["decks"][i]["reason"], "a deck needs 4 distinct cards");
         assert_eq!(res.body["decks"][i]["deckId"], Value::Null);
+        assert_eq!(res.body["decks"][i]["name"], Value::Null);
     }
     for i in 3..5 {
         assert_eq!(res.body["decks"][i]["reason"], "each card needs 1 talent index from 0 to 2");
@@ -337,6 +339,30 @@ async fn guide_html_is_safe(pool: PgPool) {
     assert!(!html.contains("data:image"), "{html}");
     assert!(html.contains("<a href=\"https://example.com\" rel=\"nofollow ugc noopener\">ok</a>"), "{html}");
     assert_eq!(res.body["guide"], guide);
+}
+
+#[sqlx::test]
+async fn guide_preview(pool: PgPool) {
+    let app = app(pool.clone());
+    let (a_id, a) = user(&pool, "76561190000000001").await;
+    let preview =
+        |cookie: &str, guide: &str| req("POST", "/api/decks/preview", cookie, Some(json!({ "guide": guide })));
+    let guide = "# Title\n\n<script>alert(1)</script>\n\n- [ok](https://example.com)";
+    assert_eq!(send(&app, preview("", guide)).await.status, StatusCode::UNAUTHORIZED);
+    assert_eq!(send(&app, preview(&a, &"g".repeat(50_001))).await.status, StatusCode::BAD_REQUEST);
+    assert_eq!(send(&app, preview(&a, &"g".repeat(50_000))).await.status, StatusCode::OK);
+
+    let res = send(&app, preview(&a, guide)).await;
+    assert_eq!(res.status, StatusCode::OK, "{}", res.body);
+    let html = res.body["html"].as_str().unwrap();
+    assert!(!html.contains("<script"), "{html}");
+    assert!(html.contains("&lt;script&gt;alert(1)&lt;/script&gt;"), "{html}");
+    let body = json!({ "name": "G", "cards": SEAT0_CARDS, "talents": [0, 0, 0, 0], "guide": guide });
+    let created = send(&app, req("POST", "/api/decks", &a, Some(body))).await;
+    assert_eq!(created.body["guideHtml"], res.body["html"]);
+
+    sqlx::query("UPDATE users SET banned_at = now() WHERE id = $1").bind(a_id).execute(&pool).await.unwrap();
+    assert_eq!(send(&app, preview(&a, guide)).await.status, StatusCode::FORBIDDEN);
 }
 
 #[sqlx::test]

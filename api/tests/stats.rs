@@ -179,6 +179,12 @@ async fn deck_detail_stats_and_winrate_sort(pool: PgPool) {
     let sorted = send(&app, get("/api/decks?sort=winrate", "")).await.body;
     let order: Vec<_> = sorted.as_array().unwrap().iter().map(|d| d["id"].as_i64().unwrap()).collect();
     assert_eq!(order, [ids[0], ids[1], ids[2], ids[3]]);
+    let list_stats: Vec<Value> =
+        sorted.as_array().unwrap().iter().map(|d| json!([d["games"], d["wins"], d["winRate"]])).collect();
+    assert_eq!(
+        list_stats,
+        [json!([20, 12, 0.6]), json!([23, 8, 8.0 / 23.0]), json!([3, 2, null]), json!([0, 0, null])]
+    );
     let page = |offset: i64| get(&format!("/api/decks?sort=winrate&limit=2&offset={offset}"), "");
     let pages = [send(&app, page(0)).await.body, send(&app, page(2)).await.body, send(&app, page(4)).await.body];
     let paged: Vec<Vec<i64>> =

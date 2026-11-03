@@ -1,0 +1,9 @@
+node_modules
+build
+.svelte-kit
+src/lib/paraglide
+project.inlang/cache
+Dockerfile
+.dockerignore
+.env
+.env.*

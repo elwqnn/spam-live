@@ -110,6 +110,16 @@ pub struct Deck {
     pub published_at: Option<DateTime<Utc>>,
 }
 
+#[derive(Serialize, ToSchema, FromRow)]
+pub struct DeckItem {
+    #[serde(flatten)]
+    #[sqlx(flatten)]
+    pub deck: Deck,
+    #[serde(flatten)]
+    #[sqlx(flatten)]
+    pub stats: stats::KeyStats,
+}
+
 #[derive(Serialize, ToSchema)]
 pub struct DeckStats {
     pub version: String,
@@ -247,6 +257,23 @@ pub async fn create_deck(
     Ok((StatusCode::CREATED, Json(load(&s, id, Some(user.id)).await?)))
 }
 
+#[derive(Deserialize, ToSchema)]
+pub struct GuidePreview {
+    pub guide: String,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct GuideHtml {
+    pub html: String,
+}
+
+#[utoipa::path(post, path = "/api/decks/preview", tag = "decks", request_body = GuidePreview,
+    responses((status = 200, body = GuideHtml, description = "The same HTML as guideHtml"),
+        (status = 400, body = ErrorBody), (status = 401, body = ErrorBody), (status = 403, body = ErrorBody)))]
+pub async fn preview(_user: CurrentUser, Json(body): Json<GuidePreview>) -> Result<Json<GuideHtml>, ApiError> {
+    Ok(Json(GuideHtml { html: render_guide(&check_guide(body.guide)?) }))
+}
+
 #[utoipa::path(get, path = "/api/decks/{id}", tag = "decks", params(("id" = i64, Path, description = "Deck ID")),
     responses((status = 200, body = DeckDetail), (status = 404, body = ErrorBody)))]
 pub async fn get_deck(
@@ -361,15 +388,17 @@ pub struct DeckQuery {
 }
 
 #[utoipa::path(get, path = "/api/decks", tag = "decks", params(DeckQuery),
-    responses((status = 200, body = Vec<Deck>,
+    responses((status = 200, body = Vec<DeckItem>,
         description = "Public decks. author=me lists the decks of the caller with drafts. \
-            Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent."),
+            Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. \
+            games, wins and winRate are the stats of the deck key for the latest catalog version. \
+            winRate is null below 20 games."),
         (status = 400, body = ErrorBody), (status = 401, body = ErrorBody)))]
 pub async fn list_decks(
     State(s): State<AppState>,
     user: Option<CurrentUser>,
     Query(q): Query<DeckQuery>,
-) -> Result<Json<Vec<Deck>>, ApiError> {
+) -> Result<Json<Vec<DeckItem>>, ApiError> {
     let (author, drafts) = match q.author.as_deref() {
         None => (None, false),
         Some("me") => {
@@ -389,10 +418,12 @@ pub async fn list_decks(
     };
     let decks = sqlx::query_as(AssertSqlSafe(format!(
         "WITH ws AS (
-             SELECT deck_key, win_rate(count(*), count(*) FILTER (WHERE win)) AS win_rate
+             SELECT deck_key, count(*) AS games, count(*) FILTER (WHERE win) AS wins,
+                 win_rate(count(*), count(*) FILTER (WHERE win)) AS win_rate
              FROM deck_results WHERE app_version = $6 GROUP BY deck_key
          )
-         SELECT {DECK_COLUMNS} {DECK_FROM} LEFT JOIN ws ON ws.deck_key = d.deck_key
+         SELECT {DECK_COLUMNS}, COALESCE(ws.games, 0) AS games, COALESCE(ws.wins, 0) AS wins, ws.win_rate
+         {DECK_FROM} LEFT JOIN ws ON ws.deck_key = d.deck_key
          WHERE ($1::bigint IS NULL OR d.author_id = $1) AND (d.status = 'public' OR $2)
              AND ($3::uuid IS NULL OR $3 = ANY (d.cards))
              AND ($4::timestamptz IS NULL OR COALESCE(d.published_at, d.created_at) < $4)
@@ -466,6 +497,7 @@ pub enum ImportStatus {
 pub struct ImportedDeck {
     pub game_deck_id: String,
     pub deck_id: Option<i64>,
+    pub name: Option<String>,
     pub status: ImportStatus,
     pub reason: Option<String>,
 }
@@ -561,14 +593,14 @@ pub async fn import(
     }
     let mut decks = Vec::with_capacity(latest.len());
     for (game_deck_id, parsed) in latest {
-        let (deck_id, status, reason) = match parsed {
+        let (deck_id, name, status, reason) = match parsed {
             Ok(d) => {
                 let (id, status, reason) = store_import(&s, user.id, &game_deck_id, &d).await?;
-                (Some(id), status, reason)
+                (Some(id), Some(d.name), status, reason)
             }
-            Err(reason) => (None, ImportStatus::Skipped, Some(reason)),
+            Err(reason) => (None, None, ImportStatus::Skipped, Some(reason)),
         };
-        decks.push(ImportedDeck { game_deck_id, deck_id, status, reason });
+        decks.push(ImportedDeck { game_deck_id, deck_id, name, status, reason });
     }
     Ok(Json(ImportResult { decks }))
 }
@@ -768,6 +800,7 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/api/decks", get(list_decks).post(create_deck))
         .route("/api/decks/import", post(import).layer(DefaultBodyLimit::max(MAX_IMPORT_BYTES)))
+        .route("/api/decks/preview", post(preview))
         .route("/api/decks/{id}", get(get_deck).patch(patch_deck).delete(delete_deck))
         .route("/api/decks/{id}/publish", post(publish))
         .route("/api/decks/{id}/unpublish", post(unpublish))

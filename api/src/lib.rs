@@ -105,6 +105,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         decks::import,
         decks::list_decks,
         decks::create_deck,
+        decks::preview,
         decks::get_deck,
         decks::patch_deck,
         decks::delete_deck,
@@ -126,7 +127,8 @@ pub fn public<T: Serialize>(body: T) -> Response {
         admin::unlink,
         admin::disputed,
         admin::unknown_cards,
-    )
+    ),
+    components(schemas(decks::DeckSort, stats::StatsSort))
 )]
 pub struct ApiDoc;
 
