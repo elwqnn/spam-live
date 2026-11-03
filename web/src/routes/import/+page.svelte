@@ -253,7 +253,7 @@
 						{m.import_app()}
 						<a
 							class="underline underline-offset-4 hover:text-foreground"
-							href="https://github.com/elwqnn/spam-tcg/releases/latest"
+							href="https://github.com/elwqnn/spam-live/releases/latest"
 							rel="external">{m.import_app_download()}</a
 						>
 					</p>

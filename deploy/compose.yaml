@@ -1,0 +1,110 @@
+name: spam-live
+
+x-healthcheck: &healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 3
+  start_period: 60s
+  start_interval: 2s
+
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      web:
+        condition: service_healthy
+
+  api:
+    image: ghcr.io/elwqnn/spam-live-api:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://spam:${POSTGRES_PASSWORD:?}@postgres:5432/spam
+      PUBLIC_URL: ${SITE_URL:?}
+      STEAM_API_KEY: ${STEAM_API_KEY:?}
+      DESKTOP_MIN_VERSION: ${DESKTOP_MIN_VERSION:-0.0.0}
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/api/desktop/min-version"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    image: ghcr.io/elwqnn/spam-live-web:latest
+    restart: unless-stopped
+    environment:
+      ORIGIN: ${SITE_URL:?}
+      API_URL: http://api:8080
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+    depends_on:
+      api:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: spam
+      POSTGRES_DB: spam
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "pg_isready", "-U", "spam", "-d", "spam"]
+
+  backup:
+    image: postgres:18
+    restart: unless-stopped
+    init: true
+    stop_signal: SIGTERM
+    environment:
+      PGHOST: postgres
+      PGUSER: spam
+      PGDATABASE: spam
+      PGPASSWORD: ${POSTGRES_PASSWORD:?}
+    volumes:
+      - ./backups:/backups
+    entrypoint:
+      - bash
+      - -c
+      - |
+        set -uo pipefail
+        umask 077
+        while true; do
+          file=/backups/spam-$$(date -u +%F).sql.gz
+          if pg_dump | gzip > "$$file.tmp"; then
+            mv "$$file.tmp" "$$file"
+            ls -1 /backups/spam-*.sql.gz | sort -r | tail -n +8 | xargs -r rm -f --
+          else
+            rm -f "$$file.tmp"
+            echo "pg_dump failed" >&2
+          fi
+          sleep 86400
+        done
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  newt:
+    image: fosrl/newt:1.18.0
+    restart: unless-stopped
+    environment:
+      PANGOLIN_ENDPOINT: https://portal.seblcs.eu
+      NEWT_ID: ${NEWT_ID:?}
+      NEWT_SECRET: ${NEWT_SECRET:?}
+      BLUEPRINT_FILE: /blueprint.yaml
+    volumes:
+      - ./blueprint.yaml:/blueprint.yaml:ro
+    extra_hosts:
+      - portal.seblcs.eu:172.17.0.1
+    depends_on:
+      - caddy
+
+volumes:
+  pgdata:

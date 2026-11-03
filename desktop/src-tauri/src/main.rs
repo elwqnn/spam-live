@@ -29,9 +29,9 @@ const SITE: &str = match option_env!("SPAM_SITE_URL") {
     Some(url) => url,
     None => "http://localhost:5173",
 };
-const RELEASES: &str = "https://github.com/elwqnn/spam-tcg/releases/latest";
+const RELEASES: &str = "https://github.com/elwqnn/spam-live/releases/latest";
 const VERSION: &str = env!("CARGO_PKG_VERSION");
-const KEYRING_SERVICE: &str = "io.github.elwqnn.spamtcg";
+const KEYRING_SERVICE: &str = "io.github.elwqnn.spamlive";
 const POLL: Duration = Duration::from_secs(2);
 const APPIMAGE_VARS: [&str; 11] = [
     "LD_LIBRARY_PATH",
@@ -413,7 +413,7 @@ fn main() {
             let open = MenuItem::with_id(app, "open", "Open", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let mut tray = TrayIconBuilder::new()
-                .tooltip("SPAM TCG")
+                .tooltip("SPAM Live")
                 .menu(&Menu::with_items(app, &[&open, &quit])?)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "open" => show(app),

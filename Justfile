@@ -1,4 +1,5 @@
-db_container := "spam-tcg-db"
+db_container := "spam-live-db"
+image := "ghcr.io/elwqnn/spam-live"
 
 db:
     #!/usr/bin/env bash
@@ -6,7 +7,7 @@ db:
     if ! docker container inspect {{db_container}} >/dev/null 2>&1; then
         docker run -d --name {{db_container}} -p 127.0.0.1::5432 \
             -e POSTGRES_USER=spam -e POSTGRES_PASSWORD=spam -e POSTGRES_DB=spam \
-            -v spam-tcg-pgdata:/var/lib/postgresql postgres:18 >/dev/null
+            -v spam-live-pgdata:/var/lib/postgresql postgres:18 >/dev/null
     else
         docker start {{db_container}} >/dev/null
     fi
@@ -70,3 +71,23 @@ test-web:
 
 test-desktop:
     cd desktop/src-tauri && cargo test
+
+images:
+    docker build -f api/Dockerfile -t {{image}}-api:latest .
+    docker build -t {{image}}-web:latest web
+
+push: images
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ -n "$(git status --porcelain)" ]; then echo "commit all changes before you push" >&2; exit 1; fi
+    sha=$(git rev-parse --short HEAD)
+    for app in api web; do
+        docker tag {{image}}-$app:latest {{image}}-$app:$sha
+        docker push {{image}}-$app:latest
+        docker push {{image}}-$app:$sha
+    done
+
+deploy:
+    git pull --ff-only
+    docker compose -f deploy/compose.yaml pull
+    docker compose -f deploy/compose.yaml up -d

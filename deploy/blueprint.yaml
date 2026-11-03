@@ -1,0 +1,12 @@
+proxy-resources:
+  spam-live:
+    name: SPAM Live
+    protocol: http
+    full-domain: spam-live.elwqnn.eu
+    ssl: true
+    auth:
+      sso-enabled: false
+    targets:
+      - hostname: caddy
+        port: 80
+        method: http

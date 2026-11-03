@@ -41,7 +41,7 @@ jobs:
           tauriScript: bun tauri
           args: --bundles ${{ matrix.bundles }}
           tagName: desktop-v__VERSION__
-          releaseName: SPAM TCG desktop v__VERSION__
+          releaseName: SPAM Live desktop v__VERSION__
           releaseBody: Unsigned build. Windows SmartScreen can show a warning before the installer starts.
           releaseDraft: true
           prerelease: false

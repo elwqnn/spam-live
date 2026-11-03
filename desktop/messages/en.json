@@ -1,6 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"app_name": "SPAM TCG",
+	"app_name": "SPAM Live",
 	"app_intro": "The app sends your new SPAM matches and decks to the site automatically. It reads only the match files of the server api.crocodyle.fr and the deck lines of the game logs.",
 	"update_text": "A new version of the app is available.",
 	"update_link": "Download",
