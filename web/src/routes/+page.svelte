@@ -48,8 +48,8 @@
 	</div>
 </section>
 
-<section class="rows">
-	<div class="flex flex-wrap items-end gap-4 row">
+<section>
+	<div class="flex flex-wrap items-end gap-4 section-head">
 		{@render heading(m.home_top_decks())}
 		<a
 			class="mb-1.5 ml-auto eyebrow text-muted-foreground transition-colors hover:text-foreground"
@@ -65,12 +65,12 @@
 			</ul>
 		</div>
 	{:else}
-		<p class="row text-sm text-muted-foreground">{m.home_no_top_decks()}</p>
+		<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">{m.home_no_top_decks()}</p>
 	{/if}
 </section>
 
-<section class="rows">
-	<div class="row">
+<section>
+	<div class="section-head">
 		{@render heading(m.home_recent_decks())}
 	</div>
 	{#if data.recent.length}
@@ -82,7 +82,9 @@
 			</ul>
 		</div>
 	{:else}
-		<p class="row text-sm text-muted-foreground">{m.home_no_recent_decks()}</p>
+		<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">
+			{m.home_no_recent_decks()}
+		</p>
 	{/if}
 </section>
 

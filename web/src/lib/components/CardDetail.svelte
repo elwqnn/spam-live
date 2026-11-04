@@ -158,8 +158,8 @@
 	</TitleRow>
 
 	{#if decks.length}
-		<section class="rows">
-			<div class="flex flex-wrap items-end justify-between gap-2 row">
+		<section>
+			<div class="flex flex-wrap items-end justify-between gap-2 section-head">
 				{@render heading(m.decks_with_card())}
 				<a
 					class="eyebrow text-muted-foreground transition-colors hover:text-foreground"

@@ -61,8 +61,8 @@
 	</li>
 {/snippet}
 
-<section class="rows" aria-labelledby="coverage-title">
-	<div class="grid gap-1 row">
+<section aria-labelledby="coverage-title">
+	<div class="grid gap-1 section-head">
 		<h2 id="coverage-title" class="eyebrow text-muted-foreground">{m.meta_coverage()}</h2>
 		<p class="text-sm text-muted-foreground">{m.meta_coverage_text()}</p>
 	</div>
@@ -130,6 +130,6 @@
 			</div>
 		</div>
 	{:else}
-		<p class="row text-sm text-muted-foreground">{m.no_coverage()}</p>
+		<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">{m.no_coverage()}</p>
 	{/if}
 </section>

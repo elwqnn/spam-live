@@ -120,8 +120,8 @@
 
 <DeckSummary {deck} cards={data.cards} />
 
-<section class="rows">
-	<h2 class="row font-heading text-2xl font-normal tracking-tight">{m.cards_title()}</h2>
+<section>
+	<h2 class="section-head font-heading text-2xl font-normal tracking-tight">{m.cards_title()}</h2>
 	<div>
 		<DeckCards tiles cards={deck.cards} {catalog}>
 			{#snippet below(i)}
@@ -147,8 +147,8 @@
 	</section>
 {/if}
 
-<section class="rows">
-	<div class="grid gap-1 row">
+<section>
+	<div class="grid gap-1 section-head">
 		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.live_stats()}</h2>
 		<p class="text-sm text-muted-foreground">{m.live_stats_text()}</p>
 	</div>
@@ -178,8 +178,8 @@
 </section>
 
 {#if open}
-	<section class="rows">
-		<h2 class="row font-heading text-2xl font-normal tracking-tight">
+	<section>
+		<h2 class="section-head font-heading text-2xl font-normal tracking-tight">
 			{m.comments()}
 			<span class="text-muted-foreground tabular-nums">{data.comments.length}</span>
 		</h2>
@@ -230,18 +230,23 @@
 				{/each}
 			</ul>
 		{:else}
-			<p class="row text-sm text-muted-foreground">{m.no_comments()}</p>
+			<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">{m.no_comments()}</p>
 		{/if}
 
 		{#if me}
-			<form method="POST" action="?/comment" use:enhance={closeAfter} class="grid gap-2 row">
+			<form
+				method="POST"
+				action="?/comment"
+				use:enhance={closeAfter}
+				class="grid gap-2 border-t row"
+			>
 				<label for="comment-body" class="text-sm font-medium">{m.add_comment()}</label>
 				<Textarea id="comment-body" name="body" required rows={3} />
 				{@render alert('comment')}
 				<Button type="submit" class="justify-self-start">{m.post_comment()}</Button>
 			</form>
 		{:else}
-			<p class="row text-sm">
+			<p class="border-t row text-sm">
 				<a class="underline underline-offset-4" href={loginHref(page.url)} rel="external"
 					>{m.login_to_comment()}</a
 				>

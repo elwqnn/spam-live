@@ -60,8 +60,8 @@
 	</form>
 </TitleRow>
 
-<section class="rows">
-	<h2 class="row font-heading text-2xl font-normal tracking-tight">{m.me_matches()}</h2>
+<section>
+	<h2 class="section-head font-heading text-2xl font-normal tracking-tight">{m.me_matches()}</h2>
 	{#if data.matches.length}
 		<div>
 			<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
@@ -99,13 +99,13 @@
 			</ul>
 		</div>
 	{:else}
-		<p class="row text-sm text-muted-foreground">
+		<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">
 			{m.me_no_matches()}
 			<a class="underline underline-offset-4" href={href('/import')}>{m.import_title()}</a>
 		</p>
 	{/if}
 	{#if !data.first || data.next}
-		<nav class="flex justify-between gap-2 px-4 py-3 sm:px-6" aria-label={m.pages()}>
+		<nav class="flex justify-between gap-2 border-t px-4 py-3 sm:px-6" aria-label={m.pages()}>
 			{#if !data.first}
 				<a class={link} href={queryHref(page.url, { before: null })}>{m.first_page()}</a>
 			{:else}
@@ -118,8 +118,8 @@
 	{/if}
 </section>
 
-<section class="rows">
-	<div class="flex flex-wrap items-center justify-between gap-2 row">
+<section>
+	<div class="flex flex-wrap items-center justify-between gap-2 section-head">
 		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.my_decks()}</h2>
 		<a class="text-sm hover:underline" href={href('/decks?tab=mine')}>{m.me_all_decks()}</a>
 	</div>
@@ -132,12 +132,12 @@
 			</ul>
 		</div>
 	{:else}
-		<p class="row text-sm text-muted-foreground">{m.me_no_decks()}</p>
+		<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">{m.me_no_decks()}</p>
 	{/if}
 </section>
 
-<section class="rows">
-	<div class="grid gap-1 row">
+<section>
+	<div class="grid gap-1 section-head">
 		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.devices()}</h2>
 		<p class="text-sm text-muted-foreground">{m.devices_text()}</p>
 	</div>
@@ -165,7 +165,7 @@
 			{/each}
 		</ul>
 	{:else}
-		<p class="row text-sm text-muted-foreground">{m.no_devices()}</p>
+		<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">{m.no_devices()}</p>
 	{/if}
 </section>
 
