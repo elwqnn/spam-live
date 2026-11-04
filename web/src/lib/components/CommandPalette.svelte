@@ -190,8 +190,9 @@
 </script>
 
 <Button
-	variant="outline"
+	variant="ghost"
 	size="sm"
+	class="text-muted-foreground hover:border-transparent"
 	onclick={open}
 	aria-haspopup="dialog"
 	aria-keyshortcuts={mac ? 'Meta+K' : 'Control+K'}

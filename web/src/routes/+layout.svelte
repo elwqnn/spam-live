@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { api, href, loginHref } from '#lib';
+	import AccountMenu from '#lib/components/AccountMenu.svelte';
 	import CardPreview from '#lib/components/CardPreview.svelte';
 	import CommandPalette, { type Action } from '#lib/components/CommandPalette.svelte';
 	import Dialog from '#lib/components/Dialog.svelte';
@@ -118,20 +119,7 @@
 			<div class="ml-auto flex min-w-0 flex-wrap items-center gap-3">
 				<CommandPalette bind:this={palette} {actions} {mac} />
 				{#if data.me}
-					{#if data.me.isAdmin}
-						<a class="eyebrow text-xs hover:underline" href={href('/admin')}>{m.nav_admin()}</a>
-					{/if}
-					<a
-						class="flex min-w-0 items-center gap-2 text-sm hover:underline"
-						href={href('/me')}
-						title={m.me_title()}
-					>
-						{#if data.me.avatarUrl}
-							<img src={data.me.avatarUrl} alt="" class="size-7 rounded-full" />
-						{/if}
-						<span class="max-w-32 truncate">{data.me.displayName}</span>
-					</a>
-					<Button variant="ghost" size="sm" onclick={logout}>{m.logout()}</Button>
+					<AccountMenu me={data.me} {logout} />
 				{:else}
 					<Button variant="outline" size="sm" href={login} rel="external">{m.login_steam()}</Button>
 				{/if}
