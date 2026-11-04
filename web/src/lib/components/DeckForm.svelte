@@ -120,7 +120,7 @@
 	}}
 >
 	<section class="grid gap-3" aria-labelledby="slots-title">
-		<h2 id="slots-title" class="font-heading text-2xl font-medium tracking-tight">
+		<h2 id="slots-title" class="font-heading text-2xl font-normal tracking-tight">
 			{m.your_cards()}
 			<span class="text-muted-foreground tabular-nums">{picked.length}/4</span>
 		</h2>
@@ -195,7 +195,7 @@
 	</section>
 
 	<section class="grid gap-3" aria-labelledby="picker-title">
-		<h2 id="picker-title" class="font-heading text-2xl font-medium tracking-tight">
+		<h2 id="picker-title" class="font-heading text-2xl font-normal tracking-tight">
 			{m.pick_cards()}
 		</h2>
 		<p class="text-sm text-muted-foreground" aria-live="polite">
@@ -247,7 +247,7 @@
 	</section>
 
 	<section class="grid gap-4" aria-labelledby="details-title">
-		<h2 id="details-title" class="font-heading text-2xl font-medium tracking-tight">
+		<h2 id="details-title" class="font-heading text-2xl font-normal tracking-tight">
 			{m.deck_details()}
 		</h2>
 		<div class="grid gap-1.5">

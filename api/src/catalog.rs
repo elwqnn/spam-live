@@ -213,6 +213,26 @@ pub struct CardBase {
     pub gold_income: i64,
     pub resistances: Resistances,
     pub order: i64,
+    pub face: CardFace,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct CardFace {
+    pub abilities: Vec<FaceAbility>,
+    pub tox: Vec<FaceTox>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct FaceAbility {
+    pub name: String,
+    pub cooldown: i64,
+    pub element: Option<String>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct FaceTox {
+    pub name: String,
+    pub rarity: Option<String>,
 }
 
 #[derive(Serialize, ToSchema)]
@@ -248,7 +268,11 @@ pub struct CardDetail {
     pub talents: Vec<Entry>,
 }
 
-fn base(c: &RawCard, lang: &str) -> CardBase {
+fn field(e: &RawEntry, key: &str) -> Option<String> {
+    e.data.get(key).and_then(Value::as_str).map(String::from)
+}
+
+fn base(v: &Version, c: &RawCard, lang: &str) -> CardBase {
     CardBase {
         id: c.id,
         name: tr(&c.name, lang),
@@ -266,6 +290,31 @@ fn base(c: &RawCard, lang: &str) -> CardBase {
             shadow: c.shadow_resistance,
         },
         order: c.order,
+        face: CardFace {
+            abilities: c
+                .active_abilities
+                .iter()
+                .map(|a| {
+                    let e = &v.abilities[&a.id];
+                    FaceAbility {
+                        name: tr(&e.name, lang).unwrap_or_else(|| e.id.clone()),
+                        cooldown: a.cooldown,
+                        element: field(e, "team"),
+                    }
+                })
+                .collect(),
+            tox: c
+                .passive_abilities
+                .iter()
+                .map(|id| {
+                    let e = &v.tox[id];
+                    FaceTox {
+                        name: tr(&e.name, lang).or_else(|| field(e, "title")).unwrap_or_else(|| e.id.clone()),
+                        rarity: field(e, "rarity"),
+                    }
+                })
+                .collect(),
+        },
     }
 }
 
@@ -293,7 +342,7 @@ pub async fn list_cards(State(s): State<AppState>, Query(q): Query<CardQuery>) -
         .cards
         .iter()
         .map(|c| CardSummary {
-            card: base(c, lang),
+            card: base(v, c, lang),
             abilities: c
                 .active_abilities
                 .iter()
@@ -317,7 +366,7 @@ pub async fn get_card(
     let (v, lang) = s.catalog.select(&q)?;
     let c = v.cards.iter().find(|c| c.id == id).ok_or_else(|| ApiError::new(StatusCode::NOT_FOUND, "unknown card"))?;
     Ok(public(CardDetail {
-        card: base(c, lang),
+        card: base(v, c, lang),
         abilities: c
             .active_abilities
             .iter()

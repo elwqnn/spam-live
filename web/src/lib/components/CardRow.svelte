@@ -2,7 +2,6 @@
 	import type { Snippet } from 'svelte';
 	import { href, percent, type Schemas } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
-	import CardArt from './CardArt.svelte';
 	import CardBadge from './CardBadge.svelte';
 	import CardBadgeStack from './CardBadgeStack.svelte';
 	import WinRate from './WinRate.svelte';
@@ -31,11 +30,12 @@
 	]}
 	aria-current={active ? 'true' : undefined}
 >
-	<CardArt
-		element={card.element}
-		rarity={card.rarity}
-		tag={false}
-		class="aspect-5/7 w-10 shrink-0 rounded-xs"
+	<img
+		src="/art/avatar/{card.id}.webp"
+		alt=""
+		loading="lazy"
+		decoding="async"
+		class="el-{card.element} size-10 shrink-0 rounded-sm border-2 border-(--el) bg-(--el)"
 	/>
 	<div class="grid min-w-0 flex-1 gap-1.5">
 		<a

@@ -565,6 +565,7 @@ export interface components {
         CardBase: {
             description?: string | null;
             element: string;
+            face: components["schemas"]["CardFace"];
             /** Format: int64 */
             goldIncome: number;
             /** Format: int64 */
@@ -581,6 +582,10 @@ export interface components {
             abilities: components["schemas"]["CardAbility"][];
             talents: components["schemas"]["Entry"][];
             tox: components["schemas"]["Entry"][];
+        };
+        CardFace: {
+            abilities: components["schemas"]["FaceAbility"][];
+            tox: components["schemas"]["FaceTox"][];
         };
         CardStats: {
             /** Format: uuid */
@@ -728,6 +733,16 @@ export interface components {
         };
         ErrorBody: {
             error: string;
+        };
+        FaceAbility: {
+            /** Format: int64 */
+            cooldown: number;
+            element?: string | null;
+            name: string;
+        };
+        FaceTox: {
+            name: string;
+            rarity?: string | null;
         };
         GuideHtml: {
             html: string;

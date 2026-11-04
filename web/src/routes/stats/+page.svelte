@@ -48,7 +48,9 @@
 
 <div class="grid gap-4">
 	<div class="grid gap-1">
-		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.stats_title()}</h1>
+		<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
+			{m.stats_title()}
+		</h1>
 		<p class="text-sm text-muted-foreground">{m.stats_intro()}</p>
 	</div>
 

@@ -16,7 +16,7 @@
 		<a class="eyebrow text-muted-foreground hover:text-foreground" href={href('/decks')}
 			><span aria-hidden="true">←</span> {m.all_decks()}</a
 		>
-		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.new_deck()}</h1>
+		<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">{m.new_deck()}</h1>
 		<p class="text-sm text-muted-foreground">{m.new_deck_text()}</p>
 	</div>
 	<DeckForm cards={data.cards} error={form?.error} />

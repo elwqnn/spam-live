@@ -78,7 +78,9 @@
 
 <div class="grid gap-6">
 	<div class="flex flex-wrap items-end justify-between gap-4">
-		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.cards_title()}</h1>
+		<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
+			{m.cards_title()}
+		</h1>
 		<Input
 			type="search"
 			class="w-full sm:w-64"

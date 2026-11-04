@@ -26,7 +26,7 @@
 {#snippet heading(index: string, eyebrow: string, title: string)}
 	<div class="grid gap-1.5">
 		<span class="eyebrow tracking-[.08em] text-muted-foreground">{index} · {eyebrow}</span>
-		<h2 class="font-heading text-3xl/tight font-medium tracking-tight">{title}</h2>
+		<h2 class="font-heading text-3xl/tight font-normal tracking-tight">{title}</h2>
 	</div>
 {/snippet}
 
@@ -35,19 +35,8 @@
 	<div
 		class="relative mx-auto flex max-w-300 flex-col items-center gap-7 px-4 pt-36 pb-28 text-center sm:px-6 sm:pt-44 sm:pb-36"
 	>
-		{#if data.version}
-			<a
-				href={href('/cards')}
-				class="flex min-h-7.5 items-center gap-2.5 rounded-full border border-[#fbf8f0]/28 bg-[#171715]/22 px-3 eyebrow transition-colors hover:border-[#fbf8f0]/60"
-			>
-				<span class="size-[7px] shrink-0 rounded-full bg-[#fbf8f0] motion-safe:animate-pulse-dot"
-				></span>
-				{m.home_patch({ version: data.version, count })}
-				<Arrow diagonal class="size-3 shrink-0" />
-			</a>
-		{/if}
 		<h1
-			class="max-w-4xl font-heading text-5xl/none font-medium tracking-[-0.025em] text-balance sm:text-7xl/none"
+			class="max-w-4xl font-heading text-5xl/none font-normal tracking-[-0.025em] text-balance sm:text-7xl/none"
 		>
 			{m.home_title()}
 		</h1>

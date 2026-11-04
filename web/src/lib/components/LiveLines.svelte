@@ -28,7 +28,6 @@ void main(){
 	};
 
 	const shown: HTMLCanvasElement[] = [];
-	const idle = new WeakSet<HTMLCanvasElement>();
 	let count = 0;
 	let shared: Shared | null = null;
 	let broken = false;
@@ -62,23 +61,9 @@ void main(){
 
 	const loop = () => {
 		frame = 0;
-		if (!shared) return;
-		let playing = false;
-		for (const canvas of shown) {
-			if (idle.has(canvas)) continue;
-			draw(shared, canvas);
-			playing = true;
-		}
-		if (playing) frame = requestAnimationFrame(loop);
-	};
-
-	const start = () => {
-		if (shared && !shared.still) frame ||= requestAnimationFrame(loop);
-	};
-
-	const pause = (canvas: HTMLCanvasElement, paused: boolean) => {
-		if (paused) idle.add(canvas);
-		else if (idle.delete(canvas)) start();
+		if (!shared || !shown.length) return;
+		for (const canvas of shown) draw(shared, canvas);
+		frame = requestAnimationFrame(loop);
 	};
 
 	const init = (): Shared | null => {
@@ -105,9 +90,9 @@ void main(){
 					hide(canvas);
 					if (!entry.isIntersecting) continue;
 					shown.push(canvas);
-					if (s.still || idle.has(canvas)) draw(s, canvas);
+					if (s.still) draw(s, canvas);
 				}
-				start();
+				if (!s.still) frame ||= requestAnimationFrame(loop);
 			})
 		};
 		return s;
@@ -123,7 +108,6 @@ void main(){
 
 		return () => {
 			hide(canvas);
-			idle.delete(canvas);
 			s.resize.unobserve(canvas);
 			s.view.unobserve(canvas);
 			if (--count) return;
@@ -140,7 +124,7 @@ void main(){
 <script lang="ts">
 	import { cn } from '#lib/utils.js';
 
-	let { class: className, play = true }: { class?: string; play?: boolean } = $props();
+	let { class: className }: { class?: string } = $props();
 </script>
 
 <canvas
@@ -150,5 +134,4 @@ void main(){
 		className
 	)}
 	{@attach live}
-	{@attach (canvas) => pause(canvas, !play)}
 ></canvas>

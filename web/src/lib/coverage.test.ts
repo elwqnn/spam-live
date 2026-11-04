@@ -11,7 +11,8 @@ const card = (id: string, order: number, element: string, rarity: string): CardB
 	rarity,
 	hp: 10,
 	goldIncome: 1,
-	resistances: { earth: 0, fire: 0, light: 0, nature: 0, shadow: 0, water: 0 }
+	resistances: { earth: 0, fire: 0, light: 0, nature: 0, shadow: 0, water: 0 },
+	face: { abilities: [], tox: [] }
 });
 
 const stat = (card: string, games: number) => ({ card, games, wins: 0, playRate: 0 });

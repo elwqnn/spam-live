@@ -101,12 +101,14 @@
 
 <div class="grid max-w-3xl gap-6">
 	<div class="grid gap-2">
-		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.import_title()}</h1>
+		<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
+			{m.import_title()}
+		</h1>
 		<p class="text-muted-foreground">{m.import_intro()}</p>
 	</div>
 
 	<section class="grid gap-2 text-sm">
-		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.import_folder_title()}</h2>
+		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.import_folder_title()}</h2>
 		<dl class="grid gap-x-3 gap-y-1 sm:grid-cols-[auto_1fr]">
 			{#each FOLDERS as [os, path] (os)}
 				<dt class="font-medium">{os}</dt>
@@ -117,7 +119,7 @@
 	</section>
 
 	<section class="grid gap-2 text-sm">
-		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.import_sent_title()}</h2>
+		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.import_sent_title()}</h2>
 		<p>{m.import_sent_text()}</p>
 		<ul class="grid list-disc gap-1 pl-5">
 			<li>{m.import_sent_replays()}</li>

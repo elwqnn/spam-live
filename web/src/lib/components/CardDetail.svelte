@@ -35,24 +35,20 @@
 {/snippet}
 
 {#snippet heading(title: string)}
-	<h2 class="font-heading text-2xl font-medium tracking-tight">{title}</h2>
+	<h2 class="font-heading text-2xl font-normal tracking-tight">{title}</h2>
 {/snippet}
 
 <article class="grid gap-10">
-	<div class="grid gap-6 sm:grid-cols-[16rem_minmax(0,1fr)] sm:items-start md:gap-10">
-		<CardArt
-			element={card.element}
-			rarity={card.rarity}
-			interactive
-			animate
-			class="aspect-5/7 w-full max-w-64 rounded-lg sm:sticky sm:top-8"
-		/>
+	<div class="grid gap-6 sm:grid-cols-[18rem_minmax(0,1fr)] sm:items-start md:gap-10">
+		<div class="w-full max-w-72 sm:sticky sm:top-8" aria-hidden="true">
+			<CardArt {card} interactive />
+		</div>
 		<div class="grid min-w-0 content-start gap-8">
 			<div class="grid gap-3">
 				<a class="eyebrow text-muted-foreground hover:text-foreground" href={href('/cards')}
 					><span aria-hidden="true">←</span> {m.all_cards()}</a
 				>
-				<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">
+				<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
 					{card.name ?? card.id}
 				</h1>
 				<CardBadgeStack>

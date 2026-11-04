@@ -42,7 +42,7 @@
 	<section class="flex flex-wrap items-center gap-4">
 		{#if me.avatarUrl}<img src={me.avatarUrl} alt="" class="size-16 rounded-full" />{/if}
 		<div class="grid min-w-0 flex-1 gap-1">
-			<h1 class="font-heading text-3xl font-medium tracking-tight wrap-anywhere sm:text-4xl">
+			<h1 class="font-heading text-3xl font-normal tracking-tight wrap-anywhere sm:text-4xl">
 				{me.displayName}
 			</h1>
 			<p class="text-sm text-muted-foreground">
@@ -60,7 +60,7 @@
 	</section>
 
 	<section class="grid gap-3">
-		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.me_matches()}</h2>
+		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.me_matches()}</h2>
 		{#if data.matches.length}
 			<ul class="grid gap-3">
 				{#each data.matches as match (match.gameUid)}
@@ -109,7 +109,7 @@
 
 	<section class="grid gap-3">
 		<div class="flex flex-wrap items-center justify-between gap-2">
-			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.my_decks()}</h2>
+			<h2 class="font-heading text-2xl font-normal tracking-tight">{m.my_decks()}</h2>
 			<a class="text-sm hover:underline" href={href('/decks?tab=mine')}>{m.me_all_decks()}</a>
 		</div>
 		{#if data.decks.length}
@@ -133,7 +133,7 @@
 
 	<section class="grid gap-3">
 		<div class="grid gap-1">
-			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.devices()}</h2>
+			<h2 class="font-heading text-2xl font-normal tracking-tight">{m.devices()}</h2>
 			<p class="text-sm text-muted-foreground">{m.devices_text()}</p>
 		</div>
 		{#if data.devices.length}
@@ -168,7 +168,7 @@
 
 	<section class="grid gap-3">
 		<div class="grid gap-1">
-			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.delete_account()}</h2>
+			<h2 class="font-heading text-2xl font-normal tracking-tight">{m.delete_account()}</h2>
 			<p class="text-sm text-muted-foreground">{m.delete_account_text()}</p>
 		</div>
 		<div>

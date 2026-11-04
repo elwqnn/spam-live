@@ -106,7 +106,9 @@
 		<div class="absolute inset-0 band-scrim" aria-hidden="true"></div>
 		<div class="relative flex flex-col gap-[18px] px-5 py-[18px]">
 			<div class="flex items-center gap-2">
-				<h1 class="text-base font-semibold">SPAM <span class="font-normal">Live</span></h1>
+				<h1 class="text-base font-semibold tracking-wide">
+					SPAM<span class="font-normal">.live</span>
+				</h1>
 				<div class="ml-auto flex gap-0.5" role="group" aria-label={m.language()}>
 					{#each locales as locale (locale)}
 						<button
@@ -126,7 +128,7 @@
 						watching ? 'el-nature pulse bg-(--el)' : 'bg-muted-foreground'
 					]}
 				></span>
-				<span class="font-heading text-[22px] font-medium tracking-[-.01em]">{headline}</span>
+				<span class="font-heading text-[22px] font-normal tracking-[-.01em]">{headline}</span>
 			</p>
 		</div>
 	</header>

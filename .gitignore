@@ -6,3 +6,5 @@ samples/
 
 .env
 deploy/backups/
+
+web/static/art/

@@ -1,6 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"app_name": "SPAM Live",
+	"app_name": "SPAM.live",
 	"app_intro": "L'application envoie automatiquement vos nouveaux matchs et decks SPAM au site. Elle lit uniquement les fichiers de match du serveur api.crocodyle.fr et les lignes de deck des journaux du jeu.",
 	"headline_watching": "Surveillance des matchs",
 	"headline_pairing": "En attente de liaison",

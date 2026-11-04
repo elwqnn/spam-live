@@ -35,40 +35,44 @@
 
 <article class="grid max-w-2xl gap-6 text-sm leading-6">
 	<div class="grid gap-2">
-		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">
+		<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
 			{m.privacy_title()}
 		</h1>
 		<p class="text-muted-foreground">{m.privacy_intro()}</p>
 	</div>
 
 	<section class="grid gap-2">
-		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.privacy_who_title()}</h2>
+		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.privacy_who_title()}</h2>
 		<p>{m.privacy_who_text()}</p>
 		<p>{m.privacy_contact()}</p>
 	</section>
 
 	<section class="grid gap-2">
-		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.privacy_store_title()}</h2>
+		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.privacy_store_title()}</h2>
 		{@render list(stored)}
 	</section>
 
 	<section class="grid gap-2">
-		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.privacy_not_store_title()}</h2>
+		<h2 class="font-heading text-2xl font-normal tracking-tight">
+			{m.privacy_not_store_title()}
+		</h2>
 		{@render list(notStored)}
 	</section>
 
 	<section class="grid gap-2">
-		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.privacy_why_title()}</h2>
+		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.privacy_why_title()}</h2>
 		<p>{m.privacy_why_text()}</p>
 	</section>
 
 	<section class="grid gap-2">
-		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.privacy_retention_title()}</h2>
+		<h2 class="font-heading text-2xl font-normal tracking-tight">
+			{m.privacy_retention_title()}
+		</h2>
 		{@render list(retention)}
 	</section>
 
 	<section class="grid gap-2">
-		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.privacy_delete_title()}</h2>
+		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.privacy_delete_title()}</h2>
 		<p>
 			{m.privacy_delete_text()}
 			<a class="underline underline-offset-4" href={href('/me')}>{m.me_title()}</a>.
@@ -78,7 +82,7 @@
 	</section>
 
 	<section class="grid gap-2">
-		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.privacy_cookies_title()}</h2>
+		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.privacy_cookies_title()}</h2>
 		<p>{m.privacy_cookies_text()}</p>
 	</section>
 </article>

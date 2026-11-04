@@ -3,6 +3,7 @@ set dotenv-load
 db_port := "55432"
 container := "spam-live-db"
 image := "ghcr.io/elwqnn/spam-live"
+game_data := home_directory() / ".local/share/Steam/steamapps/common/SPAM/SPAM_Data"
 
 export DATABASE_URL := env("DATABASE_URL", "postgres://spam:spam@127.0.0.1:" + db_port + "/spam")
 export PUBLIC_URL := env("PUBLIC_URL", "http://localhost:5173")
@@ -43,6 +44,11 @@ api: db
 [doc('Run the website on port 5173.')]
 web:
     cd web && bun run dev
+
+[group('dev')]
+[doc('Export the card art of the game to web/static/art/. Never commit it.')]
+art data=game_data:
+    uv run datamine/art.py "{{data}}" web/static/art/
 
 [group('dev')]
 [doc('Run the desktop app against the local website.')]
@@ -91,6 +97,7 @@ test *args: db
 [group('release')]
 [doc('Build the API and web images.')]
 images:
+    @test -d web/static/art/card -a -d web/static/art/avatar -a -f web/static/art/ui/card_mask.webp || { echo "web/static/art/ is missing or incomplete: run just art first" >&2; exit 1; }
     docker build -f api/Dockerfile -t {{image}}-api:latest .
     docker build -t {{image}}-web:latest web
 

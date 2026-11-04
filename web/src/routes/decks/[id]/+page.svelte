@@ -44,7 +44,7 @@
 			><span aria-hidden="true">←</span> {m.all_decks()}</a
 		>
 		<div class="flex flex-wrap items-center gap-2">
-			<h1 class="font-heading text-3xl font-medium tracking-tight wrap-anywhere sm:text-4xl">
+			<h1 class="font-heading text-3xl font-normal tracking-tight wrap-anywhere sm:text-4xl">
 				{deck.name}
 			</h1>
 			{#if !open}<Badge variant="secondary">{m.draft()}</Badge>{/if}
@@ -121,7 +121,7 @@
 	<DeckSummary {deck} cards={data.cards} />
 
 	<section class="grid gap-3">
-		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.cards_title()}</h2>
+		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.cards_title()}</h2>
 		<DeckCards tiles cards={deck.cards} {catalog}>
 			{#snippet below(i)}
 				{@const talent = data.cards[i]?.talents[deck.talents[i]]}
@@ -140,14 +140,14 @@
 
 	{#if deck.guideHtml.trim()}
 		<section class="grid gap-3">
-			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.guide()}</h2>
+			<h2 class="font-heading text-2xl font-normal tracking-tight">{m.guide()}</h2>
 			<Guide html={deck.guideHtml} />
 		</section>
 	{/if}
 
 	<section class="grid gap-3">
 		<div class="grid gap-1">
-			<h2 class="font-heading text-2xl font-medium tracking-tight">{m.live_stats()}</h2>
+			<h2 class="font-heading text-2xl font-normal tracking-tight">{m.live_stats()}</h2>
 			<p class="text-sm text-muted-foreground">{m.live_stats_text()}</p>
 		</div>
 		<div class="grid gap-3 sm:grid-cols-2">
@@ -175,7 +175,7 @@
 
 	{#if open}
 		<section class="grid gap-3">
-			<h2 class="font-heading text-2xl font-medium tracking-tight">
+			<h2 class="font-heading text-2xl font-normal tracking-tight">
 				{m.comments()}
 				<span class="text-muted-foreground tabular-nums">{data.comments.length}</span>
 			</h2>

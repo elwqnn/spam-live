@@ -17,7 +17,7 @@
 			class="eyebrow wrap-anywhere text-muted-foreground hover:text-foreground"
 			href={href(`/decks/${data.deck.id}`)}><span aria-hidden="true">←</span> {data.deck.name}</a
 		>
-		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.edit_deck()}</h1>
+		<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">{m.edit_deck()}</h1>
 	</div>
 	{#key data.deck.id}
 		<DeckForm cards={data.cards} deck={data.deck} details={data.details} error={form?.error} />

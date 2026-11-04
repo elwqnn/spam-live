@@ -413,7 +413,7 @@ fn main() {
             let open = MenuItem::with_id(app, "open", "Open", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let mut tray = TrayIconBuilder::new()
-                .tooltip("SPAM Live")
+                .tooltip("SPAM.live")
                 .menu(&Menu::with_items(app, &[&open, &quit])?)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "open" => show(app),

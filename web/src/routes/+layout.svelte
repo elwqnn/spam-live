@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { Moon02Icon, Sun03Icon } from '@hugeicons/core-free-icons';
+	import { Download04Icon, Moon02Icon, Sun03Icon } from '@hugeicons/core-free-icons';
 	import { page } from '$app/state';
 	import { api, href, loginHref } from '#lib';
 	import { Button } from '#lib/components/ui/button/index.js';
@@ -42,8 +42,8 @@
 		<div
 			class="mx-auto flex max-w-300 flex-wrap items-center gap-x-8 gap-y-3 px-4 py-4 sm:px-6 sm:py-5"
 		>
-			<a href={href('/')} class="text-[17px] font-semibold tracking-tight"
-				>SPAM <span class={hero ? 'font-normal' : 'text-muted-foreground'}>Live</span></a
+			<a href={href('/')} class="text-[17px] font-semibold tracking-wide"
+				>SPAM<span class={hero ? 'font-normal' : 'text-muted-foreground'}>.live</span></a
 			>
 			<nav class="flex flex-wrap gap-x-6 gap-y-2">
 				{#each nav as [path, label] (path)}
@@ -91,6 +91,13 @@
 							: undefined}>{m.login_steam()}</Button
 					>
 				{/if}
+				<Button
+					size="sm"
+					href="https://github.com/elwqnn/spam-live/releases/latest"
+					rel="external"
+					class="bg-[#f2ead3] text-[#171715] hover:bg-[#fbf4df]"
+					><HugeiconsIcon icon={Download04Icon} />{m.nav_download()}</Button
+				>
 			</div>
 		</div>
 	</header>

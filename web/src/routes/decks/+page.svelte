@@ -44,7 +44,9 @@
 
 <div class="grid gap-6">
 	<div class="flex flex-wrap items-center justify-between gap-2">
-		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.decks_title()}</h1>
+		<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
+			{m.decks_title()}
+		</h1>
 		<Button href={href('/decks/new')}>{m.new_deck()}</Button>
 	</div>
 

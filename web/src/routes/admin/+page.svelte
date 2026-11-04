@@ -30,7 +30,7 @@
 </svelte:head>
 
 <div class="grid gap-4">
-	<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.admin_title()}</h1>
+	<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">{m.admin_title()}</h1>
 
 	<nav class="flex flex-wrap gap-1">
 		{#each tabs as [key, label] (key)}

@@ -6,7 +6,6 @@
 	import { href, percent, type Schemas } from '#lib';
 	import { coverage, type Count } from '#lib/coverage.js';
 	import { m } from '#lib/paraglide/messages.js';
-	import CardArt from './CardArt.svelte';
 	import { ELEMENTS, RARITIES } from './CardBadge.svelte';
 	import RarityMark from './RarityMark.svelte';
 
@@ -74,13 +73,14 @@
 									<a
 										href={href(`/cards/${card.id}`)}
 										title={card.name ?? card.id}
-										class="block rounded-xs spring motion-safe:hover:-translate-y-0.5"
+										class="block rounded-sm spring motion-safe:hover:-translate-y-0.5"
 									>
-										<CardArt
-											element={card.element}
-											rarity={card.rarity}
-											tag={false}
-											class="aspect-5/7 w-9 rounded-xs"
+										<img
+											src="/art/avatar/{card.id}.webp"
+											alt=""
+											loading="lazy"
+											decoding="async"
+											class="el-{card.element} size-9 rounded-sm border-2 border-(--el) bg-(--el)"
 										/>
 										<span class="sr-only">{card.name ?? card.id}</span>
 									</a>

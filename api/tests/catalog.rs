@@ -18,16 +18,22 @@ fn mini(version: &str, card_name: Value) -> Value {
             "id": CARD, "name": card_name, "description": null, "element": "fire", "rarity": "rarity-common",
             "hp": 500, "goldIncome": 5, "fireResistance": 1, "waterResistance": 2, "earthResistance": 3,
             "natureResistance": 4, "lightResistance": 5, "shadowResistance": 6, "order": 1,
-            "activeAbilities": [{ "id": "hit", "cooldown": 2 }], "passiveAbilities": ["tox1"],
+            "activeAbilities": [{ "id": "hit", "cooldown": 2 }, { "id": "kick", "cooldown": 1 }], "passiveAbilities": ["tox1", "tox2"],
             "talents": ["t1", "t2", "t3"], "isReleased": 1
         }],
-        "abilities": [{ "id": "hit", "name": { "en": "Hit", "fr": "Coup" }, "description": null, "cooldown": 9, "manaCost": 3 }],
+        "abilities": [
+            { "id": "hit", "name": { "en": "Hit", "fr": "Coup" }, "description": null, "cooldown": 9, "manaCost": 3, "team": "water" },
+            { "id": "kick", "name": { "en": "Kick", "fr": null }, "description": null }
+        ],
         "talents": [
             { "id": "t1", "name": { "en": "One", "fr": null }, "description": { "en": "First" } },
             { "id": "t2", "name": { "en": "Two" }, "description": null },
             { "id": "t3", "name": null, "description": null }
         ],
-        "tox": [{ "id": "tox1", "title": "Burn_R", "name": { "en": "Burn", "fr": "Brûlure" }, "description": null }]
+        "tox": [
+            { "id": "tox1", "title": "Burn_R", "rarity": "rarity-rare", "name": { "en": "Burn", "fr": "Brûlure" }, "description": null },
+            { "id": "tox2", "title": "Ghost_C", "name": null, "description": null }
+        ]
     })
 }
 
@@ -117,14 +123,23 @@ async fn versions_and_language_fallback() {
     assert_eq!(list.headers["cache-control"], "public, max-age=300");
     assert_eq!(list.body[0]["name"], "Alpha");
     assert_eq!(list.body[0]["resistances"]["shadow"], 6);
-    assert_eq!(list.body[0]["abilities"], json!([{ "id": "hit", "cooldown": 2 }]));
+    assert_eq!(list.body[0]["abilities"], json!([{ "id": "hit", "cooldown": 2 }, { "id": "kick", "cooldown": 1 }]));
     assert_eq!(list.body[0]["talents"], json!(["t1", "t2", "t3"]));
+    let face = json!({
+        "abilities": [
+            { "name": "Coup", "cooldown": 2, "element": "water" },
+            { "name": "Kick", "cooldown": 1, "element": null }
+        ],
+        "tox": [{ "name": "Brûlure", "rarity": "rarity-rare" }, { "name": "Ghost_C", "rarity": null }]
+    });
+    assert_eq!(list.body[0]["face"], face);
     assert_eq!(send(&app, get("/api/cards?version=1.9.0", "")).await.body[0]["name"], "Old");
 
     let detail = send(&app, get(&format!("/api/cards/{CARD}?lang=fr"), "")).await;
     assert_eq!(detail.status, StatusCode::OK);
     let d = detail.body;
     assert_eq!(d["name"], "Alpha");
+    assert_eq!(d["face"], face);
     assert_eq!(d["description"], Value::Null);
     assert_eq!(d["abilities"][0]["cooldown"], 2);
     assert_eq!(d["abilities"][0]["ability"]["name"], "Coup");
