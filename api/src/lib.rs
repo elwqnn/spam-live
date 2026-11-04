@@ -105,6 +105,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         catalog::versions,
         catalog::list_cards,
         catalog::get_card,
+        catalog::artists,
         catalog::glossary,
         catalog::glossary_keywords,
         matches::upload,

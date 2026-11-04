@@ -248,6 +248,88 @@ async fn real_catalog_artist() {
 }
 
 #[tokio::test]
+async fn artist_list() {
+    let mut file = mini("1.0.0", json!({ "en": "A" }));
+    let artist_id = |i: usize| format!("00000000-0000-4000-8000-0000000000a{i}");
+    let card_id = |i: usize| format!("00000000-0000-4000-8000-0000000000c{i}");
+    let artists = [
+        ("bob", "http://bob.example/"),
+        ("Ann", "https://www.instagram.com/ann/"),
+        ("Carl", ""),
+        ("  ", "https://a.example/"),
+        ("Unused", "https://u.example/"),
+        ("dee", ""),
+        (" Dee ", ""),
+    ];
+    file["artists"] = artists
+        .iter()
+        .enumerate()
+        .map(|(i, (name, link))| json!({ "id": artist_id(i), "name": name, "link": link }))
+        .collect();
+    let card = file["cards"][0].clone();
+    file["cards"] = [
+        (Some(0), 5),
+        (Some(1), 3),
+        (Some(2), 1),
+        (Some(0), 2),
+        (Some(3), 4),
+        (Some(1), 1),
+        (Some(0), 4),
+        (None, 0),
+        (Some(6), 0),
+        (Some(5), 0),
+    ]
+    .into_iter()
+    .enumerate()
+    .map(|(i, (artist, order))| {
+        let mut c = card.clone();
+        c["id"] = json!(card_id(i));
+        c["artist"] = json!(artist.map(artist_id));
+        c["order"] = json!(order);
+        c
+    })
+    .collect();
+    let dir = temp_dir("artist-list", &[("1.0.0.json", file.to_string())]);
+    let catalog = Catalog::load(&dir).unwrap();
+    std::fs::remove_dir_all(&dir).unwrap();
+    let app = api::router(state_with(lazy_pool(), "https://steamcommunity.com/openid/login", catalog));
+    let res = send(&app, get("/api/artists?lang=fr", "")).await;
+    assert_eq!(res.status, StatusCode::OK);
+    assert_eq!(res.headers["cache-control"], "public, max-age=300");
+    let list = res.body.as_array().unwrap();
+    let names: Vec<_> = list.iter().map(|a| a["name"].clone()).collect();
+    assert_eq!(names, [json!("Ann"), json!("bob"), json!("Carl"), json!("Dee"), json!("dee")]);
+    assert_eq!(list[0]["links"], json!([{ "kind": "instagram", "url": "https://www.instagram.com/ann/" }]));
+    assert_eq!((list[1]["links"].clone(), list[2]["links"].clone()), (json!([]), json!([])));
+    let ids = |a: &Value| a["cards"].as_array().unwrap().iter().map(|c| c["id"].clone()).collect::<Vec<_>>();
+    let card = |i: usize| json!(card_id(i));
+    assert_eq!(ids(&list[1]), [card(3), card(6), card(0)]);
+    assert_eq!(ids(&list[0]), [card(5), card(1)]);
+    assert_eq!(ids(&list[2]), [card(2)]);
+    assert_eq!((ids(&list[3]), ids(&list[4])), (vec![card(8)], vec![card(9)]));
+    assert_eq!(list[1]["cards"][0]["face"]["abilities"][0]["name"], "Coup");
+    assert_eq!(send(&app, get("/api/artists?lang=xx", "")).await.status, StatusCode::BAD_REQUEST);
+    assert_eq!(send(&app, get("/api/artists?version=9.9.9", "")).await.status, StatusCode::NOT_FOUND);
+}
+
+#[tokio::test]
+async fn real_catalog_artists() {
+    let app = api::router(state_with(lazy_pool(), "https://steamcommunity.com/openid/login", real_catalog()));
+    let list = send(&app, get("/api/artists", "")).await.body;
+    let list = list.as_array().unwrap();
+    assert_eq!(list.len(), 29);
+    let mut ids: Vec<_> = list.iter().flat_map(|a| a["cards"].as_array().unwrap()).map(|c| c["id"].clone()).collect();
+    assert_eq!(ids.len(), 151);
+    ids.sort_by_key(|id| id.to_string());
+    ids.dedup();
+    assert_eq!(ids.len(), 151);
+    let names: Vec<_> = list.iter().map(|a| a["name"].as_str().unwrap().to_lowercase()).collect();
+    assert!(names.is_sorted());
+    let wolf = list.iter().find(|a| a["name"] == "Mr Wolf").unwrap();
+    assert_eq!(wolf["links"], json!([]));
+}
+
+#[tokio::test]
 async fn glossary_without_lists() {
     let dir = temp_dir("glossary", &[("1.0.0.json", mini("1.0.0", json!({ "en": "A" })).to_string())]);
     let catalog = Catalog::load(&dir).unwrap();
@@ -313,6 +395,7 @@ async fn openapi_lists_routes() {
     for path in [
         "/api/matches",
         "/api/cards/{id}",
+        "/api/artists",
         "/api/glossary",
         "/api/glossary/keywords",
         "/api/device/token",

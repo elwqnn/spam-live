@@ -142,6 +142,8 @@
 	"nav_import": "Importer",
 	"nav_admin": "Admin",
 	"footer_privacy": "Confidentialité",
+	"credits": "Crédits",
+	"credits_intro": "Les illustrations des cartes de SPAM appartiennent à Ticroco et à leurs artistes. SPAM.live est un site de fans non officiel, non affilié à Ticroco.",
 	"mode_ranked": "Classé",
 	"mode_n": "Mode {n}",
 	"status_new": "Nouveau",

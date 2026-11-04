@@ -324,6 +324,13 @@ pub struct Artist {
 }
 
 #[derive(Serialize, ToSchema)]
+pub struct ArtistCards {
+    #[serde(flatten)]
+    pub artist: Artist,
+    pub cards: Vec<CardBase>,
+}
+
+#[derive(Serialize, ToSchema)]
 pub struct ArtistLink {
     pub kind: LinkKind,
     pub url: String,
@@ -551,11 +558,33 @@ pub async fn get_card(
     }))
 }
 
+#[utoipa::path(get, path = "/api/artists", tag = "catalog", params(CardQuery),
+    responses((status = 200, body = Vec<ArtistCards>, description = "Artists with 1 or more cards, sorted by name \
+        without case. cards is sorted by card order."),
+        (status = 400, body = crate::ErrorBody), (status = 404, body = crate::ErrorBody)))]
+pub async fn artists(State(s): State<AppState>, Query(q): Query<CardQuery>) -> Result<Response, ApiError> {
+    let (v, lang) = s.catalog.select(&q)?;
+    let mut cards: Vec<&RawCard> = v.cards.iter().collect();
+    cards.sort_by_key(|c| c.order);
+    let mut list: Vec<_> = v
+        .artists
+        .values()
+        .filter_map(|a| {
+            let artist = artist(a)?;
+            let cards: Vec<_> = cards.iter().filter(|c| c.artist == Some(a.id)).map(|c| base(v, c, lang)).collect();
+            (!cards.is_empty()).then_some(ArtistCards { artist, cards })
+        })
+        .collect();
+    list.sort_by_cached_key(|a| (a.artist.name.to_lowercase(), a.cards[0].id));
+    Ok(public(list))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/api/catalog/versions", get(versions))
         .route("/api/cards", get(list_cards))
         .route("/api/cards/{id}", get(get_card))
+        .route("/api/artists", get(artists))
         .route("/api/glossary", get(glossary))
         .route("/api/glossary/keywords", get(glossary_keywords))
 }

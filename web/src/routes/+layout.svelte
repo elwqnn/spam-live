@@ -146,6 +146,10 @@
 				class="eyebrow text-muted-foreground transition-colors hover:text-foreground"
 				href={href('/privacy')}>{m.footer_privacy()}</a
 			>
+			<a
+				class="eyebrow text-muted-foreground transition-colors hover:text-foreground"
+				href={href('/credits')}>{m.credits()}</a
+			>
 			<div class="flex items-center gap-3 sm:ml-auto">
 				<span class="sr-only">{m.language()}</span>
 				{#each locales as locale (locale)}

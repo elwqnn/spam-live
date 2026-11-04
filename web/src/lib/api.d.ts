@@ -116,6 +116,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/artists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["artists"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/logout": {
         parameters: {
             query?: never;
@@ -608,6 +624,9 @@ export interface components {
         Artist: {
             links: components["schemas"]["ArtistLink"][];
             name: string;
+        };
+        ArtistCards: components["schemas"]["Artist"] & {
+            cards: components["schemas"]["CardBase"][];
         };
         ArtistLink: {
             kind: components["schemas"]["LinkKind"];
@@ -1213,6 +1232,45 @@ export interface operations {
                 content?: never;
             };
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    artists: {
+        parameters: {
+            query?: {
+                version?: string;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Artists with 1 or more cards, sorted by name without case. cards is sorted by card order. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArtistCards"][];
+                };
+            };
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
