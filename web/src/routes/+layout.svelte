@@ -102,36 +102,38 @@
 	<title>{m.site_name()}</title>
 </svelte:head>
 
-<div class="overflow-x-clip lg:px-8">
-	<div class="rows mx-auto flex min-h-dvh max-w-300 flex-col lg:border-x">
-		<header class="flex flex-wrap items-center gap-x-8 gap-y-3 px-4 py-4 sm:px-6 sm:py-5">
-			<a href={href('/')} class="text-[17px] font-semibold tracking-wide"
-				>SPAM<span class="text-muted-foreground">.live</span></a
-			>
-			<nav class="flex flex-wrap gap-x-6 gap-y-2">
-				{#each nav as [path, label] (path)}
-					<a
-						class="eyebrow text-xs text-muted-foreground transition-colors hover:text-foreground"
-						href={href(path)}>{label()}</a
-					>
-				{/each}
-			</nav>
-			<div class="ml-auto flex min-w-0 flex-wrap items-center gap-3">
-				<CommandPalette bind:this={palette} {actions} {mac} />
-				{#if data.me}
-					<AccountMenu me={data.me} {logout} />
-				{:else}
-					<Button variant="outline" size="sm" href={login} rel="external">{m.login_steam()}</Button>
-				{/if}
-				<Button size="sm" href={download} aria-keyshortcuts={single ? 'd' : undefined}
-					><HugeiconsIcon icon={Download04Icon} />{m.nav_download()}<kbd
-						aria-hidden="true"
-						class="key-hint in-[.keys-off]:hidden">D</kbd
-					></Button
+<div class="flex min-h-dvh flex-col overflow-x-clip lg:px-8">
+	<header
+		class="head mx-auto flex w-full max-w-300 flex-wrap items-center gap-x-8 gap-y-3 px-4 py-4 sm:px-6 sm:py-5 lg:border-x"
+	>
+		<a href={href('/')} class="text-[17px] font-semibold tracking-wide"
+			>SPAM<span class="text-muted-foreground">.live</span></a
+		>
+		<nav class="flex flex-wrap gap-x-6 gap-y-2">
+			{#each nav as [path, label] (path)}
+				<a
+					class="eyebrow text-xs text-muted-foreground transition-colors hover:text-foreground"
+					href={href(path)}>{label()}</a
 				>
-			</div>
-		</header>
+			{/each}
+		</nav>
+		<div class="ml-auto flex min-w-0 flex-wrap items-center gap-3">
+			<CommandPalette bind:this={palette} {actions} {mac} />
+			{#if data.me}
+				<AccountMenu me={data.me} {logout} />
+			{:else}
+				<Button variant="outline" size="sm" href={login} rel="external">{m.login_steam()}</Button>
+			{/if}
+			<Button size="sm" href={download} aria-keyshortcuts={single ? 'd' : undefined}
+				><HugeiconsIcon icon={Download04Icon} />{m.nav_download()}<kbd
+					aria-hidden="true"
+					class="key-hint in-[.keys-off]:hidden">D</kbd
+				></Button
+			>
+		</div>
+	</header>
 
+	<div class="rows mx-auto flex w-full max-w-300 flex-1 flex-col lg:border-x">
 		<main class="rows flex flex-1 flex-col">
 			{@render children()}
 		</main>

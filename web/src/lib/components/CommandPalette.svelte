@@ -197,7 +197,7 @@
 	aria-haspopup="dialog"
 	aria-keyshortcuts={mac ? 'Meta+K' : 'Control+K'}
 >
-	<HugeiconsIcon icon={Search01Icon} /><span class="max-sm:sr-only">{m.palette_open()}</span><kbd
+	<HugeiconsIcon icon={Search01Icon} /><span class="sr-only">{m.palette_open()}</span><kbd
 		aria-hidden="true"
 		class="key-hint">{mac ? '⌘' : 'Ctrl'} K</kbd
 	>

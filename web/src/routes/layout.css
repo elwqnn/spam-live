@@ -193,6 +193,40 @@
 	}
 }
 
+@utility head {
+	z-index: 20;
+	border-bottom-width: 1px;
+	background-color: var(--background);
+	@variant sm {
+		position: sticky;
+		top: 0;
+	}
+	@variant lg {
+		box-shadow:
+			-5px 0 var(--background),
+			5px 0 var(--background);
+		&::before,
+		&::after {
+			--cross: color-mix(in oklab, var(--foreground) 30%, transparent);
+			content: '';
+			position: absolute;
+			bottom: -5px;
+			left: -5px;
+			z-index: 1;
+			width: 9px;
+			height: 9px;
+			background:
+				linear-gradient(var(--cross), var(--cross)) center / 1px 100% no-repeat,
+				linear-gradient(var(--cross), var(--cross)) center / 100% 1px no-repeat;
+			pointer-events: none;
+		}
+		&::after {
+			right: -5px;
+			left: auto;
+		}
+	}
+}
+
 @utility row {
 	@apply px-4 py-8 sm:px-6 sm:py-10;
 }
@@ -219,7 +253,7 @@
 		@apply bg-background text-foreground;
 	}
 	html {
-		@apply font-sans;
+		@apply font-sans sm:scroll-pt-28;
 	}
 	kbd {
 		@apply inline-flex h-5 min-w-5 items-center justify-center rounded-xs border px-1 font-mono text-[11px] leading-none font-normal tracking-normal text-muted-foreground normal-case;
