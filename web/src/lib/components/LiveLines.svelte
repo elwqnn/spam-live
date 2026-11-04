@@ -9,13 +9,14 @@ ${FIELD}uniform vec2 o;
 uniform float d;
 uniform float t;
 uniform float w;
+uniform float g;
 void main(){
   float f;
   vec3 col=field((o+gl_FragCoord.xy/d)/${SCALE}.,t,f);
   float v=f*${LEVELS}.;
   float k=d*w;
   float a=(1.-min(abs(fract(v-.5)-.5)/max(fwidth(v),1e-4)/max(k,1.),1.))*min(k,1.);
-  gl_FragColor=vec4(col*a,a);
+  gl_FragColor=vec4(mix(col,vec3(.5),g)*a,a);
 }`;
 
 	type Shared = {
@@ -24,6 +25,7 @@ void main(){
 		ratio: WebGLUniformLocation | null;
 		time: WebGLUniformLocation | null;
 		line: WebGLUniformLocation | null;
+		gray: WebGLUniformLocation | null;
 		still: boolean;
 		start: number;
 		resize: ResizeObserver;
@@ -31,7 +33,7 @@ void main(){
 	};
 
 	const shown: HTMLCanvasElement[] = [];
-	const looks = new WeakMap<Element, [number, number]>();
+	const looks = new WeakMap<Element, [number, number, number]>();
 	let count = 0;
 	let shared: Shared | null = null;
 	let broken = false;
@@ -54,11 +56,12 @@ void main(){
 		if (source.width < width) source.width = width;
 		if (source.height < height) source.height = height;
 		const rect = canvas.getBoundingClientRect();
-		const [line, speed] = looks.get(canvas) ?? [1, 1];
+		const [line, speed, gray] = looks.get(canvas) ?? [1, 1, 0];
 		s.gl.viewport(0, 0, width, height);
 		s.gl.uniform2f(s.origin, rect.left + scrollX, -(rect.top + scrollY + height / ratio));
 		s.gl.uniform1f(s.ratio, ratio);
 		s.gl.uniform1f(s.line, line);
+		s.gl.uniform1f(s.gray, gray);
 		s.gl.uniform1f(s.time, 20 + (s.still ? 0 : ((performance.now() - s.start) / 1000) * speed));
 		s.gl.drawArrays(s.gl.TRIANGLES, 0, 3);
 		ctx.clearRect(0, 0, width, height);
@@ -86,6 +89,7 @@ void main(){
 			ratio: gl.getUniformLocation(linked, 'd'),
 			time: gl.getUniformLocation(linked, 't'),
 			line: gl.getUniformLocation(linked, 'w'),
+			gray: gl.getUniformLocation(linked, 'g'),
 			still: matchMedia('(prefers-reduced-motion: reduce)').matches,
 			start: performance.now(),
 			resize: new ResizeObserver((entries) => {
@@ -106,12 +110,12 @@ void main(){
 	};
 
 	const live =
-		(line: number, speed: number): Attachment<HTMLCanvasElement> =>
+		(line: number, speed: number, gray: boolean): Attachment<HTMLCanvasElement> =>
 		(canvas) => {
 			if (!shared && !broken) shared = init();
 			const s = shared;
 			if (!s || !canvas.getContext('2d')) return;
-			looks.set(canvas, [line, speed]);
+			looks.set(canvas, [line, speed, gray ? 1 : 0]);
 			count++;
 			s.resize.observe(canvas);
 			s.view.observe(canvas);
@@ -137,8 +141,9 @@ void main(){
 	let {
 		class: className,
 		line = 1,
-		speed = 1
-	}: { class?: string; line?: number; speed?: number } = $props();
+		speed = 1,
+		gray = false
+	}: { class?: string; line?: number; speed?: number; gray?: boolean } = $props();
 </script>
 
 <canvas
@@ -147,5 +152,5 @@ void main(){
 		'pointer-events-none absolute inset-0 -z-10 size-full opacity-30 motion-safe:transition-opacity motion-safe:duration-300 [:hover>&]:opacity-35',
 		className
 	)}
-	{@attach live(line, speed)}
+	{@attach live(line, speed, gray)}
 ></canvas>

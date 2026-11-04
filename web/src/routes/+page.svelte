@@ -23,11 +23,8 @@
 	<meta name="description" content={m.site_tagline()} />
 </svelte:head>
 
-{#snippet heading(index: string, eyebrow: string, title: string)}
-	<div class="grid gap-1.5">
-		<span class="eyebrow tracking-[.08em] text-muted-foreground">{index} · {eyebrow}</span>
-		<h2 class="font-heading text-3xl/tight font-normal tracking-tight">{title}</h2>
-	</div>
+{#snippet heading(title: string)}
+	<h2 class="font-heading text-3xl/tight font-normal tracking-tight">{title}</h2>
 {/snippet}
 
 <section class="relative isolate text-[#fbf8f0]">
@@ -78,7 +75,7 @@
 
 <section class="rows">
 	<div class="flex flex-wrap items-end gap-4 row">
-		{@render heading('01', m.home_meta(), m.home_top_decks())}
+		{@render heading(m.home_top_decks())}
 		<a
 			class="mb-1.5 ml-auto eyebrow text-muted-foreground transition-colors hover:text-foreground"
 			href={href('/stats')}>{m.see_all_stats()} <span aria-hidden="true">→</span></a
@@ -120,7 +117,7 @@
 
 <section class="rows">
 	<div class="row">
-		{@render heading('02', m.home_community(), m.home_recent_decks())}
+		{@render heading(m.home_recent_decks())}
 	</div>
 	{#if data.recent.length}
 		<CardStack>
@@ -152,7 +149,7 @@
 >
 	<LiveLines line={0.5} speed={1 / 3} class="opacity-7 [:hover>&]:opacity-9" />
 	<div class="grid max-w-xl gap-3">
-		{@render heading('03', m.home_contribute(), m.import_title())}
+		{@render heading(m.import_title())}
 		<p class="text-muted-foreground">{m.import_text()}</p>
 	</div>
 	<Button size="lg" href={href('/import')}>{m.nav_import()}<Arrow /></Button>
