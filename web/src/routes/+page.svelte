@@ -12,7 +12,6 @@
 	let { data }: PageProps = $props();
 
 	const catalog = $derived(new Map(data.cards.map((c) => [c.id, c])));
-	const count = $derived(data.cards.length);
 	const line = 'border-[#fbf8f0]/35 bg-[#171715]/35 hover:border-[#fbf8f0]/70';
 </script>
 
@@ -27,14 +26,14 @@
 <section class="relative isolate text-[#fbf8f0]">
 	<ShaderBackground />
 	<div
-		class="relative flex flex-col items-center gap-7 px-4 pt-24 pb-28 text-center sm:px-6 sm:pt-32 sm:pb-36"
+		class="relative flex flex-col items-center gap-5 px-4 pt-12 pb-16 text-center sm:px-6 sm:pt-16 sm:pb-20"
 	>
 		<h1
-			class="max-w-4xl font-heading text-5xl/none font-normal tracking-[-0.025em] text-balance sm:text-7xl/none"
+			class="font-heading text-4xl/none font-normal tracking-[-0.025em] text-balance sm:text-5xl/none xl:text-6xl/none"
 		>
 			{m.home_title()}
 		</h1>
-		<p class="max-w-xl text-lg">{m.home_subtitle()}</p>
+		<p class="max-w-2xl text-lg text-balance">{m.home_subtitle()}</p>
 		<div class="flex flex-wrap justify-center gap-3">
 			<Button
 				size="lg"
@@ -46,27 +45,6 @@
 				>{m.import_title()}</Button
 			>
 		</div>
-		<form
-			method="GET"
-			action={href('/cards')}
-			role="search"
-			class="flex h-13 w-full max-w-145 items-center gap-3.5 rounded-sm border border-[#fbf8f0]/16 bg-[#171715]/70 pr-1.5 pl-4.5 backdrop-blur-sm transition-colors focus-within:border-[#fbf8f0]/60 focus-within:bg-[#171715]/80"
-		>
-			<span aria-hidden="true" class="font-mono text-sm">/</span>
-			<input
-				type="search"
-				name="q"
-				aria-label={m.search()}
-				placeholder={m.home_search({ count })}
-				class="h-full min-w-0 flex-1 bg-transparent text-sm text-[#fbf8f0] outline-none placeholder:text-[#fbf8f0]/75"
-			/>
-			<button
-				type="submit"
-				aria-label={m.search()}
-				class="grid size-10 shrink-0 place-items-center rounded-sm transition-colors hover:bg-[#fbf8f0]/10 focus-visible:ring-1 focus-visible:ring-[#fbf8f0]/60"
-				><Arrow class="size-4" /></button
-			>
-		</form>
 	</div>
 </section>
 
