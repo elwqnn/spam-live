@@ -153,31 +153,43 @@
 	</form>
 {:else if data.tab === 'matches'}
 	{#if data.disputed.length}
-		<ul class="divide-y">
-			{#each data.disputed as d (d.gameUid)}
-				<li class="grid gap-2 px-4 py-4 text-sm sm:px-6">
-					<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-						<code class="font-medium">{d.gameUid}</code>
-						<span class="font-medium">{modeName(d.gameMode)}</span>
-						{#if d.isAi}<Badge variant="outline">{m.ai()}</Badge>{/if}
-						<span class="text-muted-foreground"><Time iso={d.startUtc} /></span>
-						<span class="text-muted-foreground">{m.version_label({ version: d.appVersion })}</span>
-						<span class="text-muted-foreground">
-							{m.winner()}: {d.winnerSeat == null ? m.result_draw() : m.seat_n({ n: d.winnerSeat })}
-						</span>
-						<span class="text-muted-foreground"
-							>{m.admin_uploaders()}: {d.uploaderIds.join(', ')}</span
-						>
-					</div>
-					<dl class="grid gap-x-3 gap-y-1 sm:grid-cols-[auto_1fr]">
-						<dt class="text-xs text-muted-foreground sm:pt-0.5">{m.seat_n({ n: 0 })}</dt>
-						<dd><DeckCards cards={d.seat0Cards} {catalog} /></dd>
-						<dt class="text-xs text-muted-foreground sm:pt-0.5">{m.seat_n({ n: 1 })}</dt>
-						<dd><DeckCards cards={d.seat1Cards} {catalog} /></dd>
-					</dl>
-				</li>
-			{/each}
-		</ul>
+		<div>
+			<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
+				{#each data.disputed as d (d.gameUid)}
+					<li
+						class="flex flex-col gap-3 p-4 transition-colors [contain-intrinsic-size:auto_360px] [content-visibility:auto] hover:bg-row sm:p-5"
+					>
+						<div class="grid gap-1">
+							<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+								<code class="font-medium break-all">{d.gameUid}</code>
+								<span class="font-medium">{modeName(d.gameMode)}</span>
+								{#if d.isAi}<Badge variant="outline">{m.ai()}</Badge>{/if}
+							</div>
+							<p class="flex flex-wrap gap-x-3 text-xs text-muted-foreground tabular-nums">
+								<Time iso={d.startUtc} />
+								<span>{m.version_label({ version: d.appVersion })}</span>
+								<span
+									>{m.winner()}: {d.winnerSeat == null
+										? m.result_draw()
+										: m.seat_n({ n: d.winnerSeat })}</span
+								>
+								<span class="wrap-anywhere">{m.admin_uploaders()}: {d.uploaderIds.join(', ')}</span>
+							</p>
+						</div>
+						<dl class="grid gap-3">
+							<div class="grid gap-1.5">
+								<dt class="text-xs text-muted-foreground">{m.seat_n({ n: 0 })}</dt>
+								<dd><DeckCards cards={d.seat0Cards} {catalog} /></dd>
+							</div>
+							<div class="grid gap-1.5">
+								<dt class="text-xs text-muted-foreground">{m.seat_n({ n: 1 })}</dt>
+								<dd><DeckCards cards={d.seat1Cards} {catalog} /></dd>
+							</div>
+						</dl>
+					</li>
+				{/each}
+			</ul>
+		</div>
 	{:else}
 		<p class="row text-sm text-muted-foreground">{m.admin_no_disputed()}</p>
 	{/if}

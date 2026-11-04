@@ -3,13 +3,12 @@
 	import { queryHref } from '#lib';
 	import CardRow from '#lib/components/CardRow.svelte';
 	import CardStack from '#lib/components/CardStack.svelte';
-	import DeckCards from '#lib/components/DeckCards.svelte';
+	import DeckKeyTile from '#lib/components/DeckKeyTile.svelte';
 	import FilterBar from '#lib/components/FilterBar.svelte';
 	import FilterMenu from '#lib/components/FilterMenu.svelte';
 	import MetaCoverage from '#lib/components/MetaCoverage.svelte';
 	import WinRate from '#lib/components/WinRate.svelte';
 	import { buttonVariants } from '#lib/components/ui/button/index.js';
-	import * as Table from '#lib/components/ui/table/index.js';
 	import type { Filter } from '#lib/filter.js';
 	import TitleRow from '#lib/components/TitleRow.svelte';
 	import TrendMenu from '#lib/components/TrendMenu.svelte';
@@ -81,27 +80,11 @@
 {#if tab === 'decks'}
 	{#if data.decks.length}
 		<div>
-			<Table.Root>
-				<Table.Header>
-					<Table.Row>
-						<Table.Head class="pl-4 sm:pl-6">{m.deck()}</Table.Head>
-						<Table.Head class="text-right whitespace-normal">{m.games()}</Table.Head>
-						<Table.Head class="pr-4 text-right whitespace-normal sm:pr-6">{m.win_rate()}</Table.Head
-						>
-					</Table.Row>
-				</Table.Header>
-				<Table.Body>
-					{#each data.decks as deck (deck.cards.join())}
-						<Table.Row>
-							<Table.Cell class="min-w-40 py-3.5 pl-4 whitespace-normal sm:min-w-48 sm:pl-6">
-								<DeckCards cards={deck.cards} {catalog} />
-							</Table.Cell>
-							<Table.Cell class="text-right text-[13px] tabular-nums">{deck.games}</Table.Cell>
-							<Table.Cell class="pr-4 sm:pr-6"><WinRate value={deck.winRate} /></Table.Cell>
-						</Table.Row>
-					{/each}
-				</Table.Body>
-			</Table.Root>
+			<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
+				{#each data.decks as deck, i (deck.cards.join())}
+					<DeckKeyTile {deck} rank={i + 1} {catalog} />
+				{/each}
+			</ul>
 		</div>
 	{:else}
 		<p class="row text-sm text-muted-foreground">{m.no_stats()}</p>

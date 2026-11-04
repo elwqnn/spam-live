@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { closeAfter, formAction, href, modeName, queryHref } from '#lib';
 	import DeckCards from '#lib/components/DeckCards.svelte';
+	import DeckTile from '#lib/components/DeckTile.svelte';
 	import Dialog from '#lib/components/Dialog.svelte';
 	import Time from '#lib/components/Time.svelte';
 	import { Badge } from '#lib/components/ui/badge/index.js';
@@ -62,31 +63,41 @@
 <section class="rows">
 	<h2 class="row font-heading text-2xl font-normal tracking-tight">{m.me_matches()}</h2>
 	{#if data.matches.length}
-		<ul class="divide-y">
-			{#each data.matches as match (match.gameUid)}
-				{@const [label, variant] = results[match.result]}
-				<li class="grid gap-2 px-4 py-4 sm:px-6">
-					<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-						<Badge {variant}>{label()}</Badge>
-						<span class="font-medium">{modeName(match.gameMode)}</span>
-						{#if match.isAi}<Badge variant="outline">{m.ai()}</Badge>{/if}
-						{#if match.disputed}<Badge variant="destructive">{m.disputed()}</Badge>{/if}
-						<span class="flex flex-wrap gap-x-3 text-xs text-muted-foreground tabular-nums">
-							<Time iso={match.startUtc} />
-							<span>{m.version_label({ version: match.appVersion })}</span>
-							<span>{m.duration({ time: duration(match.durationMs) })}</span>
-							<span>{m.turns({ n: match.turnCount })}</span>
-						</span>
-					</div>
-					<dl class="grid gap-x-3 gap-y-1 sm:grid-cols-[auto_1fr]">
-						<dt class="text-xs text-muted-foreground sm:pt-0.5">{m.my_cards()}</dt>
-						<dd><DeckCards cards={match.myCards} {catalog} /></dd>
-						<dt class="text-xs text-muted-foreground sm:pt-0.5">{m.opponent_cards()}</dt>
-						<dd><DeckCards cards={match.opponentCards} {catalog} /></dd>
-					</dl>
-				</li>
-			{/each}
-		</ul>
+		<div>
+			<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
+				{#each data.matches as match (match.gameUid)}
+					{@const [label, variant] = results[match.result]}
+					<li
+						class="flex flex-col gap-3 p-4 transition-colors [contain-intrinsic-size:auto_360px] [content-visibility:auto] hover:bg-row sm:p-5"
+					>
+						<div class="grid gap-1">
+							<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+								<Badge {variant}>{label()}</Badge>
+								<span class="font-medium">{modeName(match.gameMode)}</span>
+								{#if match.isAi}<Badge variant="outline">{m.ai()}</Badge>{/if}
+								{#if match.disputed}<Badge variant="destructive">{m.disputed()}</Badge>{/if}
+							</div>
+							<p class="flex flex-wrap gap-x-3 text-xs text-muted-foreground tabular-nums">
+								<Time iso={match.startUtc} />
+								<span>{m.version_label({ version: match.appVersion })}</span>
+								<span>{m.duration({ time: duration(match.durationMs) })}</span>
+								<span>{m.turns({ n: match.turnCount })}</span>
+							</p>
+						</div>
+						<dl class="grid gap-3">
+							<div class="grid gap-1.5">
+								<dt class="text-xs text-muted-foreground">{m.my_cards()}</dt>
+								<dd><DeckCards cards={match.myCards} {catalog} /></dd>
+							</div>
+							<div class="grid gap-1.5">
+								<dt class="text-xs text-muted-foreground">{m.opponent_cards()}</dt>
+								<dd><DeckCards cards={match.opponentCards} {catalog} /></dd>
+							</div>
+						</dl>
+					</li>
+				{/each}
+			</ul>
+		</div>
 	{:else}
 		<p class="row text-sm text-muted-foreground">
 			{m.me_no_matches()}
@@ -113,19 +124,13 @@
 		<a class="text-sm hover:underline" href={href('/decks?tab=mine')}>{m.me_all_decks()}</a>
 	</div>
 	{#if data.decks.length}
-		<ul class="divide-y">
-			{#each data.decks as deck (deck.id)}
-				<li class="grid gap-1 px-4 py-4 sm:px-6">
-					<p class="flex flex-wrap items-center gap-2 text-sm">
-						<a class="font-medium wrap-anywhere hover:underline" href={href(`/decks/${deck.id}`)}
-							>{deck.name}</a
-						>
-						{#if deck.status === 'draft'}<Badge variant="secondary">{m.draft()}</Badge>{/if}
-					</p>
-					<DeckCards cards={deck.cards} {catalog} />
-				</li>
-			{/each}
-		</ul>
+		<div>
+			<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
+				{#each data.decks as deck (deck.id)}
+					<DeckTile {deck} {catalog} />
+				{/each}
+			</ul>
+		</div>
 	{:else}
 		<p class="row text-sm text-muted-foreground">{m.me_no_decks()}</p>
 	{/if}

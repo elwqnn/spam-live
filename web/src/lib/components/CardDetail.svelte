@@ -4,9 +4,8 @@
 	import CardArt from './CardArt.svelte';
 	import CardBadge from './CardBadge.svelte';
 	import CardBadgeStack from './CardBadgeStack.svelte';
-	import CardStack from './CardStack.svelte';
 	import Change from './Change.svelte';
-	import DeckRow from './DeckRow.svelte';
+	import DeckTile from './DeckTile.svelte';
 	import Description from './Description.svelte';
 	import TitleRow from './TitleRow.svelte';
 	import TrendMenu from './TrendMenu.svelte';
@@ -156,11 +155,13 @@
 					>{m.decks_with_card_all()} <span aria-hidden="true">→</span></a
 				>
 			</div>
-			<CardStack>
-				{#each decks as deck (deck.id)}
-					<DeckRow {deck} {catalog} />
-				{/each}
-			</CardStack>
+			<div>
+				<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
+					{#each decks as deck (deck.id)}
+						<DeckTile {deck} {catalog} />
+					{/each}
+				</ul>
+			</div>
 		</section>
 	{/if}
 

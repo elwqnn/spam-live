@@ -2,7 +2,7 @@ import { api, ok } from '#lib';
 import { getLocale } from '#lib/paraglide/runtime.js';
 import type { PageLoad } from './$types';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 24;
 const MAX_OFFSET = 10_000;
 const SORTS = ['votes', 'recent', 'winrate'] as const;
 type Query = Record<string, string | null>;

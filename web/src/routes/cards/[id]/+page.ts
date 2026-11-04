@@ -15,7 +15,7 @@ export const load: PageLoad = async ({ fetch, url, params, untrack }) => {
 		client.GET('/api/cards/{id}', { params: { path: { id: params.id }, query: { lang } } }),
 		client.GET('/api/stats/cards', { params: { query: { version, trend } } }),
 		client.GET('/api/catalog/versions'),
-		client.GET('/api/decks', { params: { query: { card: params.id, limit: 5 } } }),
+		client.GET('/api/decks', { params: { query: { card: params.id, limit: 6 } } }),
 		client.GET('/api/glossary/keywords', { params: { query: { lang } } })
 	]);
 	const list = decks.data ?? [];

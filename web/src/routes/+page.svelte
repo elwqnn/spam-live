@@ -1,14 +1,11 @@
 <script lang="ts">
 	import { href } from '#lib';
 	import Arrow from '#lib/components/Arrow.svelte';
-	import Author from '#lib/components/Author.svelte';
-	import CardStack from '#lib/components/CardStack.svelte';
-	import DeckCards from '#lib/components/DeckCards.svelte';
+	import DeckKeyTile from '#lib/components/DeckKeyTile.svelte';
+	import DeckTile from '#lib/components/DeckTile.svelte';
 	import LiveLines from '#lib/components/LiveLines.svelte';
 	import ShaderBackground from '#lib/components/ShaderBackground.svelte';
-	import WinRate from '#lib/components/WinRate.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
-	import * as Table from '#lib/components/ui/table/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
 
@@ -83,32 +80,11 @@
 	</div>
 	{#if data.top.length}
 		<div>
-			<Table.Root>
-				<Table.Header>
-					<Table.Row class="hover:bg-transparent">
-						<Table.Head class="w-12 pl-4 sm:pl-6">#</Table.Head>
-						<Table.Head>{m.deck()}</Table.Head>
-						<Table.Head class="hidden text-right sm:table-cell">{m.games()}</Table.Head>
-						<Table.Head class="pr-4 text-right sm:pr-6">{m.win_rate()}</Table.Head>
-					</Table.Row>
-				</Table.Header>
-				<Table.Body>
-					{#each data.top as deck, i (deck.cards.join())}
-						<Table.Row>
-							<Table.Cell class="pl-4 text-xs text-muted-foreground tabular-nums sm:pl-6"
-								>{String(i + 1).padStart(2, '0')}</Table.Cell
-							>
-							<Table.Cell class="py-3.5 whitespace-normal">
-								<DeckCards cards={deck.cards} {catalog} />
-							</Table.Cell>
-							<Table.Cell class="hidden text-right text-[13px] tabular-nums sm:table-cell"
-								>{deck.games}</Table.Cell
-							>
-							<Table.Cell class="pr-4 sm:pr-6"><WinRate value={deck.winRate} /></Table.Cell>
-						</Table.Row>
-					{/each}
-				</Table.Body>
-			</Table.Root>
+			<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
+				{#each data.top as deck, i (deck.cards.join())}
+					<DeckKeyTile {deck} rank={i + 1} {catalog} />
+				{/each}
+			</ul>
 		</div>
 	{:else}
 		<p class="row text-sm text-muted-foreground">{m.home_no_top_decks()}</p>
@@ -120,25 +96,13 @@
 		{@render heading(m.home_recent_decks())}
 	</div>
 	{#if data.recent.length}
-		<CardStack>
-			{#each data.recent as deck (deck.id)}
-				<li class="grid gap-2.5 px-4 py-4 transition-colors hover:bg-row sm:px-6">
-					<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-						<a
-							class="text-[15px] font-medium wrap-anywhere hover:underline"
-							href={href(`/decks/${deck.id}`)}>{deck.name}</a
-						>
-						<span class="flex min-w-0 text-sm text-muted-foreground">
-							<Author name={deck.authorName} avatar={deck.authorAvatar} />
-						</span>
-						<span class="ml-auto eyebrow text-muted-foreground"
-							>{m.votes()} <b class="font-medium text-foreground">{deck.votes}</b></span
-						>
-					</div>
-					<DeckCards cards={deck.cards} {catalog} />
-				</li>
-			{/each}
-		</CardStack>
+		<div>
+			<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
+				{#each data.recent as deck (deck.id)}
+					<DeckTile {deck} {catalog} />
+				{/each}
+			</ul>
+		</div>
 	{:else}
 		<p class="row text-sm text-muted-foreground">{m.home_no_recent_decks()}</p>
 	{/if}

@@ -3,7 +3,7 @@ import { api, loginHref, ok } from '#lib';
 import { getLocale } from '#lib/paraglide/runtime.js';
 import type { PageLoad } from './$types';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 24;
 
 export const load: PageLoad = async ({ fetch, url, parent }) => {
 	const { me } = await parent();
@@ -13,7 +13,7 @@ export const load: PageLoad = async ({ fetch, url, parent }) => {
 	const [cards, matches, decks, devices] = await Promise.all([
 		client.GET('/api/cards', { params: { query: { lang: getLocale() } } }),
 		client.GET('/api/me/matches', { params: { query: { before, limit: PAGE_SIZE + 1 } } }),
-		client.GET('/api/decks', { params: { query: { author: 'me', sort: 'recent', limit: 5 } } }),
+		client.GET('/api/decks', { params: { query: { author: 'me', sort: 'recent', limit: 6 } } }),
 		client.GET('/api/me/devices')
 	]);
 	const list = ok(matches);

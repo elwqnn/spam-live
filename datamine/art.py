@@ -26,6 +26,7 @@ UI = {
 }
 CARD = (1432, 2048)
 ILLUSTRATION = (716, 1024)
+THUMB = (179, 256)
 AVATAR = (256, 256)
 
 
@@ -69,7 +70,7 @@ def main(data_dir, out_dir):
             sys.exit(f"{path}: {len(found)} sprites")
         return found[0].read()
 
-    for folder in ("card", "avatar", "ui"):
+    for folder in ("card", "thumb", "avatar", "ui"):
         shutil.rmtree(os.path.join(out_dir, folder), ignore_errors=True)
     files = []
 
@@ -95,12 +96,13 @@ def main(data_dir, out_dir):
         if art.size != CARD:
             sys.exit(f"{tree['_illustrationResourcePath']}: illustration is {art.width}x{art.height}, expected 1432x2048")
         save(art.resize(ILLUSTRATION, Image.LANCZOS), f"card/{tree['_id']}.webp")
+        save(art.resize(THUMB, Image.LANCZOS), f"thumb/{tree['_id']}.webp")
         x, y = tree["_avatarImageOffset"]["x"], tree["_avatarImageOffset"]["y"]
         w, h = tree["_avatarImageSize"]["x"], tree["_avatarImageSize"]["y"]
         save(art.crop((x, y, x + w, y + h)).resize(AVATAR, Image.LANCZOS), f"avatar/{tree['_id']}.webp")
 
     total = sum(os.path.getsize(f) for f in files)
-    print(f"ui={len(UI)} card={released} avatar={released} files={len(files)} size={total / 1e6:.1f} MB")
+    print(f"ui={len(UI)} card={released} thumb={released} avatar={released} files={len(files)} size={total / 1e6:.1f} MB")
 
 
 if __name__ == "__main__":

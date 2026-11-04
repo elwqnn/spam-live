@@ -2,8 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { href, queryHref } from '#lib';
-	import CardStack from '#lib/components/CardStack.svelte';
-	import DeckRow from '#lib/components/DeckRow.svelte';
+	import DeckTile from '#lib/components/DeckTile.svelte';
 	import FilterBar from '#lib/components/FilterBar.svelte';
 	import FilterMenu from '#lib/components/FilterMenu.svelte';
 	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
@@ -97,11 +96,13 @@
 </div>
 
 {#if data.decks.length}
-	<CardStack>
-		{#each data.decks as deck (deck.id)}
-			<DeckRow {deck} {catalog} />
-		{/each}
-	</CardStack>
+	<div>
+		<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
+			{#each data.decks as deck (deck.id)}
+				<DeckTile {deck} {catalog} />
+			{/each}
+		</ul>
+	</div>
 {:else}
 	<p class="row text-sm text-muted-foreground">{m.no_decks()}</p>
 {/if}

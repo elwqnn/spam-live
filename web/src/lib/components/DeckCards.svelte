@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { href, type Schemas } from '#lib';
+	import type { Schemas } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
-	import CardBadge from './CardBadge.svelte';
 	import CardGrid from './CardGrid.svelte';
+	import CardThumb from './CardThumb.svelte';
 	import CardTile from './CardTile.svelte';
 
 	let {
@@ -39,17 +39,9 @@
 		{/each}
 	</CardGrid>
 {:else}
-	<ul class="flex flex-wrap gap-x-3 gap-y-1.5">
+	<ul class="grid grid-cols-4 gap-2 pt-1.5 pl-1.5">
 		{#each cards as id (id)}
-			{@const card = catalog.get(id)}
-			<li class="flex items-center gap-1.5 text-sm">
-				{#if card}
-					<CardBadge type="element" value={card.element} />
-					<a class="hover:underline" href={href(`/cards/${id}`)}>{card.name ?? id}</a>
-				{:else}
-					<span class="text-muted-foreground">{m.unknown_card()} {id.slice(0, 8)}</span>
-				{/if}
-			</li>
+			<li><CardThumb {id} card={catalog.get(id)} /></li>
 		{/each}
 	</ul>
 {/if}
