@@ -240,27 +240,29 @@
 		top: 0;
 	}
 	@variant lg {
-		box-shadow:
-			-5px 0 var(--background),
-			5px 0 var(--background);
 		&::before,
 		&::after {
 			--cross: color-mix(in oklab, var(--foreground) 30%, transparent);
 			content: '';
 			position: absolute;
 			bottom: -5px;
-			left: -5px;
+			left: calc(-5px - var(--reach));
 			z-index: 1;
-			width: 9px;
+			width: calc(9px + var(--reach));
 			height: 9px;
 			background:
-				linear-gradient(var(--cross), var(--cross)) center / 1px 100% no-repeat,
-				linear-gradient(var(--cross), var(--cross)) center / 100% 1px no-repeat;
+				linear-gradient(var(--cross), var(--cross)) right 4px top 0 / 1px 100% no-repeat,
+				linear-gradient(var(--cross), var(--cross)) right 0 center / 9px 1px no-repeat,
+				linear-gradient(var(--cross), var(--cross)) right calc(var(--side) + 3px) center / 3px 3px
+					no-repeat,
+				linear-gradient(to left, var(--border) calc(var(--side) - 4px), transparent) left center /
+					calc(100% - 9px) 1px no-repeat;
 			pointer-events: none;
 		}
 		&::after {
-			right: -5px;
+			right: calc(-5px - var(--reach));
 			left: auto;
+			transform: scaleX(-1);
 		}
 	}
 }
