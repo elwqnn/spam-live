@@ -2,7 +2,7 @@ mod common;
 
 use std::path::PathBuf;
 
-use api::catalog::{Catalog, parse_version};
+use api::catalog::{Catalog, artist_link, parse_version};
 use axum::http::StatusCode;
 use common::*;
 use serde_json::{Value, json};
@@ -70,11 +70,20 @@ fn load_errors() {
     dangling["cards"][0]["talents"][0] = json!("missing");
     let dangling = temp_dir("dangling", &[("1.0.0.json", dangling.to_string())]);
     assert!(Catalog::load(&dangling).err().unwrap().contains("unknown id"));
+    let mut unknown_artist = mini("1.0.0", json!({ "en": "A" }));
+    unknown_artist["cards"][0]["artist"] = json!("00000000-0000-4000-8000-0000000000a1");
+    let unknown_artist = temp_dir("unknown-artist", &[("1.0.0.json", unknown_artist.to_string())]);
+    assert!(Catalog::load(&unknown_artist).err().unwrap().contains("unknown artist"));
+    let mut duplicate_artist = mini("1.0.0", json!({ "en": "A" }));
+    let artist = json!({ "id": "00000000-0000-4000-8000-0000000000a1", "name": "Ann", "link": "" });
+    duplicate_artist["artists"] = json!([artist, artist]);
+    let duplicate_artist = temp_dir("duplicate-artist", &[("1.0.0.json", duplicate_artist.to_string())]);
+    assert!(Catalog::load(&duplicate_artist).err().unwrap().contains("duplicate artist id"));
     let duplicate = mini("1.0.0", json!({ "en": "A" })).to_string();
     let duplicate = temp_dir("duplicate", &[("a.json", duplicate.clone()), ("b.json", duplicate)]);
     assert!(Catalog::load(&duplicate).err().unwrap().contains("duplicate catalog version"));
     assert!(Catalog::load(&PathBuf::from("/nonexistent/catalog")).is_err());
-    for dir in [empty, invalid, dangling, duplicate] {
+    for dir in [empty, invalid, dangling, unknown_artist, duplicate_artist, duplicate] {
         std::fs::remove_dir_all(dir).unwrap();
     }
 }
@@ -149,6 +158,7 @@ async fn versions_and_language_fallback() {
     let talents: Vec<_> = d["talents"].as_array().unwrap().iter().map(|t| t["name"].clone()).collect();
     assert_eq!(talents, [json!("One"), json!("Two"), Value::Null]);
     assert_eq!(d["talents"][0]["description"], "First");
+    assert_eq!(d.get("artist"), Some(&Value::Null));
 
     assert_eq!(send(&app, get("/api/cards?lang=de", "")).await.status, StatusCode::BAD_REQUEST);
     assert_eq!(send(&app, get("/api/cards?version=9.9.9", "")).await.status, StatusCode::NOT_FOUND);
@@ -166,6 +176,75 @@ async fn real_catalog_card() {
     assert!(d["name"].is_string());
     assert_eq!(d["talents"].as_array().unwrap().len(), 3);
     assert!(!d["abilities"].as_array().unwrap().is_empty());
+}
+
+#[test]
+fn artist_link_kinds() {
+    let kind = |url: &str| serde_json::to_value(artist_link(url).map(|l| l.kind)).unwrap();
+    for (url, expected) in [
+        ("https://www.instagram.com/a/", "instagram"),
+        ("https://x.com/a", "x"),
+        ("https://twitter.com/a", "x"),
+        ("https://kilianbillet.artstation.com", "artstation"),
+        ("https://bsky.app/profile/a", "bluesky"),
+        ("https://www.twitch.tv/a", "twitch"),
+        ("https://linktr.ee/a", "linktree"),
+        ("https://example.com/", "website"),
+        ("https://notinstagram.com/", "website"),
+        ("https://instagram.com.evil.example/", "website"),
+    ] {
+        assert_eq!(kind(url), expected, "{url}");
+    }
+    assert_eq!(artist_link("https://kilianbillet.artstation.com").unwrap().url, "https://kilianbillet.artstation.com");
+    for bad in ["http://www.instagram.com/a", "", "javascript:alert(1)", "ftp://a.com", "https://"] {
+        assert!(artist_link(bad).is_none(), "{bad:?}");
+    }
+}
+
+#[tokio::test]
+async fn card_artist() {
+    let mut file = mini("1.0.0", json!({ "en": "A" }));
+    let artists =
+        [(" Ann ", "https://www.instagram.com/ann/"), ("Bob", "http://bob.example/"), ("  ", "https://a.example/")];
+    let card = file["cards"][0].clone();
+    file["cards"] = json!([]);
+    file["artists"] = json!([]);
+    for (i, (name, link)) in artists.iter().enumerate() {
+        let id = format!("00000000-0000-4000-8000-0000000000a{i}");
+        file["artists"].as_array_mut().unwrap().push(json!({ "id": id, "name": name, "link": link }));
+        let mut c = card.clone();
+        c["id"] = json!(format!("00000000-0000-4000-8000-0000000000c{i}"));
+        c["artist"] = json!(id);
+        file["cards"].as_array_mut().unwrap().push(c);
+    }
+    let dir = temp_dir("artist", &[("1.0.0.json", file.to_string())]);
+    let catalog = Catalog::load(&dir).unwrap();
+    std::fs::remove_dir_all(&dir).unwrap();
+    let app = api::router(state_with(lazy_pool(), "https://steamcommunity.com/openid/login", catalog));
+    let artist = async |i: usize| {
+        send(&app, get(&format!("/api/cards/00000000-0000-4000-8000-0000000000c{i}"), ""))
+            .await
+            .body
+            .get("artist")
+            .cloned()
+    };
+    let ann = json!({ "name": "Ann", "links": [{ "kind": "instagram", "url": "https://www.instagram.com/ann/" }] });
+    assert_eq!(artist(0).await, Some(ann));
+    assert_eq!(artist(1).await, Some(json!({ "name": "Bob", "links": [] })));
+    assert_eq!(artist(2).await, Some(Value::Null));
+    let list = send(&app, get("/api/cards", "")).await.body;
+    assert!(list[0].get("artist").is_none());
+}
+
+#[tokio::test]
+async fn real_catalog_artist() {
+    let app = api::router(state_with(lazy_pool(), "https://steamcommunity.com/openid/login", real_catalog()));
+    let meridia = send(&app, get("/api/cards/5103c8e0-1326-4bc0-9b2f-05f5daf76b4a", "")).await.body;
+    let trinity =
+        json!({ "name": "Trinity", "links": [{ "kind": "linktree", "url": "https://linktr.ee/trinitydraw" }] });
+    assert_eq!(meridia["artist"], trinity);
+    let vivy = send(&app, get("/api/cards/4b5c9594-0497-4d5f-9631-e413c3a89483", "")).await.body;
+    assert_eq!(vivy["artist"], json!({ "name": "Mr Wolf", "links": [] }));
 }
 
 #[tokio::test]

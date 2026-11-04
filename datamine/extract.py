@@ -16,6 +16,7 @@ from UnityPy.helpers.TypeTreeGenerator import TypeTreeGenerator
 LANGS = {"English": "en", "French": "fr", "Spanish": "es", "Portuguese": "pt", "Portuguese (Brazil)": "pt-BR", "Italian": "it", "German": "de"}
 ID_FIELD = {
     "Spam.Data.CardData": "_id",
+    "Spam.Data.ArtistData": "_id",
     "TcgEngine.AbilityData": "id",
     "TcgEngine.TalentData": "id",
     "TcgEngine.ModificatorStatusData": "_UUID",
@@ -25,7 +26,7 @@ ID_FIELD = {
 }
 CARD, TOX = "Spam.Data.CardData", "TcgEngine.ModificatorStatusData"
 IGNORE = {
-    "Spam.Data.ArtistData", "Spam.Data.AvatarData", "Spam.Data.BadgeData", "Spam.Data.BannerData", "Spam.Data.CardStyleData",
+    "Spam.Data.AvatarData", "Spam.Data.BadgeData", "Spam.Data.BannerData", "Spam.Data.CardStyleData",
     "Spam.Data.CurrencyData", "Spam.Data.DeckSlotData", "Spam.Data.EffectFilterData", "Spam.Data.ElementalOrnamentData",
     "Spam.Data.EmoteData", "Spam.Data.FinisherData", "Spam.Data.GameTypeData", "Spam.Data.InfoData", "Spam.Data.MoneyArticleData",
     "Spam.Data.MonthlySubscriptionData", "Spam.Data.OrbData", "Spam.Data.RankData", "Spam.Data.RewardData", "Spam.Data.SideArenaData",
@@ -38,10 +39,13 @@ IGNORE = {
     "TcgEngine._EffectNULL",
 }
 IGNORE_PREFIXES = ("TcgEngine.Effect", "TcgEngine.Condition", "TcgEngine.Filter")
-OUT = {"Spam.Data.CardData": "cards", "TcgEngine.AbilityData": "abilities", "TcgEngine.TalentData": "talents", "TcgEngine.ModificatorStatusData": "tox"}
+OUT = {
+    "Spam.Data.CardData": "cards", "Spam.Data.ArtistData": "artists", "TcgEngine.AbilityData": "abilities",
+    "TcgEngine.TalentData": "talents", "TcgEngine.ModificatorStatusData": "tox",
+}
 DROP = {
     "m_GameObject", "m_Enabled", "m_Script", "m_Name", "_id", "_hasCustomId", "_name",
-    "_illustration", "_illustrationResourcePath", "_cardColor", "_artist", "_avatarImageOffset", "_avatarImageSize", "_styles",
+    "_illustration", "_illustrationResourcePath", "_cardColor", "_avatarImageOffset", "_avatarImageSize", "_styles",
     "status_fx", "<ModificatorImage>k__BackingField",
 }
 TEXT_KEYS = {
@@ -198,9 +202,12 @@ def main(data_dir, out_dir):
             continue
         record = conv({k: v for k, v in tree.items() if k != ID_FIELD[full]}, data[key][1].assets_file)
         record["id"] = tree[ID_FIELD[full]]
-        name_key, desc_key = TEXT_KEYS[OUT[full]](record)
         assert "name" not in record and "description" not in record
-        record["name"], record["description"] = localize(name_key), localize(desc_key)
+        if OUT[full] == "artists":
+            record["name"] = tree["_name"]
+        else:
+            name_key, desc_key = TEXT_KEYS[OUT[full]](record)
+            record["name"], record["description"] = localize(name_key), localize(desc_key)
         catalog[OUT[full]].append(record)
 
     abilities = {a["id"]: a for a in catalog["abilities"]}

@@ -21762,6 +21762,153 @@
     }
   ],
   "appVersion": "1.28.1",
+  "artists": [
+    {
+      "id": "05b64712-23b2-482b-a91b-405c7752c3a7",
+      "link": "https://www.deirdre-illustration.fr/",
+      "name": "Deirdre"
+    },
+    {
+      "id": "097af65c-195b-4064-92c0-d9cf91b8147c",
+      "link": "https://www.instagram.com/_3mbers/",
+      "name": "Embers"
+    },
+    {
+      "id": "28f0db1e-97a0-4ead-99f9-b897b08f62ad",
+      "link": "https://www.instagram.com/daerun_/",
+      "name": "Daerun"
+    },
+    {
+      "id": "2e88a2a9-c691-4b9b-9ce4-772d87488ecb",
+      "link": "https://nathanfischbach.myportfolio.com/",
+      "name": "Mr.Kelbi"
+    },
+    {
+      "id": "362afa0f-107c-45be-9dc6-f60268633e70",
+      "link": "https://x.com/yoru_flush",
+      "name": "Yoru Flush"
+    },
+    {
+      "id": "36569d67-6041-4ed2-8240-d92cf84e2e95",
+      "link": "https://www.artstation.com/nenaosuart",
+      "name": "Nenaosu"
+    },
+    {
+      "id": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
+      "link": "https://www.instagram.com/olivier_simon_illustrations/",
+      "name": "Krackdur"
+    },
+    {
+      "id": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
+      "link": "https://www.artstation.com/noadumas",
+      "name": "Nao"
+    },
+    {
+      "id": "5304e5cc-6448-4d22-8256-3fc32aa8ae3d",
+      "link": "https://www.instagram.com/manayel__/",
+      "name": "Manayel"
+    },
+    {
+      "id": "5c2e7cc1-be6c-4cc2-86de-93ec45117e52",
+      "link": "https://www.instagram.com/qntn.tattoo/",
+      "name": "quetrax"
+    },
+    {
+      "id": "600648af-1771-4f86-9086-855e88088097",
+      "link": "https://etienneegonneau.ultra-book.com/",
+      "name": "Krisakx"
+    },
+    {
+      "id": "899fb361-9ede-48e3-af71-848f871397ee",
+      "link": "",
+      "name": "Mr Wolf"
+    },
+    {
+      "id": "8c40d247-0e3b-42fd-b87d-df062d91dd7d",
+      "link": "https://www.nyx-studios.com/mael",
+      "name": "Mr.A"
+    },
+    {
+      "id": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
+      "link": "https://x.com/Atto_Wnd",
+      "name": "Atto"
+    },
+    {
+      "id": "a886ab75-25be-449a-aa59-336403dde8bc",
+      "link": "https://www.instagram.com/elisa_nalam/",
+      "name": "ElisaMalan"
+    },
+    {
+      "id": "abf4c8ff-a769-47f3-a1b3-b1b9c0e8aec7",
+      "link": "https://www.instagram.com/cracotille/",
+      "name": "Cracotille"
+    },
+    {
+      "id": "b5746a26-7407-439e-ae79-3aeab2f1d323",
+      "link": "https://www.artstation.com/euphyart",
+      "name": "Euphy"
+    },
+    {
+      "id": "b816c3fb-2ae6-456a-974c-eb1af611df59",
+      "link": "https://www.instagram.com/vincent__ricci/",
+      "name": "SAN"
+    },
+    {
+      "id": "bc538c74-6439-4691-8552-d1aa52777214",
+      "link": "https://www.instagram.com/simdof__/",
+      "name": "Simdof"
+    },
+    {
+      "id": "c1992a82-cec2-4054-bd45-5c3905d0678e",
+      "link": "https://www.instagram.com/frozen.redemption/",
+      "name": "Saki"
+    },
+    {
+      "id": "c485552e-eb06-4ce9-8077-42a34146901f",
+      "link": "https://bsky.app/profile/bloderyn.bsky.social",
+      "name": "Bloderyn"
+    },
+    {
+      "id": "ce5979e1-b75f-4584-ac34-d83d7d249c6b",
+      "link": "https://www.instagram.com/nero_metanoia?igsh=bmN3em5iOGtkYjFo",
+      "name": "Luga"
+    },
+    {
+      "id": "dace1f88-11c0-4ce4-8640-b7f60d9df287",
+      "link": "https://kilianbillet.artstation.com",
+      "name": "Kilian_bllt"
+    },
+    {
+      "id": "e99376d1-60a8-4efe-a08e-8065c0fcc20a",
+      "link": "https://www.artstation.com/le_yack_albinos",
+      "name": "le_yack_albinos"
+    },
+    {
+      "id": "f10ae8ab-b56b-4859-baf1-9807d9ef4798",
+      "link": "https://www.instagram.com/amytisarts/",
+      "name": "Amytis"
+    },
+    {
+      "id": "f31e1f9c-56d1-4ea0-85ec-b29dec33f268",
+      "link": "https://www.instagram.com/takoo.real/",
+      "name": "Takoo"
+    },
+    {
+      "id": "f607f4e6-74b7-4919-9066-6195fa37f9b6",
+      "link": "https://www.instagram.com/white_.arts/",
+      "name": "White_arts"
+    },
+    {
+      "id": "fae297e4-1e8d-4026-9b73-32fd6ca121d8",
+      "link": "https://linktr.ee/trinitydraw",
+      "name": "Trinity "
+    },
+    {
+      "id": "fcc5bf7a-633f-4d9f-a1dc-038f826b2894",
+      "link": "https://www.instagram.com/thelunerouge",
+      "name": "Lune Rouge"
+    }
+  ],
   "cards": [
     {
       "activeAbilities": [
@@ -21778,6 +21925,7 @@
           "id": "Embrasement"
         }
       ],
+      "artist": "c1992a82-cec2-4054-bd45-5c3905d0678e",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -21837,6 +21985,7 @@
           "id": "MultiBoost"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -21892,6 +22041,7 @@
           "id": "Brulure nocturne"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -21950,6 +22100,7 @@
           "id": "Ecrit sombre"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22011,6 +22162,7 @@
           "id": "Soin multiple"
         }
       ],
+      "artist": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22070,6 +22222,7 @@
           "id": "flasque"
         }
       ],
+      "artist": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22129,6 +22282,7 @@
           "id": "Flambée"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22192,6 +22346,7 @@
           "id": "Piétinement"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22251,6 +22406,7 @@
           "id": "Danse de la brume"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22316,6 +22472,7 @@
           "id": "Chute précise"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22375,6 +22532,7 @@
           "id": "Couvee protectrice"
         }
       ],
+      "artist": "fcc5bf7a-633f-4d9f-a1dc-038f826b2894",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22430,6 +22588,7 @@
           "id": "Morsure"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22489,6 +22648,7 @@
           "id": "Forteresse"
         }
       ],
+      "artist": "28f0db1e-97a0-4ead-99f9-b897b08f62ad",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22550,6 +22710,7 @@
           "id": "Ecran"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22609,6 +22770,7 @@
           "id": "Hasardo"
         }
       ],
+      "artist": "f10ae8ab-b56b-4859-baf1-9807d9ef4798",
       "cardTypes": [
         "Standard",
         "Reverse",
@@ -22666,6 +22828,7 @@
           "id": "Eau trouble"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22728,6 +22891,7 @@
           "id": "Choix sombre"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22789,6 +22953,7 @@
           "id": "Ohohohohohoh"
         }
       ],
+      "artist": "e99376d1-60a8-4efe-a08e-8065c0fcc20a",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22848,6 +23013,7 @@
           "id": "Choix Floral"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22905,6 +23071,7 @@
           "id": "Doux foyer"
         }
       ],
+      "artist": "600648af-1771-4f86-9086-855e88088097",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -22967,6 +23134,7 @@
           "id": "MultiBoost"
         }
       ],
+      "artist": "c1992a82-cec2-4054-bd45-5c3905d0678e",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23030,6 +23198,7 @@
           "id": "MultiBoost"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23089,6 +23258,7 @@
           "id": "berceuse_marine"
         }
       ],
+      "artist": "c485552e-eb06-4ce9-8077-42a34146901f",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23144,6 +23314,7 @@
           "id": "Claque sombrevol"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23203,6 +23374,7 @@
           "id": "Quintuor"
         }
       ],
+      "artist": "5304e5cc-6448-4d22-8256-3fc32aa8ae3d",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23262,6 +23434,7 @@
           "id": "Dernier plaisir"
         }
       ],
+      "artist": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23319,6 +23492,7 @@
           "id": "Revitalisation"
         }
       ],
+      "artist": "bc538c74-6439-4691-8552-d1aa52777214",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23381,6 +23555,7 @@
           "id": "Drain vital"
         }
       ],
+      "artist": "dace1f88-11c0-4ce4-8640-b7f60d9df287",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23440,6 +23615,7 @@
           "id": "Envol"
         }
       ],
+      "artist": "362afa0f-107c-45be-9dc6-f60268633e70",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23499,6 +23675,7 @@
           "id": "Aide pensive"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23558,6 +23735,7 @@
           "id": "Regenair"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23613,6 +23791,7 @@
           "id": "Mache mot"
         }
       ],
+      "artist": "fae297e4-1e8d-4026-9b73-32fd6ca121d8",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23675,6 +23854,7 @@
           "id": "Treve"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23736,6 +23916,7 @@
           "id": "Eau brulante"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23795,6 +23976,7 @@
           "id": "Choix brulant"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23856,6 +24038,7 @@
           "id": "Aqua-Sombre"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23915,6 +24098,7 @@
           "id": "Charme Sinistre"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -23970,6 +24154,7 @@
           "id": "Onde de Tenebres"
         }
       ],
+      "artist": "899fb361-9ede-48e3-af71-848f871397ee",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24027,6 +24212,7 @@
           "id": "Danse des plumes"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24086,6 +24272,7 @@
           "id": "Amour"
         }
       ],
+      "artist": "5304e5cc-6448-4d22-8256-3fc32aa8ae3d",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24143,6 +24330,7 @@
           "id": "Hurle frappe"
         }
       ],
+      "artist": "2e88a2a9-c691-4b9b-9ce4-772d87488ecb",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24204,6 +24392,7 @@
           "id": "Eolienne"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24263,6 +24452,7 @@
           "id": "Volupté"
         }
       ],
+      "artist": "fae297e4-1e8d-4026-9b73-32fd6ca121d8",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24318,6 +24508,7 @@
           "id": "Dualite Draconique"
         }
       ],
+      "artist": "f31e1f9c-56d1-4ea0-85ec-b29dec33f268",
       "cardTypes": [
         "Standard",
         "Reverse",
@@ -24375,6 +24566,7 @@
           "id": "Vitesse folle"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24434,6 +24626,7 @@
           "id": "Embrasement"
         }
       ],
+      "artist": "28f0db1e-97a0-4ead-99f9-b897b08f62ad",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24489,6 +24682,7 @@
           "id": "Mascarade cosmique"
         }
       ],
+      "artist": "ce5979e1-b75f-4584-ac34-d83d7d249c6b",
       "cardTypes": [
         "Standard",
         "Reverse",
@@ -24546,6 +24740,7 @@
           "id": "Flamme magique"
         }
       ],
+      "artist": "b5746a26-7407-439e-ae79-3aeab2f1d323",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24607,6 +24802,7 @@
           "id": "Cri du perchoir"
         }
       ],
+      "artist": "fcc5bf7a-633f-4d9f-a1dc-038f826b2894",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24664,6 +24860,7 @@
           "id": "Gloutonnage"
         }
       ],
+      "artist": "c1992a82-cec2-4054-bd45-5c3905d0678e",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24729,6 +24926,7 @@
           "id": "Mythique"
         }
       ],
+      "artist": "f607f4e6-74b7-4919-9066-6195fa37f9b6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24784,6 +24982,7 @@
           "id": "Courant aleatoire"
         }
       ],
+      "artist": "b816c3fb-2ae6-456a-974c-eb1af611df59",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24845,6 +25044,7 @@
           "id": "Soin de terre"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24906,6 +25106,7 @@
           "id": "Embrasement critique"
         }
       ],
+      "artist": "c1992a82-cec2-4054-bd45-5c3905d0678e",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -24965,6 +25166,7 @@
           "id": "Digue"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25022,6 +25224,7 @@
           "id": "Galop arctique"
         }
       ],
+      "artist": "fcc5bf7a-633f-4d9f-a1dc-038f826b2894",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25080,6 +25283,7 @@
           "id": "Encre seche"
         }
       ],
+      "artist": "e99376d1-60a8-4efe-a08e-8065c0fcc20a",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25141,6 +25345,7 @@
           "id": "Kung fu"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25200,6 +25405,7 @@
           "id": "Flash"
         }
       ],
+      "artist": "2e88a2a9-c691-4b9b-9ce4-772d87488ecb",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25259,6 +25465,7 @@
           "id": "Marteau-lumineux"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25318,6 +25525,7 @@
           "id": "Arc-en-ciel"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25375,6 +25583,7 @@
           "id": "Veuve noire"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25436,6 +25645,7 @@
           "id": "Bond rapide"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25493,6 +25703,7 @@
           "id": "Remue sol"
         }
       ],
+      "artist": "c1992a82-cec2-4054-bd45-5c3905d0678e",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25558,6 +25769,7 @@
           "id": "Aide nocturne"
         }
       ],
+      "artist": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25613,6 +25825,7 @@
           "id": "Sucre doux"
         }
       ],
+      "artist": "c485552e-eb06-4ce9-8077-42a34146901f",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25671,6 +25884,7 @@
           "id": "Bain de boue"
         }
       ],
+      "artist": "8c40d247-0e3b-42fd-b87d-df062d91dd7d",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25729,6 +25943,7 @@
           "id": "Ecrit luminescent"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25786,6 +26001,7 @@
           "id": "Roule-boule"
         }
       ],
+      "artist": "c1992a82-cec2-4054-bd45-5c3905d0678e",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25845,6 +26061,7 @@
           "id": "Barrière Florale"
         }
       ],
+      "artist": "8c40d247-0e3b-42fd-b87d-df062d91dd7d",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25900,6 +26117,7 @@
           "id": "Foudre"
         }
       ],
+      "artist": "c1992a82-cec2-4054-bd45-5c3905d0678e",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -25962,6 +26180,7 @@
           "id": "Planete Soin"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26027,6 +26246,7 @@
           "id": "Papillon"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26082,6 +26302,7 @@
           "id": "Aventure"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26144,6 +26365,7 @@
           "id": "Clair obscur"
         }
       ],
+      "artist": "28f0db1e-97a0-4ead-99f9-b897b08f62ad",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26203,6 +26425,7 @@
           "id": "Choix Solaire"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26260,6 +26483,7 @@
           "id": "Protection marine"
         }
       ],
+      "artist": "b816c3fb-2ae6-456a-974c-eb1af611df59",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26321,6 +26545,7 @@
           "id": "Appel de la forêt"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26378,6 +26603,7 @@
           "id": "Lucky fire"
         }
       ],
+      "artist": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26439,6 +26665,7 @@
           "id": "Barrière Florale"
         }
       ],
+      "artist": "600648af-1771-4f86-9086-855e88088097",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26494,6 +26721,7 @@
           "id": "Ecou-lave"
         }
       ],
+      "artist": "2e88a2a9-c691-4b9b-9ce4-772d87488ecb",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26556,6 +26784,7 @@
           "id": "Obscur"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26611,6 +26840,7 @@
           "id": "Miasmes de la Sagesse"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26663,6 +26893,7 @@
     },
     {
       "activeAbilities": [],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26722,6 +26953,7 @@
           "id": "Supra rayon humide"
         }
       ],
+      "artist": "a886ab75-25be-449a-aa59-336403dde8bc",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26780,6 +27012,7 @@
           "id": "Epidemie"
         }
       ],
+      "artist": "bc538c74-6439-4691-8552-d1aa52777214",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26838,6 +27071,7 @@
           "id": "Lance-bouclier"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26895,6 +27129,7 @@
           "id": "Coup de corne"
         }
       ],
+      "artist": "2e88a2a9-c691-4b9b-9ce4-772d87488ecb",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -26953,6 +27188,7 @@
           "id": "Malediction aquatique"
         }
       ],
+      "artist": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27015,6 +27251,7 @@
           "id": "Jugement divin"
         }
       ],
+      "artist": "c1992a82-cec2-4054-bd45-5c3905d0678e",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27074,6 +27311,7 @@
           "id": "Ultime repos"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27131,6 +27369,7 @@
           "id": "Devalement"
         }
       ],
+      "artist": "c1992a82-cec2-4054-bd45-5c3905d0678e",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27188,6 +27427,7 @@
           "id": "Enroulement de liane"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27246,6 +27486,7 @@
           "id": "Oeil pour oeil"
         }
       ],
+      "artist": "c1992a82-cec2-4054-bd45-5c3905d0678e",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27304,6 +27545,7 @@
           "id": "rayon_lunaire"
         }
       ],
+      "artist": "fcc5bf7a-633f-4d9f-a1dc-038f826b2894",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27361,6 +27603,7 @@
           "id": "Renaissance Sylvatique"
         }
       ],
+      "artist": "c1992a82-cec2-4054-bd45-5c3905d0678e",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27422,6 +27665,7 @@
           "id": "frenesie"
         }
       ],
+      "artist": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27477,6 +27721,7 @@
           "id": "Fort"
         }
       ],
+      "artist": "bc538c74-6439-4691-8552-d1aa52777214",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27538,6 +27783,7 @@
           "id": "Choix Terrestre"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27595,6 +27841,7 @@
           "id": "Bim-boum"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27657,6 +27904,7 @@
           "id": "Glisse Brulante"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27712,6 +27960,7 @@
           "id": "Tempete de sable"
         }
       ],
+      "artist": "abf4c8ff-a769-47f3-a1b3-b1b9c0e8aec7",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27773,6 +28022,7 @@
           "id": "Rempart"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27836,6 +28086,7 @@
           "id": "Résurection"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27899,6 +28150,7 @@
           "id": "Corne 25"
         }
       ],
+      "artist": "b5746a26-7407-439e-ae79-3aeab2f1d323",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -27954,6 +28206,7 @@
           "id": "Misty punch"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28015,6 +28268,7 @@
           "id": "Triste Etoile"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28074,6 +28328,7 @@
           "id": "Bond rapide"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28131,6 +28386,7 @@
           "id": "Fin du periple"
         }
       ],
+      "artist": "c1992a82-cec2-4054-bd45-5c3905d0678e",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28193,6 +28449,7 @@
           "id": "Mue"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28254,6 +28511,7 @@
           "id": "Avalement"
         }
       ],
+      "artist": "fcc5bf7a-633f-4d9f-a1dc-038f826b2894",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28315,6 +28573,7 @@
           "id": "Lumiere cosmique"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28372,6 +28631,7 @@
           "id": "Frappe golemique"
         }
       ],
+      "artist": "b816c3fb-2ae6-456a-974c-eb1af611df59",
       "cardTypes": [
         "Standard",
         "Reverse",
@@ -28434,6 +28694,7 @@
           "id": "Eau brulante"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28493,6 +28754,7 @@
           "id": "Sacrifice"
         }
       ],
+      "artist": "b5746a26-7407-439e-ae79-3aeab2f1d323",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28554,6 +28816,7 @@
           "id": "Bond-chanceux"
         }
       ],
+      "artist": "fcc5bf7a-633f-4d9f-a1dc-038f826b2894",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28613,6 +28876,7 @@
           "id": "Cisaille veneneuse"
         }
       ],
+      "artist": "ce5979e1-b75f-4584-ac34-d83d7d249c6b",
       "cardTypes": [
         "Standard",
         "Reverse",
@@ -28670,6 +28934,7 @@
           "id": "Drain élémentaires"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28731,6 +28996,7 @@
           "id": "Soin soleil"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28788,6 +29054,7 @@
           "id": "Respiration"
         }
       ],
+      "artist": "05b64712-23b2-482b-a91b-405c7752c3a7",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28849,6 +29116,7 @@
           "id": "Transfusion"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28906,6 +29174,7 @@
           "id": "Tenebreal"
         }
       ],
+      "artist": "5c2e7cc1-be6c-4cc2-86de-93ec45117e52",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -28964,6 +29233,7 @@
           "id": "Son percant"
         }
       ],
+      "artist": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29022,6 +29292,7 @@
           "id": "jackpot"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29079,6 +29350,7 @@
           "id": "Avaleau"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29134,6 +29406,7 @@
           "id": "Petit sortilege"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29192,6 +29465,7 @@
           "id": "Exploison"
         }
       ],
+      "artist": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29254,6 +29528,7 @@
           "id": "Souffle d'eau"
         }
       ],
+      "artist": "fcc5bf7a-633f-4d9f-a1dc-038f826b2894",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29311,6 +29586,7 @@
           "id": "Feau"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29368,6 +29644,7 @@
           "id": "griffure"
         }
       ],
+      "artist": "fcc5bf7a-633f-4d9f-a1dc-038f826b2894",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29425,6 +29702,7 @@
           "id": "Reve enfume"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29483,6 +29761,7 @@
           "id": "Eclair purificateur"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29540,6 +29819,7 @@
           "id": "Incendie"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29595,6 +29875,7 @@
           "id": "Sagesse"
         }
       ],
+      "artist": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29656,6 +29937,7 @@
           "id": "Silenfeu"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29711,6 +29993,7 @@
           "id": "Course folle"
         }
       ],
+      "artist": "2e88a2a9-c691-4b9b-9ce4-772d87488ecb",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29772,6 +30055,7 @@
           "id": "Vague"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29831,6 +30115,7 @@
           "id": "Phare"
         }
       ],
+      "artist": "fcc5bf7a-633f-4d9f-a1dc-038f826b2894",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29886,6 +30171,7 @@
           "id": "Boule de haine"
         }
       ],
+      "artist": "600648af-1771-4f86-9086-855e88088097",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -29947,6 +30233,7 @@
           "id": "Soin critique"
         }
       ],
+      "artist": "097af65c-195b-4064-92c0-d9cf91b8147c",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -30002,6 +30289,7 @@
           "id": "Premiere valse"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -30060,6 +30348,7 @@
           "id": "Gobe-pierre"
         }
       ],
+      "artist": "a886ab75-25be-449a-aa59-336403dde8bc",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -30122,6 +30411,7 @@
           "id": "Choix Aqueux"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -30179,6 +30469,7 @@
           "id": "Ecorchage"
         }
       ],
+      "artist": "fcc5bf7a-633f-4d9f-a1dc-038f826b2894",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -30236,6 +30527,7 @@
           "id": "Feuille magique"
         }
       ],
+      "artist": "4f203cc3-4ad6-4ab7-a804-3af16ca232e6",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -30298,6 +30590,7 @@
           "id": "Paie-torche"
         }
       ],
+      "artist": "28f0db1e-97a0-4ead-99f9-b897b08f62ad",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -30355,6 +30648,7 @@
           "id": "Morsure brulante"
         }
       ],
+      "artist": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -30421,6 +30715,7 @@
           "id": "Protect boost"
         }
       ],
+      "artist": "96c27c5a-ebad-46dc-a9df-bd0dc581640b",
       "cardTypes": [
         "Standard",
         "Reverse",
@@ -30476,6 +30771,7 @@
           "id": "Souffle du dragon"
         }
       ],
+      "artist": "fcc5bf7a-633f-4d9f-a1dc-038f826b2894",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -30538,6 +30834,7 @@
           "id": "Braisegarde"
         }
       ],
+      "artist": "36569d67-6041-4ed2-8240-d92cf84e2e95",
       "cardTypes": [
         "Standard",
         "FullArt",
@@ -30597,6 +30894,7 @@
           "id": "Fond marin"
         }
       ],
+      "artist": "4b15036a-ab95-4e5a-bf3c-fd61a16574ed",
       "cardTypes": [
         "Standard",
         "FullArt",

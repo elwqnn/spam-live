@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { entryName, href, percent, type CardDetail, type Schemas } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
+	import ArtistCredit from './ArtistCredit.svelte';
 	import CardArt from './CardArt.svelte';
 	import CardBadge from './CardBadge.svelte';
 	import CardBadgeStack from './CardBadgeStack.svelte';
@@ -50,8 +51,13 @@
 
 <article class="rows">
 	<TitleRow class="grid gap-6 row sm:grid-cols-[18rem_minmax(0,1fr)] sm:items-start md:gap-10">
-		<div class="w-full max-w-72 sm:sticky sm:top-8" aria-hidden="true">
-			<CardArt {card} interactive />
+		<div class="grid w-full max-w-72 gap-3 sm:sticky sm:top-8">
+			<div aria-hidden="true">
+				<CardArt {card} interactive />
+			</div>
+			{#if card.artist}
+				<ArtistCredit artist={card.artist} />
+			{/if}
 		</div>
 		<div class="grid min-w-0 content-start gap-8">
 			<div class="grid gap-3">

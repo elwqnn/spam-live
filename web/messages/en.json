@@ -349,5 +349,8 @@
 	"change_down": "down {value} points {against}",
 	"change_none": "no change {against}",
 	"against_week": "against the 7 days before",
-	"against_version": "against the version before"
+	"against_version": "against the version before",
+	"illustration": "Illustration: {name}",
+	"artist_link": "{name} on {network} (new tab)",
+	"website": "Website"
 }

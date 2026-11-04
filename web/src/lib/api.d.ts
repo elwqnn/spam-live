@@ -605,6 +605,14 @@ export interface components {
             cooldown: number;
             id: string;
         };
+        Artist: {
+            links: components["schemas"]["ArtistLink"][];
+            name: string;
+        };
+        ArtistLink: {
+            kind: components["schemas"]["LinkKind"];
+            url: string;
+        };
         Asset: {
             name: string;
             /** Format: int64 */
@@ -634,6 +642,7 @@ export interface components {
         };
         CardDetail: components["schemas"]["CardBase"] & {
             abilities: components["schemas"]["CardAbility"][];
+            artist?: components["schemas"]["Artist"] | null;
             talents: components["schemas"]["Entry"][];
             tox: components["schemas"]["Entry"][];
         };
@@ -839,6 +848,8 @@ export interface components {
             /** Format: int64 */
             wins: number;
         };
+        /** @enum {string} */
+        LinkKind: "instagram" | "x" | "bluesky" | "twitch" | "artstation" | "linktree" | "website";
         /** @enum {string} */
         MatchResult: "win" | "loss" | "draw";
         Me: {

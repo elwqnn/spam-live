@@ -29,6 +29,8 @@ struct File {
     keywords: Vec<RawEntry>,
     #[serde(default)]
     effects: Vec<RawEntry>,
+    #[serde(default)]
+    artists: Vec<RawArtist>,
 }
 
 #[derive(Deserialize)]
@@ -51,6 +53,16 @@ struct RawCard {
     active_abilities: Vec<AbilityRef>,
     passive_abilities: Vec<String>,
     talents: Vec<String>,
+    #[serde(default)]
+    artist: Option<Uuid>,
+}
+
+#[derive(Deserialize)]
+struct RawArtist {
+    id: Uuid,
+    name: String,
+    #[serde(default)]
+    link: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -72,6 +84,7 @@ struct Version {
     tox: HashMap<String, RawEntry>,
     keywords: Vec<RawEntry>,
     effects: Vec<RawEntry>,
+    artists: HashMap<Uuid, RawArtist>,
 }
 
 pub struct Catalog {
@@ -108,6 +121,11 @@ impl Version {
         let abilities = index(file.abilities, "ability")?;
         let talents = index(file.talents, "talent")?;
         let tox = index(file.tox, "tox")?;
+        let len = file.artists.len();
+        let artists: HashMap<_, _> = file.artists.into_iter().map(|a| (a.id, a)).collect();
+        if artists.len() != len {
+            return Err("duplicate artist id".into());
+        }
         for card in &file.cards {
             let missing = card
                 .active_abilities
@@ -118,6 +136,9 @@ impl Version {
                 .or_else(|| card.talents.iter().find(|id| !talents.contains_key(*id)));
             if let Some(id) = missing {
                 return Err(format!("card {} refers to unknown id {id:?}", card.id));
+            }
+            if let Some(id) = card.artist.filter(|id| !artists.contains_key(id)) {
+                return Err(format!("card {} refers to unknown artist {id}", card.id));
             }
         }
         Ok(Self {
@@ -130,6 +151,7 @@ impl Version {
             tox,
             keywords: file.keywords,
             effects: file.effects,
+            artists,
         })
     }
 }
@@ -287,6 +309,58 @@ pub struct CardDetail {
     pub abilities: Vec<CardAbility>,
     pub tox: Vec<Entry>,
     pub talents: Vec<Entry>,
+    pub artist: Option<Artist>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct Artist {
+    pub name: String,
+    pub links: Vec<ArtistLink>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct ArtistLink {
+    pub kind: LinkKind,
+    pub url: String,
+}
+
+#[derive(Serialize, ToSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum LinkKind {
+    Instagram,
+    X,
+    Bluesky,
+    Twitch,
+    Artstation,
+    Linktree,
+    Website,
+}
+
+pub fn artist_link(url: &str) -> Option<ArtistLink> {
+    if !url.starts_with("https://") {
+        return None;
+    }
+    let parsed = url::Url::parse(url).ok()?;
+    let host = parsed.host_str()?.to_ascii_lowercase();
+    let kind = [
+        ("instagram.com", LinkKind::Instagram),
+        ("x.com", LinkKind::X),
+        ("twitter.com", LinkKind::X),
+        ("bsky.app", LinkKind::Bluesky),
+        ("twitch.tv", LinkKind::Twitch),
+        ("artstation.com", LinkKind::Artstation),
+        ("linktr.ee", LinkKind::Linktree),
+    ]
+    .into_iter()
+    .find(|(domain, _)| host.strip_suffix(domain).is_some_and(|rest| rest.is_empty() || rest.ends_with('.')))
+    .map_or(LinkKind::Website, |(_, kind)| kind);
+    Some(ArtistLink { kind, url: url.into() })
+}
+
+fn artist(a: &RawArtist) -> Option<Artist> {
+    let name = a.name.trim();
+    (!name.is_empty())
+        .then(|| Artist { name: name.into(), links: a.link.as_deref().and_then(artist_link).into_iter().collect() })
 }
 
 fn field(e: &RawEntry, key: &str) -> Option<String> {
@@ -468,6 +542,7 @@ pub async fn get_card(
             .collect(),
         tox: c.passive_abilities.iter().map(|id| entry(&v.tox[id], lang)).collect(),
         talents: c.talents.iter().map(|id| entry(&v.talents[id], lang)).collect(),
+        artist: c.artist.and_then(|id| artist(&v.artists[&id])),
     }))
 }
 
