@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import { queryHref, type Schemas } from '#lib';
-	import { buttonVariants } from '#lib/components/ui/button/index.js';
+	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
 	import type { Filter } from '#lib/filter.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import CardGrid from './CardGrid.svelte';
@@ -34,12 +34,38 @@
 		['grid', m.view_grid],
 		['rows', m.view_rows]
 	] as const;
+	const empty = { games: 0, playRate: 0, winRate: null };
+
+	let shown = $state(true);
+
+	onMount(() => {
+		shown = !document.documentElement.classList.contains('stats-off');
+	});
+
+	function toggleStats() {
+		shown = !shown;
+		document.documentElement.classList.toggle('stats-off', !shown);
+		try {
+			localStorage.setItem('cardStats', shown ? 'on' : 'off');
+		} catch {
+			return;
+		}
+	}
 </script>
 
 <div class="px-4 py-3 sm:px-6">
 	<FilterBar {filters}>
 		{#snippet actions()}
 			{@render extra?.()}
+			{#if stats && mode === 'grid'}
+				<Button
+					variant={shown ? 'secondary' : 'ghost'}
+					size="sm"
+					aria-pressed={shown}
+					class="in-[.stats-off]:border-transparent in-[.stats-off]:bg-transparent in-[.stats-off]:hover:border-border in-[.stats-off]:hover:bg-muted"
+					onclick={toggleStats}>{m.stats()}</Button
+				>
+			{/if}
 			{#if showToggle}
 				<nav class="flex gap-1" aria-label={m.view()}>
 					{#each views as [key, label] (key)}
@@ -68,7 +94,9 @@
 	<div>
 		<CardGrid {columns}>
 			{#each cards as card (card.id)}
-				<li><CardTile {card} stats={stats?.get(card.id)} /></li>
+				<li>
+					<CardTile {card} stats={shown && stats ? (stats.get(card.id) ?? empty) : undefined} />
+				</li>
 			{/each}
 		</CardGrid>
 	</div>

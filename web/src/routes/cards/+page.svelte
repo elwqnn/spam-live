@@ -5,9 +5,11 @@
 	import { ELEMENTS, RARITIES } from '#lib/components/CardBadge.svelte';
 	import CardList from '#lib/components/CardList.svelte';
 	import FilterMenu from '#lib/components/FilterMenu.svelte';
+	import FloatingElements from '#lib/components/FloatingElements.svelte';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { selection, type Filter } from '#lib/filter.js';
 	import TitleRow from '#lib/components/TitleRow.svelte';
+	import TrendMenu from '#lib/components/TrendMenu.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import type { PageProps } from './$types';
@@ -93,10 +95,12 @@
 				reset: false
 			})}
 	/>
+	<FloatingElements />
 </TitleRow>
 
 <CardList {cards} {stats} {filters}>
 	{#snippet actions()}
 		<FilterMenu filter={sorts} />
+		<TrendMenu />
 	{/snippet}
 </CardList>

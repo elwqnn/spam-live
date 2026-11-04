@@ -17,7 +17,8 @@
 		onchange={(e) =>
 			goto(
 				queryHref(page.url, {
-					version: e.currentTarget.value === versions[0] ? null : e.currentTarget.value
+					version: e.currentTarget.value === versions[0] ? null : e.currentTarget.value,
+					...(e.currentTarget.value === 'all' ? { trend: null } : {})
 				}),
 				{ reset: false }
 			)}

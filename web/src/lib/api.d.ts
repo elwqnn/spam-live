@@ -649,7 +649,11 @@ export interface components {
             /** Format: double */
             playRate: number;
             /** Format: double */
+            playRateChange?: number | null;
+            /** Format: double */
             winRate?: number | null;
+            /** Format: double */
+            winRateChange?: number | null;
             /** Format: int64 */
             wins: number;
         };
@@ -947,6 +951,8 @@ export interface components {
             id: string;
             name: string;
         };
+        /** @enum {string} */
+        Trend: "week" | "version";
         UnknownCard: {
             /** Format: uuid */
             cardId: string;
@@ -2500,6 +2506,7 @@ export interface operations {
             query?: {
                 /** @example all */
                 version?: string;
+                trend?: components["schemas"]["Trend"];
             };
             header?: never;
             path?: never;
@@ -2507,7 +2514,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description playRate = deck results with the card / all deck results. winRate is null below 20 games. */
+            /** @description playRate = deck results with the card / all deck results. winRate is null below 20 games. winRateChange and playRateChange = period A - period B, as fractions. trend week (default): A is the last 7 days and B is the 7 days before, on the match end time, in the selected version. trend version: A is the selected version and B is the catalog version before it. The changes are null below 20 games in A or in B, and in version mode for all or a version that is not in the catalog. */
             200: {
                 headers: {
                     [name: string]: unknown;

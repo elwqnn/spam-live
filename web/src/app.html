@@ -9,6 +9,8 @@
 				if (localStorage.theme === 'light') document.documentElement.classList.remove('dark');
 				if (localStorage.getItem('shortcuts') === 'off')
 					document.documentElement.classList.add('keys-off');
+				if (localStorage.getItem('cardStats') === 'off')
+					document.documentElement.classList.add('stats-off');
 			} catch {}
 		</script>
 		%sveltekit.head%

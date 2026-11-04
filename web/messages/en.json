@@ -344,5 +344,13 @@
 	"download_step_link": "Link it to your SPAM.live account.",
 	"download_step_play": "Play ranked matches. The app uploads them.",
 	"download_manual": "Upload by hand",
-	"download_source": "Source code on GitHub"
+	"download_source": "Source code on GitHub",
+	"trend": "Change",
+	"trend_week": "7 days",
+	"points": "{value} pts",
+	"change_up": "up {value} points {against}",
+	"change_down": "down {value} points {against}",
+	"change_none": "no change {against}",
+	"against_week": "against the 7 days before",
+	"against_version": "against the version before"
 }

@@ -5,9 +5,11 @@
 	import CardBadge from './CardBadge.svelte';
 	import CardBadgeStack from './CardBadgeStack.svelte';
 	import CardStack from './CardStack.svelte';
+	import Change from './Change.svelte';
 	import DeckRow from './DeckRow.svelte';
 	import Description from './Description.svelte';
 	import TitleRow from './TitleRow.svelte';
+	import TrendMenu from './TrendMenu.svelte';
 	import VersionSelect from './VersionSelect.svelte';
 
 	let {
@@ -29,10 +31,13 @@
 	const resistances = $derived(Object.entries(card.resistances));
 </script>
 
-{#snippet stat(label: string, value: string | number)}
-	<div class="grid gap-1 p-4">
+{#snippet stat(label: string, value: string | number, change?: number | null, color = false)}
+	<div class="grid content-start gap-1 p-4">
 		<dt class="eyebrow text-muted-foreground">{label}</dt>
-		<dd class="text-2xl tabular-nums">{value}</dd>
+		<dd class="grid gap-1">
+			<span class="text-2xl tabular-nums">{value}</span>
+			<Change value={change} {color} class="text-sm" />
+		</dd>
 	</div>
 {/snippet}
 
@@ -125,13 +130,16 @@
 			<section class="grid gap-3">
 				<div class="flex flex-wrap items-center justify-between gap-2">
 					{@render heading(m.stats())}
-					<VersionSelect {versions} />
+					<div class="flex flex-wrap items-center gap-2">
+						<TrendMenu />
+						<VersionSelect {versions} />
+					</div>
 				</div>
 				<div class="border bg-card">
 					<dl class="cells grid grid-cols-3">
 						{@render stat(m.games(), stats?.games ?? 0)}
-						{@render stat(m.play_rate(), percent(stats?.playRate))}
-						{@render stat(m.win_rate(), percent(stats?.winRate))}
+						{@render stat(m.play_rate(), percent(stats?.playRate), stats?.playRateChange)}
+						{@render stat(m.win_rate(), percent(stats?.winRate), stats?.winRateChange, true)}
 					</dl>
 				</div>
 			</section>

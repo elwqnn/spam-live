@@ -135,7 +135,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         admin::disputed,
         admin::unknown_cards,
     ),
-    components(schemas(decks::DeckSort, stats::StatsSort))
+    components(schemas(decks::DeckSort, stats::StatsSort, stats::Trend))
 )]
 pub struct ApiDoc;
 

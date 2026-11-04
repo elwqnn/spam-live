@@ -160,6 +160,11 @@ impl Catalog {
         &self.versions[0].name
     }
 
+    pub fn previous(&self, version: &str) -> Option<&str> {
+        let key = &self.versions.iter().find(|v| v.name == version)?.key;
+        self.versions.iter().find(|v| v.key < *key).map(|v| v.name.as_str())
+    }
+
     pub fn knows_card(&self, app_version: &str, id: &Uuid) -> bool {
         let has = |v: &Version| v.cards.iter().any(|c| c.id == *id);
         has(&self.versions[0]) || self.versions.iter().find(|v| v.name == app_version).is_some_and(has)

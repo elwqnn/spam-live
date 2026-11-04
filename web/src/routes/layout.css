@@ -27,6 +27,8 @@
 	--accent: #eceae2;
 	--accent-foreground: #1c1b18;
 	--destructive: oklch(0.51 0.2 27.325);
+	--up: #367030;
+	--down: #b03c26;
 	--border: rgba(23, 23, 21, 0.1);
 	--input: rgba(23, 23, 21, 0.16);
 	--ring: rgba(28, 27, 24, 0.55);
@@ -67,6 +69,8 @@
 	--accent: #22221f;
 	--accent-foreground: #f2f1ea;
 	--destructive: oklch(0.704 0.191 22.216);
+	--up: #86c275;
+	--down: #f07a5c;
 	--border: rgba(255, 255, 255, 0.08);
 	--input: rgba(255, 255, 255, 0.12);
 	--ring: rgba(242, 234, 211, 0.5);
@@ -116,6 +120,8 @@
 	--color-input: var(--input);
 	--color-border: var(--border);
 	--color-destructive: var(--destructive);
+	--color-up: var(--up);
+	--color-down: var(--down);
 	--color-accent-foreground: var(--accent-foreground);
 	--color-accent: var(--accent);
 	--color-muted-foreground: var(--muted-foreground);

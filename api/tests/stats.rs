@@ -1,5 +1,6 @@
 mod common;
 
+use api::catalog::Catalog;
 use axum::http::StatusCode;
 use common::*;
 use serde_json::{Value, json};
@@ -19,10 +20,20 @@ struct M {
     seat0: Vec<Uuid>,
     seat1: Vec<Uuid>,
     winner: Option<i16>,
+    days: i32,
 }
 
 fn m(seat0: &[Uuid], seat1: &[Uuid], winner: Option<i16>) -> M {
-    M { version: "1.28.1", mode: 10, ai: false, disputed: false, seat0: seat0.to_vec(), seat1: seat1.to_vec(), winner }
+    M {
+        version: "1.28.1",
+        mode: 10,
+        ai: false,
+        disputed: false,
+        seat0: seat0.to_vec(),
+        seat1: seat1.to_vec(),
+        winner,
+        days: 0,
+    }
 }
 
 async fn add(pool: &PgPool, n: &mut u64, m: M, times: usize) {
@@ -31,7 +42,8 @@ async fn add(pool: &PgPool, n: &mut u64, m: M, times: usize) {
         sqlx::query(
             "INSERT INTO matches (game_uid, app_version, game_mode, is_ai, start_utc, end_utc, duration_ms,
                  turn_count, seat0_cards, seat1_cards, winner_seat, is_draw, disputed)
-             VALUES ($1, $2, $3, $4, now() - interval '10 minutes', now(), 600000, 10, $5, $6, $7, $8, $9)",
+             VALUES ($1, $2, $3, $4, now() - make_interval(days => $10) - interval '10 minutes',
+                 now() - make_interval(days => $10), 600000, 10, $5, $6, $7, $8, $9)",
         )
         .bind(format!("match-{n}"))
         .bind(m.version)
@@ -42,6 +54,7 @@ async fn add(pool: &PgPool, n: &mut u64, m: M, times: usize) {
         .bind(m.winner)
         .bind(m.winner.is_none())
         .bind(m.disputed)
+        .bind(m.days)
         .execute(pool)
         .await
         .unwrap();
@@ -80,7 +93,10 @@ fn row(cards: &[Uuid], games: i64, wins: i64, win_rate: Option<f64>) -> Value {
 }
 
 fn card(id: Uuid, games: i64, wins: i64, win_rate: Option<f64>, total: f64) -> Value {
-    json!({ "card": id, "games": games, "wins": wins, "winRate": win_rate, "playRate": games as f64 / total })
+    json!({
+        "card": id, "games": games, "wins": wins, "winRate": win_rate, "playRate": games as f64 / total,
+        "winRateChange": null, "playRateChange": null
+    })
 }
 
 #[sqlx::test]
@@ -190,4 +206,99 @@ async fn deck_detail_stats_and_winrate_sort(pool: PgPool) {
     let paged: Vec<Vec<i64>> =
         pages.iter().map(|p| p.as_array().unwrap().iter().map(|d| d["id"].as_i64().unwrap()).collect()).collect();
     assert_eq!(paged, [vec![ids[0], ids[1]], vec![ids[2], ids[3]], vec![]]);
+}
+
+fn ids(cards: [&str; 4]) -> Vec<Uuid> {
+    cards.iter().map(|c| c.parse().unwrap()).collect()
+}
+
+fn changes(body: &Value, id: Uuid) -> [Option<f64>; 2] {
+    let row = body.as_array().unwrap().iter().find(|c| c["card"] == json!(id)).unwrap();
+    ["winRateChange", "playRateChange"].map(|k| row[k].as_f64().map(|v| (v * 1e9).round()))
+}
+
+fn pts(win: f64, play: f64) -> [Option<f64>; 2] {
+    [win, play].map(|v| Some((v * 1e9).round()))
+}
+
+fn without_changes(body: &Value) -> Vec<Value> {
+    let strip = |c: &Value| json!([c["card"], c["games"], c["wins"], c["winRate"], c["playRate"]]);
+    body.as_array().unwrap().iter().map(strip).collect()
+}
+
+#[sqlx::test]
+async fn card_stats_week_trend(pool: PgPool) {
+    let (a, b) = (ids(SEAT0_CARDS), ids(SEAT1_CARDS));
+    let c = vec![a[0], a[1], b[0], b[1]];
+    let n = &mut 0;
+    let at = |days, seat0: &[Uuid], seat1: &[Uuid], winner| M { days, ..m(seat0, seat1, Some(winner)) };
+    add(&pool, n, at(1, &a, &b, 0), 12).await;
+    add(&pool, n, at(1, &a, &b, 1), 8).await;
+    add(&pool, n, at(1, &c, &b, 0), 5).await;
+    add(&pool, n, at(8, &a, &b, 0), 7).await;
+    add(&pool, n, at(8, &a, &b, 1), 12).await;
+    add(&pool, n, at(13, &a, &c, 0), 1).await;
+    add(&pool, n, at(15, &a, &b, 0), 5).await;
+    add(&pool, n, M { version: "1.27.0", ..at(1, &a, &c, 0) }, 20).await;
+    let app = app(pool.clone());
+
+    let res = send(&app, get("/api/stats/cards", "")).await;
+    assert_eq!(res.status, StatusCode::OK);
+    assert_eq!(res.headers["cache-control"], "public, max-age=300");
+    assert_eq!(changes(&res.body, a[2]), pts(12.0 / 20.0 - 8.0 / 20.0, 20.0 / 50.0 - 20.0 / 40.0));
+    assert_eq!(changes(&res.body, a[0]), pts(17.0 / 25.0 - 8.0 / 21.0, 25.0 / 50.0 - 21.0 / 40.0));
+    assert_eq!(changes(&res.body, b[2]), [None, None]);
+    assert_eq!(send(&app, get("/api/stats/cards?trend=week&version=1.28.1", "")).await.body, res.body);
+
+    let all = send(&app, get("/api/stats/cards?version=all", "")).await.body;
+    assert_eq!(changes(&all, a[2]), pts(32.0 / 40.0 - 8.0 / 20.0, 40.0 / 90.0 - 20.0 / 40.0));
+    let old = send(&app, get("/api/stats/cards?version=1.27.0", "")).await.body;
+    assert_eq!(changes(&old, a[2]), [None, None]);
+    assert_eq!(send(&app, get("/api/stats/cards?trend=other", "")).await.status, StatusCode::BAD_REQUEST);
+}
+
+fn test_catalog(versions: &[&str]) -> Catalog {
+    let dir = std::env::temp_dir().join(format!("spam-stats-catalog-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    for v in versions {
+        let file =
+            json!({ "appVersion": v, "languages": ["en"], "cards": [], "abilities": [], "talents": [], "tox": [] });
+        std::fs::write(dir.join(format!("{v}.json")), file.to_string()).unwrap();
+    }
+    let catalog = Catalog::load(&dir).unwrap();
+    std::fs::remove_dir_all(&dir).unwrap();
+    catalog
+}
+
+#[sqlx::test]
+async fn card_stats_version_trend(pool: PgPool) {
+    let (a, b) = (ids(SEAT0_CARDS), ids(SEAT1_CARDS));
+    let c = vec![a[0], a[1], b[0], b[1]];
+    let n = &mut 0;
+    let on = |version, seat0: &[Uuid], seat1: &[Uuid], winner| M { version, ..m(seat0, seat1, Some(winner)) };
+    add(&pool, n, on("1.28.1", &a, &b, 0), 12).await;
+    add(&pool, n, on("1.28.1", &a, &b, 1), 8).await;
+    add(&pool, n, on("1.27.0", &a, &b, 0), 5).await;
+    add(&pool, n, on("1.27.0", &a, &b, 1), 15).await;
+    add(&pool, n, on("1.27.0", &c, &b, 0), 10).await;
+    add(&pool, n, on("1.9.0", &a, &b, 0), 20).await;
+    add(&pool, n, on("2.0.0", &a, &b, 0), 20).await;
+    let catalog = test_catalog(&["1.9.0", "1.27.0", "1.28.1"]);
+    let app = api::router(state_with(pool.clone(), "https://steamcommunity.com/openid/login", catalog));
+    let cards = |q: &str| get(&format!("/api/stats/cards?{q}"), "");
+
+    let res = send(&app, cards("trend=version")).await;
+    assert_eq!(res.status, StatusCode::OK);
+    assert_eq!(changes(&res.body, a[2]), pts(12.0 / 20.0 - 5.0 / 20.0, 20.0 / 40.0 - 20.0 / 60.0));
+    assert_eq!(changes(&res.body, b[2]), pts(8.0 / 20.0 - 15.0 / 30.0, 20.0 / 40.0 - 30.0 / 60.0));
+    let week = send(&app, cards("")).await.body;
+    assert_eq!(without_changes(&res.body), without_changes(&week));
+    assert_eq!(week.as_array().unwrap().len(), 8);
+
+    let older = send(&app, cards("trend=version&version=1.27.0")).await.body;
+    assert_eq!(changes(&older, a[2]), pts(5.0 / 20.0 - 20.0 / 20.0, 20.0 / 60.0 - 20.0 / 40.0));
+    for q in ["version=1.9.0", "version=all", "version=2.0.0"] {
+        let body = send(&app, cards(&format!("trend=version&{q}"))).await.body;
+        assert_eq!(changes(&body, a[2]), [None, None], "{q}");
+    }
 }

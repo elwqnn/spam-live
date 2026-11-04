@@ -7,9 +7,10 @@ export const load: PageLoad = async ({ fetch, url, untrack }) => {
 		fetch,
 		untrack(() => url.origin)
 	);
+	const trend = url.searchParams.get('trend') === 'version' ? 'version' : 'week';
 	const [cards, stats] = await Promise.all([
 		client.GET('/api/cards', { params: { query: { lang: getLocale() } } }),
-		client.GET('/api/stats/cards')
+		client.GET('/api/stats/cards', { params: { query: { trend } } })
 	]);
 	return { cards: ok(cards), stats: stats.data ?? [] };
 };

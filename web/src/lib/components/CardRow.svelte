@@ -4,6 +4,7 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import CardBadge from './CardBadge.svelte';
 	import CardBadgeStack from './CardBadgeStack.svelte';
+	import Change from './Change.svelte';
 	import WinRate from './WinRate.svelte';
 
 	let {
@@ -59,11 +60,17 @@
 			</div>
 			<div class="hidden gap-0.5 text-right md:grid">
 				<dt class="eyebrow text-[10px] text-muted-foreground">{m.play_rate()}</dt>
-				<dd>{percent(stats.playRate)}</dd>
+				<dd class="grid justify-items-end">
+					{percent(stats.playRate)}
+					<Change value={stats.playRateChange} class="text-[11px]" />
+				</dd>
 			</div>
 			<div class="grid gap-0.5">
 				<dt class="text-right eyebrow text-[10px] text-muted-foreground">{m.win_rate()}</dt>
-				<dd><WinRate value={stats.winRate} element={card.element} /></dd>
+				<dd class="grid justify-items-end">
+					<WinRate value={stats.winRate} element={card.element} />
+					<Change value={stats.winRateChange} color class="text-[11px]" />
+				</dd>
 			</div>
 		</dl>
 	{/if}

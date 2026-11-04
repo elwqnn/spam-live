@@ -12,6 +12,7 @@
 	import * as Table from '#lib/components/ui/table/index.js';
 	import type { Filter } from '#lib/filter.js';
 	import TitleRow from '#lib/components/TitleRow.svelte';
+	import TrendMenu from '#lib/components/TrendMenu.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
 
@@ -28,7 +29,7 @@
 			default: data.versions[0],
 			options: [
 				...data.versions.map((v) => ({ value: v, label: v })),
-				{ value: 'all', label: m.all_versions() }
+				{ value: 'all', label: m.all_versions(), reset: { trend: null } }
 			]
 		}
 	]);
@@ -57,7 +58,7 @@
 <div class="px-4 py-3 sm:px-6">
 	<FilterBar {filters}>
 		{#snippet actions()}
-			{#if tab === 'decks'}<FilterMenu filter={sorts} />{/if}
+			{#if tab === 'decks'}<FilterMenu filter={sorts} />{:else}<TrendMenu />{/if}
 		{/snippet}
 	</FilterBar>
 </div>

@@ -344,5 +344,13 @@
 	"download_step_link": "Liez-la à votre compte SPAM.live.",
 	"download_step_play": "Jouez des matchs classés. L'application les envoie.",
 	"download_manual": "Envoyer à la main",
-	"download_source": "Code source sur GitHub"
+	"download_source": "Code source sur GitHub",
+	"trend": "Variation",
+	"trend_week": "7 jours",
+	"points": "{value} pts",
+	"change_up": "en hausse de {value} points {against}",
+	"change_down": "en baisse de {value} points {against}",
+	"change_none": "sans changement {against}",
+	"against_week": "par rapport aux 7 jours précédents",
+	"against_version": "par rapport à la version précédente"
 }

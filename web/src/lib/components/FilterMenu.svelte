@@ -5,12 +5,18 @@
 	import { selection, toggle, type Filter } from '#lib/filter.js';
 	import { m } from '#lib/paraglide/messages.js';
 
-	let { filter, reset = {} }: { filter: Filter; reset?: Record<string, null> } = $props();
+	let {
+		filter,
+		reset = {},
+		selected
+	}: { filter: Filter; reset?: Record<string, null>; selected?: string | null } = $props();
 
 	let menu = $state<HTMLElement>();
 
 	const id = $derived(`filter-${filter.id}`);
-	const current = $derived(selection(page.url.searchParams.get(filter.id)));
+	const current = $derived(
+		selection(selected === undefined ? page.url.searchParams.get(filter.id) : selected)
+	);
 	const chosen = $derived(
 		filter.multiple
 			? current
@@ -21,7 +27,8 @@
 					: []
 	);
 	const name = (value: string) => filter.options.find((o) => o.value === value)?.label ?? value;
-	const link = (value: string | null) => queryHref(page.url, { ...reset, [filter.id]: value });
+	const link = (value: string | null, extra?: Record<string, null>) =>
+		queryHref(page.url, { ...reset, ...extra, [filter.id]: value });
 	const target = (value: string) =>
 		filter.multiple ? toggle(current, value) : value === filter.default ? null : value;
 	const close = () => menu?.hidePopover();
@@ -69,7 +76,7 @@
 			<li>
 				<a
 					class={item}
-					href={link(target(option.value))}
+					href={link(target(option.value), option.reset)}
 					aria-current={on ? 'true' : undefined}
 					data-sveltekit-reset="false"
 					onclick={filter.multiple ? undefined : close}

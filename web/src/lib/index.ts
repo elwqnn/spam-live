@@ -73,3 +73,4 @@ export const closeAfter: SubmitFunction =
 	};
 
 export { fold } from './description.js';
+export { formatChange } from './change.js';

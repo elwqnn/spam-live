@@ -1,4 +1,9 @@
-export type FilterOption = { value: string; label: string; count?: number };
+export type FilterOption = {
+	value: string;
+	label: string;
+	count?: number;
+	reset?: Record<string, null>;
+};
 
 export type Filter = {
 	id: string;

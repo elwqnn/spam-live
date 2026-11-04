@@ -9,11 +9,13 @@ export const load: PageLoad = async ({ fetch, url, untrack }) => {
 	);
 	const version = url.searchParams.get('version') ?? undefined;
 	const sort = url.searchParams.get('sort') === 'games' ? 'games' : 'winrate';
+	const trend =
+		version !== 'all' && url.searchParams.get('trend') === 'version' ? 'version' : 'week';
 	const [cards, versions, decks, cardStats] = await Promise.all([
 		client.GET('/api/cards', { params: { query: { lang: getLocale() } } }),
 		client.GET('/api/catalog/versions'),
 		client.GET('/api/stats/decks', { params: { query: { version, sort } } }),
-		client.GET('/api/stats/cards', { params: { query: { version } } })
+		client.GET('/api/stats/cards', { params: { query: { version, trend } } })
 	]);
 	return {
 		cards: ok(cards),
