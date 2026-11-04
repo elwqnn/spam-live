@@ -13,6 +13,7 @@
 	import { Badge } from '#lib/components/ui/badge/index.js';
 	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
 	import { Textarea } from '#lib/components/ui/textarea/index.js';
+	import TitleRow from '#lib/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
 
@@ -38,7 +39,7 @@
 	{#if error(key)}<p role="alert" class="text-sm text-destructive">{error(key)}</p>{/if}
 {/snippet}
 
-<div class="grid gap-3 row">
+<TitleRow class="grid gap-3 row">
 	<a
 		class="eyebrow text-muted-foreground transition-colors hover:text-foreground"
 		href={href('/decks')}><span aria-hidden="true">←</span> {m.all_decks()}</a
@@ -115,7 +116,7 @@
 	{@render alert('vote')}
 	{@render alert('status')}
 	{@render alert('delete')}
-</div>
+</TitleRow>
 
 <DeckSummary {deck} cards={data.cards} />
 

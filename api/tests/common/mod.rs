@@ -34,6 +34,7 @@ pub fn config(openid_url: &str) -> Config {
         public_url: PUBLIC_URL.into(),
         steam_api_key: None,
         steam_openid_url: openid_url.into(),
+        github_release_url: "http://127.0.0.1:9/releases/latest".into(),
         desktop_min_version: "1.2.3".into(),
         max_pending_device_codes: 1000,
     }

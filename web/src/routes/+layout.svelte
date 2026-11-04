@@ -10,14 +10,15 @@
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale, locales, localizeHref } from '#lib/paraglide/runtime.js';
-	import { GO, isMac, shortcut } from '#lib/shortcut.js';
+	import { isMac, shortcut } from '#lib/shortcut.js';
 	import favicon from '#lib/assets/favicon.svg';
 	import './layout.css';
 	import type { LayoutProps } from './$types';
 
 	let { children, data }: LayoutProps = $props();
 
-	const DOWNLOAD = 'https://github.com/elwqnn/spam-live/releases/latest';
+	const GITHUB = 'https://github.com/elwqnn/spam-live';
+	const download = href('/download');
 	const login = $derived(loginHref(page.url));
 	const languages = new Intl.DisplayNames([getLocale()], { type: 'language' });
 
@@ -27,15 +28,19 @@
 	}
 
 	const nav = [
-		['d', m.nav_decks],
-		['c', m.nav_cards],
-		['s', m.nav_stats],
-		['l', m.nav_glossary],
-		['i', m.nav_import]
+		['/decks', m.nav_decks],
+		['/cards', m.nav_cards],
+		['/stats', m.nav_stats],
+		['/glossary', m.nav_glossary],
+		['/import', m.nav_import]
 	] as const;
 	function toggleTheme() {
 		localStorage.theme = document.documentElement.classList.toggle('dark') ? 'dark' : 'light';
 	}
+
+	let mac = $state(false);
+	let single = $state(true);
+	let palette = $state<ReturnType<typeof CommandPalette>>();
 
 	const actions: Action[] = $derived([
 		{ id: 'theme', label: m.theme_toggle(), run: toggleTheme },
@@ -49,18 +54,33 @@
 		data.me
 			? { id: 'logout', label: m.logout(), run: logout }
 			: { id: 'login', label: m.login_steam(), run: () => location.assign(login) },
-		{ id: 'download', label: m.import_app_download(), run: () => location.assign(DOWNLOAD) }
+		{
+			id: 'download',
+			label: m.import_app_download(),
+			hint: single ? 'd' : undefined,
+			run: () => goto(download)
+		},
+		{ id: 'github', label: m.nav_github(), run: () => location.assign(GITHUB) }
 	]);
 
-	let mac = $state(false);
-	let palette = $state<ReturnType<typeof CommandPalette>>();
-	let g: number | null = null;
-	onMount(() => (mac = isMac()));
+	onMount(() => {
+		mac = isMac();
+		single = !document.documentElement.classList.contains('keys-off');
+	});
+
+	function setSingle(on: boolean) {
+		single = on;
+		document.documentElement.classList.toggle('keys-off', !on);
+		try {
+			localStorage.setItem('shortcuts', on ? 'on' : 'off');
+		} catch {
+			return;
+		}
+	}
 
 	function onkeydown(e: KeyboardEvent) {
 		if (e.defaultPrevented || document.querySelector('dialog[open]')) return;
-		const action = shortcut(e, g, mac);
-		g = action === 'g' ? e.timeStamp : null;
+		const action = shortcut(e, mac, single);
 		if (!action) return;
 		e.preventDefault();
 		const search =
@@ -69,7 +89,7 @@
 		else if (action === 'palette' || action === 'search') palette?.open();
 		else if (action === 'help')
 			document.querySelector<HTMLDialogElement>('#shortcuts')?.showModal();
-		else if (action !== 'g') goto(href(action));
+		else goto(download);
 	}
 </script>
 
@@ -87,16 +107,10 @@
 				>SPAM<span class="text-muted-foreground">.live</span></a
 			>
 			<nav class="flex flex-wrap gap-x-6 gap-y-2">
-				{#each nav as [key, label] (key)}
+				{#each nav as [path, label] (path)}
 					<a
-						class="group relative eyebrow text-xs text-muted-foreground transition-colors hover:text-foreground"
-						href={href(GO[key])}
-						aria-keyshortcuts="g {key}"
-						>{label()}<kbd
-							aria-hidden="true"
-							class="pointer-events-none absolute top-full left-1/2 mt-1.5 hidden -translate-x-1/2 bg-background whitespace-nowrap lg:group-hover:inline-flex lg:group-focus-visible:inline-flex"
-							>g {key}</kbd
-						></a
+						class="eyebrow text-xs text-muted-foreground transition-colors hover:text-foreground"
+						href={href(path)}>{label()}</a
 					>
 				{/each}
 			</nav>
@@ -120,8 +134,11 @@
 				{:else}
 					<Button variant="outline" size="sm" href={login} rel="external">{m.login_steam()}</Button>
 				{/if}
-				<Button size="sm" href={DOWNLOAD} rel="external"
-					><HugeiconsIcon icon={Download04Icon} />{m.nav_download()}</Button
+				<Button size="sm" href={download} aria-keyshortcuts={single ? 'd' : undefined}
+					><HugeiconsIcon icon={Download04Icon} />{m.nav_download()}<kbd
+						aria-hidden="true"
+						class="key-hint in-[.keys-off]:hidden">D</kbd
+					></Button
 				>
 			</div>
 		</header>
@@ -165,15 +182,26 @@
 		<dd>{m.shortcut_palette()}</dd>
 		<dt><kbd>/</kbd></dt>
 		<dd>{m.shortcut_search()}</dd>
-		{#each nav as [key, label] (key)}
-			<dt class="flex items-center gap-1.5 text-xs text-muted-foreground">
-				<kbd>g</kbd>{m.shortcut_then()}<kbd>{key}</kbd>
-			</dt>
-			<dd>{m.shortcut_go({ page: label() })}</dd>
-		{/each}
+		<dt><kbd>D</kbd></dt>
+		<dd>{m.import_app_download()}</dd>
 		<dt><kbd>?</kbd></dt>
 		<dd>{m.shortcut_help()}</dd>
 	</dl>
+	<div class="mt-5 flex items-center gap-3 border-t pt-4">
+		<span id="shortcuts-single" class="flex-1 text-sm">{m.shortcut_single()}</span>
+		<button
+			type="button"
+			role="switch"
+			aria-checked={single}
+			aria-labelledby="shortcuts-single"
+			class="group relative h-5.5 w-9.5 flex-none cursor-pointer rounded-sm border border-foreground/25 transition-colors aria-checked:border-primary aria-checked:bg-primary"
+			onclick={() => setSingle(!single)}
+		>
+			<span
+				class="absolute top-0.5 left-0.5 size-4 rounded-full bg-foreground transition-[translate,background-color] duration-150 ease-out group-aria-checked:translate-x-4 group-aria-checked:bg-primary-foreground"
+			></span>
+		</button>
+	</div>
 	<div class="mt-5 flex justify-end">
 		<Button variant="ghost" size="sm" commandfor="shortcuts" command="close">{m.close()}</Button>
 	</div>

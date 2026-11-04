@@ -150,7 +150,7 @@
 <section
 	class="relative isolate flex flex-wrap items-end justify-between gap-6 bg-card row sm:py-12"
 >
-	<LiveLines class="opacity-7 [:hover>&]:opacity-9" />
+	<LiveLines line={0.5} speed={1 / 3} class="opacity-7 [:hover>&]:opacity-9" />
 	<div class="grid max-w-xl gap-3">
 		{@render heading('03', m.home_contribute(), m.import_title())}
 		<p class="text-muted-foreground">{m.import_text()}</p>

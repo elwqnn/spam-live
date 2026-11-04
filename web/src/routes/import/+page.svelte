@@ -6,6 +6,7 @@
 	import { Badge } from '#lib/components/ui/badge/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
+	import TitleRow from '#lib/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
 
@@ -99,12 +100,12 @@
 	</p>
 {/snippet}
 
-<div class="grid gap-2 row *:max-w-3xl">
+<TitleRow class="grid gap-2 row *:max-w-3xl">
 	<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
 		{m.import_title()}
 	</h1>
 	<p class="text-muted-foreground">{m.import_intro()}</p>
-</div>
+</TitleRow>
 
 <section class="grid gap-2 row text-sm *:max-w-3xl">
 	<h2 class="font-heading text-2xl font-normal tracking-tight">{m.import_folder_title()}</h2>
@@ -250,10 +251,8 @@
 				<p>{m.import_keep_10()}</p>
 				<p class="text-muted-foreground">
 					{m.import_app()}
-					<a
-						class="underline underline-offset-4 hover:text-foreground"
-						href="https://github.com/elwqnn/spam-live/releases/latest"
-						rel="external">{m.import_app_download()}</a
+					<a class="underline underline-offset-4 hover:text-foreground" href={href('/download')}
+						>{m.import_app_download()}</a
 					>
 				</p>
 			</div>

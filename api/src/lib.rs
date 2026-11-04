@@ -3,6 +3,7 @@ pub mod auth;
 pub mod catalog;
 pub mod decks;
 pub mod matches;
+pub mod release;
 pub mod stats;
 
 use std::{sync::Arc, time::Duration};
@@ -21,6 +22,7 @@ pub struct Config {
     pub public_url: String,
     pub steam_api_key: Option<String>,
     pub steam_openid_url: String,
+    pub github_release_url: String,
     pub desktop_min_version: String,
     pub max_pending_device_codes: i64,
 }
@@ -33,6 +35,7 @@ pub struct AppState {
     pub http: reqwest::Client,
     pub upload_limiter: Arc<matches::RateLimiter>,
     pub comment_limiter: Arc<matches::RateLimiter>,
+    pub release: Arc<release::Cache>,
 }
 
 impl AppState {
@@ -47,6 +50,7 @@ impl AppState {
                 decks::COMMENTS_PER_WINDOW,
                 Duration::from_secs(decks::COMMENT_WINDOW_SECS),
             )),
+            release: Arc::default(),
         }
     }
 }
@@ -104,6 +108,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         matches::upload,
         matches::my_matches,
         matches::min_version,
+        release::release,
         decks::import,
         decks::list_decks,
         decks::create_deck,
@@ -144,6 +149,7 @@ pub fn router(state: AppState) -> Router {
         .merge(auth::routes())
         .merge(catalog::routes())
         .merge(matches::routes())
+        .merge(release::routes())
         .merge(decks::routes())
         .merge(stats::routes())
         .merge(admin::routes())

@@ -7,6 +7,7 @@
 	import FilterBar from '#lib/components/FilterBar.svelte';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import type { Filter } from '#lib/filter.js';
+	import TitleRow from '#lib/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import type { PageProps } from './$types';
@@ -75,7 +76,7 @@
 	<title>{m.glossary_title()} · {m.site_name()}</title>
 </svelte:head>
 
-<div class="flex flex-wrap items-end justify-between gap-4 row">
+<TitleRow class="flex flex-wrap items-end justify-between gap-4 row">
 	<div class="grid gap-2">
 		<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
 			{m.glossary_title()}
@@ -97,7 +98,7 @@
 				})}
 		/>
 	</form>
-</div>
+</TitleRow>
 
 <div class="px-4 py-3 sm:px-6">
 	<FilterBar {filters} />

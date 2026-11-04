@@ -372,6 +372,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/desktop/release": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["release"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/device/code": {
         parameters: {
             query?: never;
@@ -588,6 +604,12 @@ export interface components {
             /** Format: int64 */
             cooldown: number;
             id: string;
+        };
+        Asset: {
+            name: string;
+            /** Format: int64 */
+            size: number;
+            url: string;
         };
         CardAbility: {
             ability: components["schemas"]["Entry"];
@@ -857,6 +879,14 @@ export interface components {
             /** Format: int64 */
             targetId: number;
             targetType: components["schemas"]["TargetType"];
+        };
+        Release: {
+            linux?: components["schemas"]["Asset"] | null;
+            /** Format: date-time */
+            publishedAt: string;
+            url: string;
+            version: string;
+            windows?: components["schemas"]["Asset"] | null;
         };
         ReplayResult: {
             fileName?: string | null;
@@ -2001,6 +2031,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MinVersion"];
+                };
+            };
+        };
+    };
+    release: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The latest desktop release on GitHub. windows and linux are null when the release has no such asset. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Release"];
+                };
+            };
+            /** @description No release */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
                 };
             };
         };

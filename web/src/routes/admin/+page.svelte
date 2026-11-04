@@ -9,6 +9,7 @@
 	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import * as Table from '#lib/components/ui/table/index.js';
+	import TitleRow from '#lib/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
 
@@ -29,7 +30,9 @@
 	<title>{m.admin_title()} · {m.site_name()}</title>
 </svelte:head>
 
-<h1 class="row font-heading text-3xl font-normal tracking-tight sm:text-4xl">{m.admin_title()}</h1>
+<TitleRow class="row">
+	<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">{m.admin_title()}</h1>
+</TitleRow>
 
 <nav class="flex flex-wrap gap-1 px-4 py-3 sm:px-6">
 	{#each tabs as [key, label] (key)}

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { href } from '#lib';
+	import TitleRow from '#lib/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 
 	const stored = [
@@ -34,12 +35,12 @@
 {/snippet}
 
 <article class="rows text-sm leading-6">
-	<div class="grid gap-2 row *:max-w-2xl">
+	<TitleRow class="grid gap-2 row *:max-w-2xl">
 		<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
 			{m.privacy_title()}
 		</h1>
 		<p class="text-muted-foreground">{m.privacy_intro()}</p>
-	</div>
+	</TitleRow>
 
 	<section class="grid gap-2 row *:max-w-2xl">
 		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.privacy_who_title()}</h2>

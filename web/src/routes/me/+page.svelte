@@ -8,6 +8,7 @@
 	import { Badge } from '#lib/components/ui/badge/index.js';
 	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
+	import TitleRow from '#lib/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
 
@@ -38,7 +39,7 @@
 	{#if error(key)}<p role="alert" class="text-sm text-destructive">{error(key)}</p>{/if}
 {/snippet}
 
-<section class="flex flex-wrap items-center gap-4 row">
+<TitleRow class="flex flex-wrap items-center gap-4 row">
 	{#if me.avatarUrl}<img src={me.avatarUrl} alt="" class="size-16 rounded-full" />{/if}
 	<div class="grid min-w-0 flex-1 gap-1">
 		<h1 class="font-heading text-3xl font-normal tracking-tight wrap-anywhere sm:text-4xl">
@@ -56,7 +57,7 @@
 	<form method="POST" action="?/logout" use:enhance>
 		<Button type="submit" variant="outline" size="sm">{m.logout()}</Button>
 	</form>
-</section>
+</TitleRow>
 
 <section class="rows">
 	<h2 class="row font-heading text-2xl font-normal tracking-tight">{m.me_matches()}</h2>

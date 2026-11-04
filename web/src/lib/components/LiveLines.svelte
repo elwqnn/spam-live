@@ -8,11 +8,13 @@
 ${FIELD}uniform vec2 o;
 uniform float d;
 uniform float t;
+uniform float w;
 void main(){
   float f;
   vec3 col=field((o+gl_FragCoord.xy/d)/${SCALE}.,t,f);
   float v=f*${LEVELS}.;
-  float a=1.-min(abs(fract(v-.5)-.5)/max(fwidth(v),1e-4)/d,1.);
+  float k=d*w;
+  float a=(1.-min(abs(fract(v-.5)-.5)/max(fwidth(v),1e-4)/max(k,1.),1.))*min(k,1.);
   gl_FragColor=vec4(col*a,a);
 }`;
 
@@ -21,6 +23,7 @@ void main(){
 		origin: WebGLUniformLocation | null;
 		ratio: WebGLUniformLocation | null;
 		time: WebGLUniformLocation | null;
+		line: WebGLUniformLocation | null;
 		still: boolean;
 		start: number;
 		resize: ResizeObserver;
@@ -28,6 +31,7 @@ void main(){
 	};
 
 	const shown: HTMLCanvasElement[] = [];
+	const looks = new WeakMap<Element, [number, number]>();
 	let count = 0;
 	let shared: Shared | null = null;
 	let broken = false;
@@ -50,10 +54,12 @@ void main(){
 		if (source.width < width) source.width = width;
 		if (source.height < height) source.height = height;
 		const rect = canvas.getBoundingClientRect();
+		const [line, speed] = looks.get(canvas) ?? [1, 1];
 		s.gl.viewport(0, 0, width, height);
 		s.gl.uniform2f(s.origin, rect.left + scrollX, -(rect.top + scrollY + height / ratio));
 		s.gl.uniform1f(s.ratio, ratio);
-		s.gl.uniform1f(s.time, 20 + (s.still ? 0 : (performance.now() - s.start) / 1000));
+		s.gl.uniform1f(s.line, line);
+		s.gl.uniform1f(s.time, 20 + (s.still ? 0 : ((performance.now() - s.start) / 1000) * speed));
 		s.gl.drawArrays(s.gl.TRIANGLES, 0, 3);
 		ctx.clearRect(0, 0, width, height);
 		ctx.drawImage(source, 0, source.height - height, width, height, 0, 0, width, height);
@@ -79,6 +85,7 @@ void main(){
 			origin: gl.getUniformLocation(linked, 'o'),
 			ratio: gl.getUniformLocation(linked, 'd'),
 			time: gl.getUniformLocation(linked, 't'),
+			line: gl.getUniformLocation(linked, 'w'),
 			still: matchMedia('(prefers-reduced-motion: reduce)').matches,
 			start: performance.now(),
 			resize: new ResizeObserver((entries) => {
@@ -98,33 +105,40 @@ void main(){
 		return s;
 	};
 
-	const live: Attachment<HTMLCanvasElement> = (canvas) => {
-		if (!shared && !broken) shared = init();
-		const s = shared;
-		if (!s || !canvas.getContext('2d')) return;
-		count++;
-		s.resize.observe(canvas);
-		s.view.observe(canvas);
+	const live =
+		(line: number, speed: number): Attachment<HTMLCanvasElement> =>
+		(canvas) => {
+			if (!shared && !broken) shared = init();
+			const s = shared;
+			if (!s || !canvas.getContext('2d')) return;
+			looks.set(canvas, [line, speed]);
+			count++;
+			s.resize.observe(canvas);
+			s.view.observe(canvas);
 
-		return () => {
-			hide(canvas);
-			s.resize.unobserve(canvas);
-			s.view.unobserve(canvas);
-			if (--count) return;
-			cancelAnimationFrame(frame);
-			frame = 0;
-			s.resize.disconnect();
-			s.view.disconnect();
-			s.gl.getExtension('WEBGL_lose_context')?.loseContext();
-			shared = null;
+			return () => {
+				hide(canvas);
+				s.resize.unobserve(canvas);
+				s.view.unobserve(canvas);
+				if (--count) return;
+				cancelAnimationFrame(frame);
+				frame = 0;
+				s.resize.disconnect();
+				s.view.disconnect();
+				s.gl.getExtension('WEBGL_lose_context')?.loseContext();
+				shared = null;
+			};
 		};
-	};
 </script>
 
 <script lang="ts">
 	import { cn } from '#lib/utils.js';
 
-	let { class: className }: { class?: string } = $props();
+	let {
+		class: className,
+		line = 1,
+		speed = 1
+	}: { class?: string; line?: number; speed?: number } = $props();
 </script>
 
 <canvas
@@ -133,5 +147,5 @@ void main(){
 		'pointer-events-none absolute inset-0 -z-10 size-full opacity-30 motion-safe:transition-opacity motion-safe:duration-300 [:hover>&]:opacity-35',
 		className
 	)}
-	{@attach live}
+	{@attach live(line, speed)}
 ></canvas>

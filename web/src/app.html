@@ -5,7 +5,11 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
 		<script>
-			if (localStorage.theme === 'light') document.documentElement.classList.remove('dark');
+			try {
+				if (localStorage.theme === 'light') document.documentElement.classList.remove('dark');
+				if (localStorage.getItem('shortcuts') === 'off')
+					document.documentElement.classList.add('keys-off');
+			} catch {}
 		</script>
 		%sveltekit.head%
 	</head>

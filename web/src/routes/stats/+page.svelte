@@ -11,6 +11,7 @@
 	import { buttonVariants } from '#lib/components/ui/button/index.js';
 	import * as Table from '#lib/components/ui/table/index.js';
 	import type { Filter } from '#lib/filter.js';
+	import TitleRow from '#lib/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
 
@@ -46,12 +47,12 @@
 	<title>{m.stats_title()} · {m.site_name()}</title>
 </svelte:head>
 
-<div class="grid gap-1 row">
+<TitleRow class="grid gap-1 row">
 	<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
 		{m.stats_title()}
 	</h1>
 	<p class="text-sm text-muted-foreground">{m.stats_intro()}</p>
-</div>
+</TitleRow>
 
 <div class="px-4 py-3 sm:px-6">
 	<FilterBar {filters}>

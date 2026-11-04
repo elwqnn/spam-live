@@ -26,6 +26,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     reqwest::Url::parse(&public_url).map_err(|e| format!("PUBLIC_URL is invalid: {e}"))?;
     let steam_openid_url = env("STEAM_OPENID_URL").unwrap_or_else(|| "https://steamcommunity.com/openid/login".into());
     reqwest::Url::parse(&steam_openid_url).map_err(|e| format!("STEAM_OPENID_URL is invalid: {e}"))?;
+    let github_release_url = env("GITHUB_RELEASE_URL")
+        .unwrap_or_else(|| "https://api.github.com/repos/elwqnn/spam-live/releases/latest".into());
+    reqwest::Url::parse(&github_release_url).map_err(|e| format!("GITHUB_RELEASE_URL is invalid: {e}"))?;
     let desktop_min_version = env("DESKTOP_MIN_VERSION").unwrap_or_else(|| "0.0.0".into());
     catalog::parse_version(&desktop_min_version).ok_or("DESKTOP_MIN_VERSION is invalid")?;
     let catalog_dir = PathBuf::from(env("CATALOG_DIR").unwrap_or_else(|| "catalog".into()));
@@ -50,6 +53,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         public_url,
         steam_api_key: env("STEAM_API_KEY"),
         steam_openid_url,
+        github_release_url,
         desktop_min_version,
         max_pending_device_codes: 1000,
     };

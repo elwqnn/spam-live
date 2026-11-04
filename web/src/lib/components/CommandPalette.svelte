@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	export type Action = { id: string; label: string; run: () => void };
+	export type Action = { id: string; label: string; hint?: string; run: () => void };
 </script>
 
 <script lang="ts">
@@ -34,6 +34,7 @@
 		run?: () => void;
 		card?: Card;
 		detail?: string;
+		hint?: string;
 	};
 
 	const uid = $props.id();
@@ -144,6 +145,7 @@
 				options: (q ? search(actions, q, (a) => a.label) : actions).map((a): Option => ({
 					key: `action-${a.id}`,
 					label: a.label,
+					hint: a.hint,
 					run: a.run
 				}))
 			}
@@ -174,7 +176,7 @@
 
 	function onkeydown(e: KeyboardEvent) {
 		if (e.isComposing) return;
-		if (shortcut(e, null, mac) === 'palette') {
+		if (shortcut(e, mac, false) === 'palette') {
 			e.preventDefault();
 			dialog?.close();
 		} else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
@@ -196,7 +198,7 @@
 >
 	<HugeiconsIcon icon={Search01Icon} /><span class="max-sm:sr-only">{m.palette_open()}</span><kbd
 		aria-hidden="true"
-		class="ml-1 hidden sm:inline-flex">{mac ? '⌘' : 'Ctrl'} K</kbd
+		class="key-hint">{mac ? '⌘' : 'Ctrl'} K</kbd
 	>
 </Button>
 
@@ -254,6 +256,7 @@
 						role="option"
 						tabindex="-1"
 						aria-selected={i === index}
+						aria-keyshortcuts={option.hint}
 						class={[
 							'flex min-h-10 w-full cursor-pointer items-center gap-3 px-4 py-1.5 text-left text-sm',
 							i === index && 'bg-row'
@@ -279,6 +282,10 @@
 						{:else if option.detail}
 							<span class="max-w-[40%] shrink-0 truncate text-xs text-muted-foreground"
 								>{option.detail}</span
+							>
+						{:else if option.hint}
+							<kbd aria-hidden="true" class="uppercase max-sm:hidden pointer-coarse:hidden"
+								>{option.hint}</kbd
 							>
 						{/if}
 					</button>

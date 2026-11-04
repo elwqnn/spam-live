@@ -7,6 +7,7 @@
 	import CardStack from './CardStack.svelte';
 	import DeckRow from './DeckRow.svelte';
 	import Description from './Description.svelte';
+	import TitleRow from './TitleRow.svelte';
 	import VersionSelect from './VersionSelect.svelte';
 
 	let {
@@ -44,7 +45,7 @@
 {/snippet}
 
 <article class="rows">
-	<div class="grid gap-6 row sm:grid-cols-[18rem_minmax(0,1fr)] sm:items-start md:gap-10">
+	<TitleRow class="grid gap-6 row sm:grid-cols-[18rem_minmax(0,1fr)] sm:items-start md:gap-10">
 		<div class="w-full max-w-72 sm:sticky sm:top-8" aria-hidden="true">
 			<CardArt {card} interactive />
 		</div>
@@ -135,7 +136,7 @@
 				</div>
 			</section>
 		</div>
-	</div>
+	</TitleRow>
 
 	{#if decks.length}
 		<section class="rows">

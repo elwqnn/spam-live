@@ -1,14 +1,10 @@
-export const GO = {
-	d: '/decks',
-	c: '/cards',
-	s: '/stats',
-	i: '/import',
-	l: '/glossary'
-} as const;
+const KEYS = new Map<string, Shortcut>([
+	['/', 'search'],
+	['?', 'help'],
+	['d', 'download']
+]);
 
-export const SEQUENCE_MS = 1000;
-
-export type Shortcut = 'palette' | 'search' | 'help' | 'g' | (typeof GO)[keyof typeof GO];
+export type Shortcut = 'palette' | 'search' | 'help' | 'download';
 
 export type Press = {
 	key: string;
@@ -17,7 +13,6 @@ export type Press = {
 	metaKey: boolean;
 	shiftKey: boolean;
 	isComposing: boolean;
-	timeStamp: number;
 	target: unknown;
 };
 
@@ -30,15 +25,10 @@ const editable = (target: unknown) => {
 
 export const isMac = () => /Mac|iPhone|iPad|iPod/.test(navigator.platform);
 
-export function shortcut(e: Press, g: number | null, mac: boolean): Shortcut | null {
+export function shortcut(e: Press, mac: boolean, single: boolean): Shortcut | null {
 	if (e.isComposing) return null;
 	const [mod, other] = mac ? [e.metaKey, e.ctrlKey] : [e.ctrlKey, e.metaKey];
 	if (mod && !other && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k') return 'palette';
-	if (e.ctrlKey || e.altKey || e.metaKey || editable(e.target)) return null;
-	if (g !== null && e.timeStamp - g < SEQUENCE_MS && Object.hasOwn(GO, e.key))
-		return GO[e.key as keyof typeof GO];
-	if (e.key === 'g') return 'g';
-	if (e.key === '/') return 'search';
-	if (e.key === '?') return 'help';
-	return null;
+	if (!single || e.ctrlKey || e.altKey || e.metaKey || editable(e.target)) return null;
+	return KEYS.get(e.key) ?? null;
 }
