@@ -20,21 +20,21 @@
 </script>
 
 {#if tiles}
-	<CardGrid columns={4} class="max-w-4xl gap-x-3 gap-y-5 sm:gap-x-3 sm:gap-y-5">
+	<CardGrid columns={4}>
 		{#each cards as id, i (id)}
 			{@const card = catalog.get(id)}
-			<li class="grid content-start gap-3">
+			<li class="grid grid-cols-1 content-start">
 				{#if card}
-					<CardTile {card} index={i} />
+					<CardTile {card} />
 				{:else}
 					<div
-						class="flex aspect-5/7 items-center justify-center rounded-lg border border-dashed p-3 text-center text-sm text-muted-foreground"
+						class="m-2 flex aspect-5/7 items-center justify-center border border-dashed p-3 text-center text-sm text-muted-foreground sm:m-3"
 					>
 						{m.unknown_card()}
 						{id.slice(0, 8)}
 					</div>
 				{/if}
-				{@render below?.(i)}
+				{#if below}<div class="border-t p-3 sm:p-4">{@render below(i)}</div>{/if}
 			</li>
 		{/each}
 	</CardGrid>

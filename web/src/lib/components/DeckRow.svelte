@@ -13,7 +13,7 @@
 </script>
 
 <li
-	class="grid gap-x-6 gap-y-3 px-5 py-4 transition-colors hover:bg-row md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+	class="grid gap-x-6 gap-y-3 px-4 py-4 transition-colors hover:bg-row sm:px-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
 >
 	<div class="grid min-w-0 gap-2.5">
 		<div class="flex flex-wrap items-center gap-x-3 gap-y-1">

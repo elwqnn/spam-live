@@ -46,81 +46,80 @@
 	<title>{m.stats_title()} · {m.site_name()}</title>
 </svelte:head>
 
-<div class="grid gap-4">
-	<div class="grid gap-1">
-		<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
-			{m.stats_title()}
-		</h1>
-		<p class="text-sm text-muted-foreground">{m.stats_intro()}</p>
-	</div>
+<div class="grid gap-1 row">
+	<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
+		{m.stats_title()}
+	</h1>
+	<p class="text-sm text-muted-foreground">{m.stats_intro()}</p>
+</div>
 
+<div class="px-4 py-3 sm:px-6">
 	<FilterBar {filters}>
 		{#snippet actions()}
 			{#if tab === 'decks'}<FilterMenu filter={sorts} />{/if}
 		{/snippet}
 	</FilterBar>
-
-	<MetaCoverage cards={data.cards} stats={data.cardStats} />
-
-	<nav class="flex gap-1">
-		<a
-			class={link(tab === 'decks')}
-			aria-current={tab === 'decks' ? 'page' : undefined}
-			href={queryHref(page.url, { tab: null })}>{m.tab_decks()}</a
-		>
-		<a
-			class={link(tab === 'cards')}
-			aria-current={tab === 'cards' ? 'page' : undefined}
-			href={queryHref(page.url, { tab: 'cards' })}>{m.tab_cards()}</a
-		>
-	</nav>
-
-	{#if tab === 'decks'}
-		{#if data.decks.length}
-			<div class="overflow-hidden rounded-xl border bg-card">
-				<Table.Root>
-					<Table.Header>
-						<Table.Row>
-							<Table.Head class="pl-4 sm:pl-5">{m.deck()}</Table.Head>
-							<Table.Head class="text-right whitespace-normal">{m.games()}</Table.Head>
-							<Table.Head class="pr-4 text-right whitespace-normal sm:pr-5"
-								>{m.win_rate()}</Table.Head
-							>
-						</Table.Row>
-					</Table.Header>
-					<Table.Body>
-						{#each data.decks as deck (deck.cards.join())}
-							<Table.Row>
-								<Table.Cell class="min-w-40 py-3.5 pl-4 whitespace-normal sm:min-w-48 sm:pl-5">
-									<DeckCards cards={deck.cards} {catalog} />
-								</Table.Cell>
-								<Table.Cell class="text-right text-[13px] tabular-nums">{deck.games}</Table.Cell>
-								<Table.Cell class="pr-4 sm:pr-5"><WinRate value={deck.winRate} /></Table.Cell>
-							</Table.Row>
-						{/each}
-					</Table.Body>
-				</Table.Root>
-			</div>
-		{:else}
-			<p class="text-sm text-muted-foreground">{m.no_stats()}</p>
-		{/if}
-	{:else if data.cardStats.length}
-		<CardStack>
-			{#each data.cardStats as row (row.card)}
-				{@const card = catalog.get(row.card)}
-				{#if card}
-					<CardRow {card} stats={row} />
-				{:else}
-					<li class="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
-						<span class="text-sm text-muted-foreground"
-							>{m.unknown_card()} {row.card.slice(0, 8)}</span
-						>
-						<WinRate value={row.winRate} />
-					</li>
-				{/if}
-			{/each}
-		</CardStack>
-	{:else}
-		<p class="text-sm text-muted-foreground">{m.no_stats()}</p>
-	{/if}
 </div>
+
+<MetaCoverage cards={data.cards} stats={data.cardStats} />
+
+<nav class="flex gap-1 px-4 py-3 sm:px-6">
+	<a
+		class={link(tab === 'decks')}
+		aria-current={tab === 'decks' ? 'page' : undefined}
+		href={queryHref(page.url, { tab: null })}>{m.tab_decks()}</a
+	>
+	<a
+		class={link(tab === 'cards')}
+		aria-current={tab === 'cards' ? 'page' : undefined}
+		href={queryHref(page.url, { tab: 'cards' })}>{m.tab_cards()}</a
+	>
+</nav>
+
+{#if tab === 'decks'}
+	{#if data.decks.length}
+		<div>
+			<Table.Root>
+				<Table.Header>
+					<Table.Row>
+						<Table.Head class="pl-4 sm:pl-6">{m.deck()}</Table.Head>
+						<Table.Head class="text-right whitespace-normal">{m.games()}</Table.Head>
+						<Table.Head class="pr-4 text-right whitespace-normal sm:pr-6">{m.win_rate()}</Table.Head
+						>
+					</Table.Row>
+				</Table.Header>
+				<Table.Body>
+					{#each data.decks as deck (deck.cards.join())}
+						<Table.Row>
+							<Table.Cell class="min-w-40 py-3.5 pl-4 whitespace-normal sm:min-w-48 sm:pl-6">
+								<DeckCards cards={deck.cards} {catalog} />
+							</Table.Cell>
+							<Table.Cell class="text-right text-[13px] tabular-nums">{deck.games}</Table.Cell>
+							<Table.Cell class="pr-4 sm:pr-6"><WinRate value={deck.winRate} /></Table.Cell>
+						</Table.Row>
+					{/each}
+				</Table.Body>
+			</Table.Root>
+		</div>
+	{:else}
+		<p class="row text-sm text-muted-foreground">{m.no_stats()}</p>
+	{/if}
+{:else if data.cardStats.length}
+	<CardStack>
+		{#each data.cardStats as row (row.card)}
+			{@const card = catalog.get(row.card)}
+			{#if card}
+				<CardRow {card} stats={row} />
+			{:else}
+				<li class="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+					<span class="text-sm text-muted-foreground"
+						>{m.unknown_card()} {row.card.slice(0, 8)}</span
+					>
+					<WinRate value={row.winRate} />
+				</li>
+			{/if}
+		{/each}
+	</CardStack>
+{:else}
+	<p class="row text-sm text-muted-foreground">{m.no_stats()}</p>
+{/if}

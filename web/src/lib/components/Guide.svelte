@@ -38,14 +38,13 @@
 		text-underline-offset: 4px;
 	}
 	.guide :global(code) {
-		border-radius: 0.25rem;
+		border-radius: 2px;
 		background: var(--muted);
 		padding: 0.1em 0.3em;
 		font-size: 0.875em;
 	}
 	.guide :global(pre) {
 		overflow-x: auto;
-		border-radius: 0.5rem;
 		background: var(--muted);
 		padding: 0.75em 1em;
 	}

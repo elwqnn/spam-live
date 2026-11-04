@@ -47,57 +47,57 @@
 	</li>
 {/snippet}
 
-<section class="grid gap-6 rounded-xl border bg-card p-5 sm:p-6" aria-labelledby="coverage-title">
-	<div class="grid gap-1">
+<section class="rows" aria-labelledby="coverage-title">
+	<div class="grid gap-1 row">
 		<h2 id="coverage-title" class="eyebrow text-muted-foreground">{m.meta_coverage()}</h2>
 		<p class="text-sm text-muted-foreground">{m.meta_coverage_text()}</p>
 	</div>
 	{#if result.played}
-		<div class="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
-			<div class="grid content-start gap-5">
-				<div class="grid gap-2">
-					<span class="text-5xl font-medium tracking-tight tabular-nums"
-						>{percent(result.share)}</span
-					>
-					{@render bar(result.share, 'bg-foreground/70')}
-					<span class="text-sm text-muted-foreground tabular-nums"
-						>{m.cards_played({ played: result.played, total: result.total })}</span
-					>
-				</div>
-				{#if rail.length}
+		<div>
+			<div class="cells grid sm:grid-cols-2 lg:grid-cols-3">
+				<div class="grid content-start gap-5 px-4 py-6 sm:col-span-2 sm:px-6 lg:col-span-1">
 					<div class="grid gap-2">
-						<h3 class="eyebrow text-[10px] text-muted-foreground">{m.never_played()}</h3>
-						<ul class="flex flex-wrap items-center gap-1.5">
-							{#each rail as card (card.id)}
-								<li>
-									<a
-										href={href(`/cards/${card.id}`)}
-										title={card.name ?? card.id}
-										class="block rounded-sm spring motion-safe:hover:-translate-y-0.5"
-									>
-										<img
-											src="/art/avatar/{card.id}.webp"
-											alt=""
-											loading="lazy"
-											decoding="async"
-											class="el-{card.element} size-9 rounded-sm border-2 border-(--el) bg-(--el)"
-										/>
-										<span class="sr-only">{card.name ?? card.id}</span>
-									</a>
-								</li>
-							{/each}
-							{#if more}
-								<li class="px-1 text-sm text-muted-foreground tabular-nums">
-									<span aria-hidden="true">+{more}</span>
-									<span class="sr-only">{m.more_cards({ n: more })}</span>
-								</li>
-							{/if}
-						</ul>
+						<span class="text-5xl font-medium tracking-tight tabular-nums"
+							>{percent(result.share)}</span
+						>
+						{@render bar(result.share, 'bg-foreground/70')}
+						<span class="text-sm text-muted-foreground tabular-nums"
+							>{m.cards_played({ played: result.played, total: result.total })}</span
+						>
 					</div>
-				{/if}
-			</div>
-			<div class="grid content-start gap-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
-				<div class="grid content-start gap-2.5">
+					{#if rail.length}
+						<div class="grid gap-2">
+							<h3 class="eyebrow text-[10px] text-muted-foreground">{m.never_played()}</h3>
+							<ul class="flex flex-wrap items-center gap-1.5">
+								{#each rail as card (card.id)}
+									<li>
+										<a
+											href={href(`/cards/${card.id}`)}
+											title={card.name ?? card.id}
+											class="group block rounded-xs"
+										>
+											<img
+												src="/art/avatar/{card.id}.webp"
+												alt=""
+												loading="lazy"
+												decoding="async"
+												class="el-{card.element} size-9 rounded-xs border-2 border-(--el) bg-(--el) transition-colors group-hover:border-foreground"
+											/>
+											<span class="sr-only">{card.name ?? card.id}</span>
+										</a>
+									</li>
+								{/each}
+								{#if more}
+									<li class="px-1 text-sm text-muted-foreground tabular-nums">
+										<span aria-hidden="true">+{more}</span>
+										<span class="sr-only">{m.more_cards({ n: more })}</span>
+									</li>
+								{/if}
+							</ul>
+						</div>
+					{/if}
+				</div>
+				<div class="grid content-start gap-2.5 px-4 py-6 sm:px-6">
 					<h3 class="eyebrow text-[10px] text-muted-foreground">{m.by_rarity()}</h3>
 					<ul class="grid gap-2">
 						{#each ordered(result.rarities, RARITIES) as [key, count] (key)}
@@ -105,7 +105,7 @@
 						{/each}
 					</ul>
 				</div>
-				<div class="grid content-start gap-2.5">
+				<div class="grid content-start gap-2.5 px-4 py-6 sm:px-6">
 					<h3 class="eyebrow text-[10px] text-muted-foreground">{m.by_element()}</h3>
 					<ul class="grid gap-2">
 						{#each ordered(result.elements, ELEMENTS) as [key, count] (key)}
@@ -116,6 +116,6 @@
 			</div>
 		</div>
 	{:else}
-		<p class="text-sm text-muted-foreground">{m.no_coverage()}</p>
+		<p class="row text-sm text-muted-foreground">{m.no_coverage()}</p>
 	{/if}
 </section>

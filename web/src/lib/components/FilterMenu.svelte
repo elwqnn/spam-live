@@ -26,7 +26,7 @@
 		filter.multiple ? toggle(current, value) : value === filter.default ? null : value;
 	const close = () => menu?.hidePopover();
 	const item =
-		'flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none';
+		'flex items-center gap-2 px-2 py-1.5 text-sm transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none';
 </script>
 
 <button
@@ -60,7 +60,7 @@
 	popover
 	{id}
 	aria-label={filter.label}
-	class="max-h-80 w-56 max-w-[calc(100vw-1rem)] overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground [position-area:block-end_span-inline-end] [position-try-fallbacks:flip-inline,flip-block,flip-block_flip-inline] supports-[position-area:block-end]:m-0 supports-[position-area:block-end]:my-1"
+	class="max-h-80 w-56 max-w-[calc(100vw-1rem)] overflow-y-auto rounded-sm border bg-popover p-1 text-popover-foreground [position-area:block-end_span-inline-end] [position-try-fallbacks:flip-inline,flip-block,flip-block_flip-inline] supports-[position-area:block-end]:m-0 supports-[position-area:block-end]:my-1"
 	style:position-anchor="--{id}"
 >
 	<ul class="grid">

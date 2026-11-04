@@ -5,6 +5,6 @@
 	let { class: className, children }: { class?: string; children: Snippet } = $props();
 </script>
 
-<ul class={cn('divide-y overflow-hidden rounded-xl border bg-card', className)}>
+<ul class={cn('divide-y', className)}>
 	{@render children()}
 </ul>

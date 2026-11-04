@@ -25,7 +25,7 @@
 
 <li
 	class={[
-		'relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-row sm:gap-4 sm:px-5',
+		'relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-row sm:gap-4 sm:px-6',
 		active && 'bg-row'
 	]}
 	aria-current={active ? 'true' : undefined}
@@ -35,7 +35,7 @@
 		alt=""
 		loading="lazy"
 		decoding="async"
-		class="el-{card.element} size-10 shrink-0 rounded-sm border-2 border-(--el) bg-(--el)"
+		class="el-{card.element} size-10 shrink-0 rounded-xs border-2 border-(--el) bg-(--el)"
 	/>
 	<div class="grid min-w-0 flex-1 gap-1.5">
 		<a

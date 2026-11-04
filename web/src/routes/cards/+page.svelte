@@ -76,28 +76,26 @@
 	<title>{m.cards_title()} · {m.site_name()}</title>
 </svelte:head>
 
-<div class="grid gap-6">
-	<div class="flex flex-wrap items-end justify-between gap-4">
-		<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
-			{m.cards_title()}
-		</h1>
-		<Input
-			type="search"
-			class="w-full sm:w-64"
-			placeholder={m.search()}
-			aria-label={m.search()}
-			value={q}
-			oninput={(e) =>
-				goto(queryHref(page.url, { q: e.currentTarget.value || null }), {
-					replace: true,
-					reset: false
-				})}
-		/>
-	</div>
-
-	<CardList {cards} {stats} {filters}>
-		{#snippet actions()}
-			<FilterMenu filter={sorts} />
-		{/snippet}
-	</CardList>
+<div class="flex flex-wrap items-end justify-between gap-4 row">
+	<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
+		{m.cards_title()}
+	</h1>
+	<Input
+		type="search"
+		class="w-full sm:w-64"
+		placeholder={m.search()}
+		aria-label={m.search()}
+		value={q}
+		oninput={(e) =>
+			goto(queryHref(page.url, { q: e.currentTarget.value || null }), {
+				replace: true,
+				reset: false
+			})}
+	/>
 </div>
+
+<CardList {cards} {stats} {filters}>
+	{#snippet actions()}
+		<FilterMenu filter={sorts} />
+	{/snippet}
+</CardList>

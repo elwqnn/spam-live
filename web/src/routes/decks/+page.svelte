@@ -42,14 +42,14 @@
 	<title>{m.decks_title()} · {m.site_name()}</title>
 </svelte:head>
 
-<div class="grid gap-6">
-	<div class="flex flex-wrap items-center justify-between gap-2">
-		<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
-			{m.decks_title()}
-		</h1>
-		<Button href={href('/decks/new')}>{m.new_deck()}</Button>
-	</div>
+<div class="flex flex-wrap items-center justify-between gap-2 row">
+	<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
+		{m.decks_title()}
+	</h1>
+	<Button href={href('/decks/new')}>{m.new_deck()}</Button>
+</div>
 
+<div class="flex flex-wrap items-center gap-2 px-4 py-3 sm:px-6">
 	{#if data.me}
 		<nav class="flex gap-1">
 			<a
@@ -64,35 +64,36 @@
 			>
 		</nav>
 	{/if}
-
-	<FilterBar {filters} {reset}>
-		{#snippet actions()}
-			<FilterMenu filter={sorts} {reset} />
-		{/snippet}
-	</FilterBar>
-
-	{#if data.decks.length}
-		<CardStack>
-			{#each data.decks as deck (deck.id)}
-				<DeckRow {deck} {catalog} />
-			{/each}
-		</CardStack>
-	{:else}
-		<p class="text-sm text-muted-foreground">{m.no_decks()}</p>
-	{/if}
-
-	{#if data.prev || data.next}
-		<nav class="flex justify-between gap-2" aria-label={m.pages()}>
-			{#if data.prev}
-				<a class={link(false)} href={queryHref(page.url, data.prev)}
-					>{data.sort === 'recent' ? m.first_page() : m.previous_page()}</a
-				>
-			{:else}
-				<span></span>
-			{/if}
-			{#if data.next}
-				<a class={link(false)} href={queryHref(page.url, data.next)}>{m.next_page()}</a>
-			{/if}
-		</nav>
-	{/if}
+	<div class="min-w-0 flex-1">
+		<FilterBar {filters} {reset}>
+			{#snippet actions()}
+				<FilterMenu filter={sorts} {reset} />
+			{/snippet}
+		</FilterBar>
+	</div>
 </div>
+
+{#if data.decks.length}
+	<CardStack>
+		{#each data.decks as deck (deck.id)}
+			<DeckRow {deck} {catalog} />
+		{/each}
+	</CardStack>
+{:else}
+	<p class="row text-sm text-muted-foreground">{m.no_decks()}</p>
+{/if}
+
+{#if data.prev || data.next}
+	<nav class="flex justify-between gap-2 px-4 py-3 sm:px-6" aria-label={m.pages()}>
+		{#if data.prev}
+			<a class={link(false)} href={queryHref(page.url, data.prev)}
+				>{data.sort === 'recent' ? m.first_page() : m.previous_page()}</a
+			>
+		{:else}
+			<span></span>
+		{/if}
+		{#if data.next}
+			<a class={link(false)} href={queryHref(page.url, data.next)}>{m.next_page()}</a>
+		{/if}
+	</nav>
+{/if}

@@ -18,8 +18,6 @@
 	--popover-foreground: #1c1b18;
 	--tile: #ffffff;
 	--row: #eceae2;
-	--board: #f7f5f0;
-	--dot: rgba(23, 23, 21, 0.1);
 	--primary: #1c1b18;
 	--primary-foreground: #f3f1ea;
 	--secondary: #e6e3da;
@@ -60,8 +58,6 @@
 	--popover-foreground: #f2f1ea;
 	--tile: #211f1c;
 	--row: #22221f;
-	--board: #1b1b19;
-	--dot: rgba(255, 255, 255, 0.075);
 	--primary: #f2ead3;
 	--primary-foreground: #171715;
 	--secondary: #2a2925;
@@ -116,7 +112,6 @@
 	--color-moss: var(--moss);
 	--color-tile: var(--tile);
 	--color-row: var(--row);
-	--color-board: var(--board);
 	--color-ring: var(--ring);
 	--color-input: var(--input);
 	--color-border: var(--border);
@@ -135,24 +130,14 @@
 	--color-card: var(--card);
 	--color-foreground: var(--foreground);
 	--color-background: var(--background);
-	--radius-xs: 3px;
+	--radius-*: initial;
+	--radius-xs: 2px;
 	--radius-sm: 4px;
-	--radius-md: 6px;
-	--radius-lg: 10px;
-	--radius-xl: 12px;
-	--radius-2xl: 14px;
-	--animate-grow: grow 1s var(--spring) 0.25s backwards;
-	--animate-rise: rise 0.5s var(--spring) calc(var(--i, 0) * 45ms) backwards;
+	--animate-grow: grow 1s ease-out 0.25s backwards;
 
 	@keyframes grow {
 		from {
 			transform: scaleX(0);
-		}
-	}
-	@keyframes rise {
-		from {
-			opacity: 0;
-			transform: translateY(12px);
 		}
 	}
 }
@@ -174,21 +159,46 @@
 	pointer-events: none;
 }
 
-@utility board {
-	background-color: var(--board);
-	background-image: radial-gradient(var(--dot) 1px, transparent 1.3px);
-	background-size: 16px 16px;
+@utility rows {
+	& > * + * {
+		position: relative;
+		border-top-width: 1px;
+	}
+	@variant lg {
+		& > * + *::before,
+		& > * + *::after {
+			--cross: color-mix(in oklab, var(--foreground) 30%, transparent);
+			content: '';
+			position: absolute;
+			top: -5px;
+			left: -5px;
+			z-index: 1;
+			width: 9px;
+			height: 9px;
+			background:
+				linear-gradient(var(--cross), var(--cross)) center / 1px 100% no-repeat,
+				linear-gradient(var(--cross), var(--cross)) center / 100% 1px no-repeat;
+			pointer-events: none;
+		}
+		& > * + *::after {
+			right: -5px;
+			left: auto;
+		}
+	}
 }
 
-@utility spring {
-	transition:
-		translate 0.35s var(--spring),
-		scale 0.35s var(--spring),
-		rotate 0.35s var(--spring),
-		color 0.15s,
-		background-color 0.15s,
-		border-color 0.15s,
-		box-shadow 0.15s;
+@utility row {
+	@apply px-4 py-8 sm:px-6 sm:py-10;
+}
+
+@utility cells {
+	margin-right: -1px;
+	margin-bottom: -1px;
+	clip-path: inset(0 1px 1px 0);
+	& > * {
+		border-right-width: 1px;
+		border-bottom-width: 1px;
+	}
 }
 
 @layer base {

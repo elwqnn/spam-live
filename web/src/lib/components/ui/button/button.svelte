@@ -4,19 +4,20 @@
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
 
 	export const buttonVariants = tv({
-		base: "group/button spring inline-flex shrink-0 items-center justify-center rounded-sm border border-transparent bg-clip-padding text-xs font-medium tracking-[.06em] whitespace-nowrap uppercase outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-96 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_[data-icon=inline-end]]:spring motion-safe:hover:[&_[data-icon=inline-end]]:translate-x-[3px] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		base: "group/button inline-flex shrink-0 items-center justify-center rounded-sm border bg-clip-padding text-xs font-medium tracking-[.06em] whitespace-nowrap uppercase transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 		variants: {
 			variant: {
 				default:
-					'relative isolate overflow-hidden bg-primary text-primary-foreground hover:bg-primary/90',
+					'relative isolate overflow-hidden border-primary bg-primary text-primary-foreground hover:bg-primary/90',
 				outline:
 					'border-foreground/25 hover:border-foreground/60 aria-expanded:border-foreground/60',
 				secondary:
-					'bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary),var(--foreground)_6%)] aria-expanded:bg-secondary',
-				ghost: 'hover:bg-muted hover:text-foreground aria-expanded:bg-muted',
+					'border-foreground/10 bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary),var(--foreground)_6%)] aria-expanded:bg-secondary',
+				ghost:
+					'border-transparent hover:border-border hover:bg-muted hover:text-foreground aria-expanded:bg-muted',
 				destructive:
-					'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/40 dark:bg-destructive/20 dark:hover:bg-destructive/30',
-				link: 'text-primary underline-offset-4 hover:underline'
+					'border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/40 dark:bg-destructive/20 dark:hover:bg-destructive/30',
+				link: 'border-transparent text-primary underline-offset-4 hover:underline'
 			},
 			size: {
 				default:

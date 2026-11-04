@@ -110,7 +110,7 @@
 
 <form
 	method="POST"
-	class="grid gap-6"
+	class="rows"
 	use:enhance={() => {
 		saving = true;
 		return async ({ update }) => {
@@ -119,134 +119,139 @@
 		};
 	}}
 >
-	<section class="grid gap-3" aria-labelledby="slots-title">
-		<h2 id="slots-title" class="font-heading text-2xl font-normal tracking-tight">
+	<section class="rows" aria-labelledby="slots-title">
+		<h2 id="slots-title" class="row font-heading text-2xl font-normal tracking-tight">
 			{m.your_cards()}
 			<span class="text-muted-foreground tabular-nums">{picked.length}/4</span>
 		</h2>
-		<ol class="grid gap-3 md:grid-cols-2">
-			{#each slots as slot, i (i)}
-				{@const card = slot && catalog.get(slot.id)}
-				{@const detail = slot && details[slot.id]}
-				<li
-					class={[
-						'grid content-start gap-3 rounded-xl border bg-card p-4',
-						!slot && 'border-dashed',
-						target === i && 'ring-2 ring-ring'
-					]}
-				>
-					{#if slot}
-						<input type="hidden" name="card" value={slot.id} />
-						<div class="flex flex-wrap items-center gap-2">
-							<span class="font-medium">
-								{card ? (card.name ?? slot.id) : `${m.unknown_card()} ${slot.id.slice(0, 8)}`}
-							</span>
-							{#if card}
-								<CardBadge type="element" value={card.element} />
-								<CardBadge type="rarity" value={card.rarity} />
-								<span class="text-xs text-muted-foreground tabular-nums">{m.hp()} {card.hp}</span>
-							{/if}
-						</div>
-						<div class="flex flex-wrap gap-2">
-							<Button
-								variant={target === i ? 'secondary' : 'outline'}
-								size="xs"
-								aria-pressed={target === i}
-								onclick={() => (target = target === i ? null : i)}>{m.replace()}</Button
-							>
-							<Button variant="ghost" size="xs" onclick={() => remove(i)}>{m.remove()}</Button>
-						</div>
-						{#if detail?.talents.length}
-							<fieldset class="grid gap-2">
-								<legend class="mb-1 text-xs text-muted-foreground">{m.talent()}</legend>
-								{#each detail.talents as t, ti (t.id)}
-									{@const tid = `talent-${i}-${ti}`}
-									<div
-										class="flex gap-2 rounded-sm border p-2 has-checked:border-ring has-checked:bg-row has-focus-visible:ring-1 has-focus-visible:ring-ring"
-									>
-										<input
-											type="radio"
-											id={tid}
-											name="talent-{slot.id}"
-											value={ti}
-											aria-describedby="{tid}-text"
-											bind:group={slot.talent}
-											class="mt-1.5 shrink-0"
-										/>
-										<div class="grid min-w-0 gap-0.5">
-											<label for={tid} class="text-sm font-medium">{entryName(t)}</label>
-											<div id="{tid}-text"><Description text={t.description} entry={t} /></div>
-										</div>
-									</div>
-								{/each}
-							</fieldset>
-						{:else}
-							<input type="hidden" name="talent-{slot.id}" value={slot.talent} />
-							<p class="text-sm text-muted-foreground">
-								{slot.id in details ? m.talent_n({ n: slot.talent + 1 }) : m.loading()}
-							</p>
-						{/if}
-					{:else}
-						<p class="text-sm text-muted-foreground">{m.empty_slot({ n: i + 1 })}</p>
-					{/if}
-				</li>
-			{/each}
-		</ol>
-	</section>
-
-	<section class="grid gap-3" aria-labelledby="picker-title">
-		<h2 id="picker-title" class="font-heading text-2xl font-normal tracking-tight">
-			{m.pick_cards()}
-		</h2>
-		<p class="text-sm text-muted-foreground" aria-live="polite">
-			{target !== null ? m.picker_replace({ n: target + 1 }) : full ? m.picker_full() : ''}
-		</p>
-		<div class="flex flex-wrap gap-2">
-			<Input
-				type="search"
-				class="w-full sm:w-64"
-				aria-label={m.search()}
-				placeholder={m.search()}
-				bind:value={q}
-			/>
-			<NativeSelect.Root aria-label={m.filter_element()} bind:value={element}>
-				<NativeSelect.Option value="">{m.all_elements()}</NativeSelect.Option>
-				{#each Object.entries(ELEMENTS) as [key, [label]] (key)}
-					<NativeSelect.Option value={key}>{label()}</NativeSelect.Option>
-				{/each}
-			</NativeSelect.Root>
-			<NativeSelect.Root aria-label={m.filter_rarity()} bind:value={rarity}>
-				<NativeSelect.Option value="">{m.all_rarities()}</NativeSelect.Option>
-				{#each Object.entries(RARITIES) as [key, label] (key)}
-					<NativeSelect.Option value={key}>{label()}</NativeSelect.Option>
-				{/each}
-			</NativeSelect.Root>
-		</div>
-		<ul class="max-h-96 divide-y overflow-y-auto rounded-xl border bg-card">
-			{#each filtered as card (card.id)}
-				{@const chosen = slots.some((s) => s?.id === card.id)}
-				{@const action = chosen ? m.picked() : target !== null ? m.replace() : m.add()}
-				<li class="flex flex-wrap items-center gap-2 px-3 py-2">
-					<span class="text-sm font-medium">{card.name ?? card.id}</span>
-					<CardBadge type="element" value={card.element} />
-					<CardBadge type="rarity" value={card.rarity} />
-					<span class="text-xs text-muted-foreground tabular-nums">{m.hp()} {card.hp}</span>
-					<Button
-						variant="outline"
-						size="xs"
-						class="ml-auto"
-						disabled={chosen || (full && target === null)}
-						aria-label="{action} {card.name ?? card.id}"
-						onclick={() => add(card.id)}>{action}</Button
+		<div>
+			<ol class="cells grid md:grid-cols-2">
+				{#each slots as slot, i (i)}
+					{@const card = slot && catalog.get(slot.id)}
+					{@const detail = slot && details[slot.id]}
+					<li
+						class={[
+							'grid content-start gap-3 px-4 py-4 sm:px-6',
+							target === i && 'ring-2 ring-ring ring-inset'
+						]}
 					>
-				</li>
-			{:else}
-				<li class="px-3 py-2 text-sm text-muted-foreground">{m.no_cards()}</li>
-			{/each}
-		</ul>
+						{#if slot}
+							<input type="hidden" name="card" value={slot.id} />
+							<div class="flex flex-wrap items-center gap-2">
+								<span class="font-medium">
+									{card ? (card.name ?? slot.id) : `${m.unknown_card()} ${slot.id.slice(0, 8)}`}
+								</span>
+								{#if card}
+									<CardBadge type="element" value={card.element} />
+									<CardBadge type="rarity" value={card.rarity} />
+									<span class="text-xs text-muted-foreground tabular-nums">{m.hp()} {card.hp}</span>
+								{/if}
+							</div>
+							<div class="flex flex-wrap gap-2">
+								<Button
+									variant={target === i ? 'secondary' : 'outline'}
+									size="xs"
+									aria-pressed={target === i}
+									onclick={() => (target = target === i ? null : i)}>{m.replace()}</Button
+								>
+								<Button variant="ghost" size="xs" onclick={() => remove(i)}>{m.remove()}</Button>
+							</div>
+							{#if detail?.talents.length}
+								<fieldset class="grid gap-2">
+									<legend class="mb-1 text-xs text-muted-foreground">{m.talent()}</legend>
+									{#each detail.talents as t, ti (t.id)}
+										{@const tid = `talent-${i}-${ti}`}
+										<div
+											class="flex gap-2 border p-2 has-checked:border-ring has-checked:bg-row has-focus-visible:ring-1 has-focus-visible:ring-ring"
+										>
+											<input
+												type="radio"
+												id={tid}
+												name="talent-{slot.id}"
+												value={ti}
+												aria-describedby="{tid}-text"
+												bind:group={slot.talent}
+												class="mt-1.5 shrink-0"
+											/>
+											<div class="grid min-w-0 gap-0.5">
+												<label for={tid} class="text-sm font-medium">{entryName(t)}</label>
+												<div id="{tid}-text"><Description text={t.description} entry={t} /></div>
+											</div>
+										</div>
+									{/each}
+								</fieldset>
+							{:else}
+								<input type="hidden" name="talent-{slot.id}" value={slot.talent} />
+								<p class="text-sm text-muted-foreground">
+									{slot.id in details ? m.talent_n({ n: slot.talent + 1 }) : m.loading()}
+								</p>
+							{/if}
+						{:else}
+							<p class="text-sm text-muted-foreground">{m.empty_slot({ n: i + 1 })}</p>
+						{/if}
+					</li>
+				{/each}
+			</ol>
+		</div>
 	</section>
 
-	<section class="grid gap-4" aria-labelledby="details-title">
+	<section class="rows" aria-labelledby="picker-title">
+		<div class="grid gap-3 row">
+			<h2 id="picker-title" class="font-heading text-2xl font-normal tracking-tight">
+				{m.pick_cards()}
+			</h2>
+			<p class="text-sm text-muted-foreground" aria-live="polite">
+				{target !== null ? m.picker_replace({ n: target + 1 }) : full ? m.picker_full() : ''}
+			</p>
+			<div class="flex flex-wrap gap-2">
+				<Input
+					type="search"
+					class="w-full sm:w-64"
+					aria-label={m.search()}
+					placeholder={m.search()}
+					bind:value={q}
+				/>
+				<NativeSelect.Root aria-label={m.filter_element()} bind:value={element}>
+					<NativeSelect.Option value="">{m.all_elements()}</NativeSelect.Option>
+					{#each Object.entries(ELEMENTS) as [key, [label]] (key)}
+						<NativeSelect.Option value={key}>{label()}</NativeSelect.Option>
+					{/each}
+				</NativeSelect.Root>
+				<NativeSelect.Root aria-label={m.filter_rarity()} bind:value={rarity}>
+					<NativeSelect.Option value="">{m.all_rarities()}</NativeSelect.Option>
+					{#each Object.entries(RARITIES) as [key, label] (key)}
+						<NativeSelect.Option value={key}>{label()}</NativeSelect.Option>
+					{/each}
+				</NativeSelect.Root>
+			</div>
+		</div>
+		<div>
+			<ul class="max-h-96 divide-y overflow-y-auto">
+				{#each filtered as card (card.id)}
+					{@const chosen = slots.some((s) => s?.id === card.id)}
+					{@const action = chosen ? m.picked() : target !== null ? m.replace() : m.add()}
+					<li class="flex flex-wrap items-center gap-2 px-4 py-2 sm:px-6">
+						<span class="text-sm font-medium">{card.name ?? card.id}</span>
+						<CardBadge type="element" value={card.element} />
+						<CardBadge type="rarity" value={card.rarity} />
+						<span class="text-xs text-muted-foreground tabular-nums">{m.hp()} {card.hp}</span>
+						<Button
+							variant="outline"
+							size="xs"
+							class="ml-auto"
+							disabled={chosen || (full && target === null)}
+							aria-label="{action} {card.name ?? card.id}"
+							onclick={() => add(card.id)}>{action}</Button
+						>
+					</li>
+				{:else}
+					<li class="px-4 py-2 text-sm text-muted-foreground sm:px-6">{m.no_cards()}</li>
+				{/each}
+			</ul>
+		</div>
+	</section>
+
+	<section class="grid gap-4 row" aria-labelledby="details-title">
 		<h2 id="details-title" class="font-heading text-2xl font-normal tracking-tight">
 			{m.deck_details()}
 		</h2>
@@ -301,7 +306,7 @@
 				role="tabpanel"
 				aria-labelledby="tab-preview"
 				hidden={tab !== 'preview'}
-				class="min-h-72 rounded-xl border bg-card p-4"
+				class="min-h-72 border bg-card p-4"
 			>
 				{#if preview?.error}
 					<p role="alert" class="text-sm text-destructive">{preview.error}</p>
@@ -314,7 +319,7 @@
 		</div>
 	</section>
 
-	<div class="grid gap-2">
+	<div class="grid gap-2 row">
 		{#if error}<p role="alert" class="text-sm text-destructive">{error}</p>{/if}
 		{#if problems.length}
 			<ul class="text-sm text-muted-foreground">

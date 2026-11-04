@@ -25,8 +25,6 @@
 		['/stats', m.nav_stats],
 		['/import', m.nav_import]
 	] as const;
-	const hero = $derived(page.route.id === '/' && !page.error);
-
 	function toggleTheme() {
 		localStorage.theme = document.documentElement.classList.toggle('dark') ? 'dark' : 'light';
 	}
@@ -37,23 +35,16 @@
 	<title>{m.site_name()}</title>
 </svelte:head>
 
-<div class="flex min-h-dvh flex-col">
-	<header class={hero ? 'absolute inset-x-0 top-0 z-10 text-[#fbf8f0]' : 'border-b bg-background'}>
-		<div
-			class="mx-auto flex max-w-300 flex-wrap items-center gap-x-8 gap-y-3 px-4 py-4 sm:px-6 sm:py-5"
-		>
+<div class="overflow-x-clip lg:px-8">
+	<div class="rows mx-auto flex min-h-dvh max-w-300 flex-col lg:border-x">
+		<header class="flex flex-wrap items-center gap-x-8 gap-y-3 px-4 py-4 sm:px-6 sm:py-5">
 			<a href={href('/')} class="text-[17px] font-semibold tracking-wide"
-				>SPAM<span class={hero ? 'font-normal' : 'text-muted-foreground'}>.live</span></a
+				>SPAM<span class="text-muted-foreground">.live</span></a
 			>
 			<nav class="flex flex-wrap gap-x-6 gap-y-2">
 				{#each nav as [path, label] (path)}
 					<a
-						class={[
-							'eyebrow text-xs transition-colors',
-							hero
-								? 'underline-offset-4 hover:underline'
-								: 'text-muted-foreground hover:text-foreground'
-						]}
+						class="eyebrow text-xs text-muted-foreground transition-colors hover:text-foreground"
 						href={href(path)}>{label()}</a
 					>
 				{/each}
@@ -73,46 +64,27 @@
 						{/if}
 						<span class="max-w-32 truncate">{data.me.displayName}</span>
 					</a>
-					<Button
-						variant="ghost"
-						size="sm"
-						onclick={logout}
-						class={hero ? 'hover:bg-[#fbf8f0]/10 hover:text-[#fbf8f0]' : undefined}
-						>{m.logout()}</Button
-					>
+					<Button variant="ghost" size="sm" onclick={logout}>{m.logout()}</Button>
 				{:else}
-					<Button
-						variant="outline"
-						size="sm"
-						href={login}
-						rel="external"
-						class={hero
-							? 'border-[#fbf8f0]/35 bg-[#171715]/25 hover:border-[#fbf8f0]/70'
-							: undefined}>{m.login_steam()}</Button
-					>
+					<Button variant="outline" size="sm" href={login} rel="external">{m.login_steam()}</Button>
 				{/if}
-				<Button
-					size="sm"
-					href="https://github.com/elwqnn/spam-live/releases/latest"
-					rel="external"
-					class="bg-[#f2ead3] text-[#171715] hover:bg-[#fbf4df]"
+				<Button size="sm" href="https://github.com/elwqnn/spam-live/releases/latest" rel="external"
 					><HugeiconsIcon icon={Download04Icon} />{m.nav_download()}</Button
 				>
 			</div>
-		</div>
-	</header>
+		</header>
 
-	<main class={hero ? 'flex-1' : 'mx-auto w-full max-w-300 flex-1 px-4 py-8 sm:px-6 sm:py-10'}>
-		{@render children()}
-	</main>
+		<main class="rows flex flex-1 flex-col">
+			{@render children()}
+		</main>
 
-	<footer class="border-t">
-		<div class="mx-auto flex max-w-300 flex-wrap items-center gap-x-5 gap-y-3 px-4 py-6 sm:px-6">
+		<footer class="flex flex-wrap items-center gap-x-5 gap-y-3 px-4 py-6 sm:px-6">
 			<p class="basis-full text-[13px] text-muted-foreground sm:basis-auto">
 				{m.footer_disclaimer()}
 			</p>
-			<a class="eyebrow text-muted-foreground hover:text-foreground" href={href('/privacy')}
-				>{m.footer_privacy()}</a
+			<a
+				class="eyebrow text-muted-foreground transition-colors hover:text-foreground"
+				href={href('/privacy')}>{m.footer_privacy()}</a
 			>
 			<div class="flex items-center gap-3 sm:ml-auto">
 				<span class="sr-only">{m.language()}</span>
@@ -122,7 +94,7 @@
 						hreflang={locale}
 						rel="external"
 						aria-current={locale === getLocale() ? 'true' : undefined}
-						class="eyebrow text-muted-foreground hover:text-foreground aria-current:text-foreground"
+						class="eyebrow text-muted-foreground transition-colors hover:text-foreground aria-current:text-foreground"
 						>{locale}</a
 					>
 				{/each}
@@ -132,7 +104,7 @@
 					<span class="sr-only">{m.theme_toggle()}</span>
 				</Button>
 			</div>
-		</div>
-	</footer>
+		</footer>
+	</div>
 </div>
 <div class="grain fixed inset-0 z-50 opacity-(--grain) mix-blend-overlay" aria-hidden="true"></div>

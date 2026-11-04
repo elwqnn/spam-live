@@ -38,90 +38,90 @@
 	{#if error(key)}<p role="alert" class="text-sm text-destructive">{error(key)}</p>{/if}
 {/snippet}
 
-<div class="grid gap-8">
-	<div class="grid gap-3">
-		<a class="eyebrow text-muted-foreground hover:text-foreground" href={href('/decks')}
-			><span aria-hidden="true">←</span> {m.all_decks()}</a
-		>
-		<div class="flex flex-wrap items-center gap-2">
-			<h1 class="font-heading text-3xl font-normal tracking-tight wrap-anywhere sm:text-4xl">
-				{deck.name}
-			</h1>
-			{#if !open}<Badge variant="secondary">{m.draft()}</Badge>{/if}
-		</div>
-		<div
-			class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground tabular-nums"
-		>
-			<span class="flex min-w-0 text-sm text-foreground">
-				<Author name={deck.authorName} avatar={deck.authorAvatar} />
-			</span>
-			<span>{m.version_label({ version: deck.appVersion })}</span>
-			<span>{m.created_on()} <Time iso={deck.createdAt} /></span>
-			{#if deck.publishedAt && open}
-				<span>{m.published_on()} <Time iso={deck.publishedAt} /></span>
-			{/if}
-			{#if deck.updatedAt !== deck.createdAt}
-				<span>{m.updated_on()} <Time iso={deck.updatedAt} /></span>
-			{/if}
-		</div>
-
-		<div class="flex flex-wrap items-center gap-2">
-			{#if !me && open}
-				<Button variant="outline" size="sm" href={loginHref(page.url)} rel="external">
-					{m.vote()} <span class="tabular-nums">{deck.votes}</span>
-				</Button>
-			{:else if me && open && !author}
-				<form method="POST" action="?/vote" use:enhance={closeAfter}>
-					<input type="hidden" name="vote" value={deck.myVote ? '0' : '1'} />
-					<Button
-						type="submit"
-						size="sm"
-						variant={deck.myVote ? 'secondary' : 'outline'}
-						aria-pressed={!!deck.myVote}
-					>
-						{m.vote()} <span class="tabular-nums">{deck.votes}</span>
-					</Button>
-				</form>
-			{:else}
-				<span class="text-sm tabular-nums">{m.votes()}: {deck.votes}</span>
-			{/if}
-			{#if me && open && !author}<Report type="deck" id={deck.id} />{/if}
-			{#if author}
-				<Button variant="outline" size="sm" href={href(`/decks/${deck.id}/edit`)}>{m.edit()}</Button
-				>
-				<form method="POST" action={open ? '?/unpublish' : '?/publish'} use:enhance={closeAfter}>
-					<Button type="submit" size="sm" variant={open ? 'outline' : 'default'}>
-						{open ? m.unpublish() : m.publish()}
-					</Button>
-				</form>
-				<Dialog
-					id="delete-deck"
-					label={m.delete()}
-					title={m.delete_deck_title()}
-					variant="destructive"
-				>
-					<p class="mb-4 text-sm">{m.delete_deck_text()}</p>
-					<form
-						method="POST"
-						action="?/delete"
-						use:enhance={closeAfter}
-						class="flex justify-end gap-2"
-					>
-						<Button type="submit" variant="ghost" formmethod="dialog">{m.cancel()}</Button>
-						<Button type="submit" variant="destructive">{m.delete()}</Button>
-					</form>
-				</Dialog>
-			{/if}
-		</div>
-		{@render alert('vote')}
-		{@render alert('status')}
-		{@render alert('delete')}
+<div class="grid gap-3 row">
+	<a
+		class="eyebrow text-muted-foreground transition-colors hover:text-foreground"
+		href={href('/decks')}><span aria-hidden="true">←</span> {m.all_decks()}</a
+	>
+	<div class="flex flex-wrap items-center gap-2">
+		<h1 class="font-heading text-3xl font-normal tracking-tight wrap-anywhere sm:text-4xl">
+			{deck.name}
+		</h1>
+		{#if !open}<Badge variant="secondary">{m.draft()}</Badge>{/if}
+	</div>
+	<div
+		class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground tabular-nums"
+	>
+		<span class="flex min-w-0 text-sm text-foreground">
+			<Author name={deck.authorName} avatar={deck.authorAvatar} />
+		</span>
+		<span>{m.version_label({ version: deck.appVersion })}</span>
+		<span>{m.created_on()} <Time iso={deck.createdAt} /></span>
+		{#if deck.publishedAt && open}
+			<span>{m.published_on()} <Time iso={deck.publishedAt} /></span>
+		{/if}
+		{#if deck.updatedAt !== deck.createdAt}
+			<span>{m.updated_on()} <Time iso={deck.updatedAt} /></span>
+		{/if}
 	</div>
 
-	<DeckSummary {deck} cards={data.cards} />
+	<div class="flex flex-wrap items-center gap-2">
+		{#if !me && open}
+			<Button variant="outline" size="sm" href={loginHref(page.url)} rel="external">
+				{m.vote()} <span class="tabular-nums">{deck.votes}</span>
+			</Button>
+		{:else if me && open && !author}
+			<form method="POST" action="?/vote" use:enhance={closeAfter}>
+				<input type="hidden" name="vote" value={deck.myVote ? '0' : '1'} />
+				<Button
+					type="submit"
+					size="sm"
+					variant={deck.myVote ? 'secondary' : 'outline'}
+					aria-pressed={!!deck.myVote}
+				>
+					{m.vote()} <span class="tabular-nums">{deck.votes}</span>
+				</Button>
+			</form>
+		{:else}
+			<span class="text-sm tabular-nums">{m.votes()}: {deck.votes}</span>
+		{/if}
+		{#if me && open && !author}<Report type="deck" id={deck.id} />{/if}
+		{#if author}
+			<Button variant="outline" size="sm" href={href(`/decks/${deck.id}/edit`)}>{m.edit()}</Button>
+			<form method="POST" action={open ? '?/unpublish' : '?/publish'} use:enhance={closeAfter}>
+				<Button type="submit" size="sm" variant={open ? 'outline' : 'default'}>
+					{open ? m.unpublish() : m.publish()}
+				</Button>
+			</form>
+			<Dialog
+				id="delete-deck"
+				label={m.delete()}
+				title={m.delete_deck_title()}
+				variant="destructive"
+			>
+				<p class="mb-4 text-sm">{m.delete_deck_text()}</p>
+				<form
+					method="POST"
+					action="?/delete"
+					use:enhance={closeAfter}
+					class="flex justify-end gap-2"
+				>
+					<Button type="submit" variant="ghost" formmethod="dialog">{m.cancel()}</Button>
+					<Button type="submit" variant="destructive">{m.delete()}</Button>
+				</form>
+			</Dialog>
+		{/if}
+	</div>
+	{@render alert('vote')}
+	{@render alert('status')}
+	{@render alert('delete')}
+</div>
 
-	<section class="grid gap-3">
-		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.cards_title()}</h2>
+<DeckSummary {deck} cards={data.cards} />
+
+<section class="rows">
+	<h2 class="row font-heading text-2xl font-normal tracking-tight">{m.cards_title()}</h2>
+	<div>
 		<DeckCards tiles cards={deck.cards} {catalog}>
 			{#snippet below(i)}
 				{@const talent = data.cards[i]?.talents[deck.talents[i]]}
@@ -136,23 +136,25 @@
 				</div>
 			{/snippet}
 		</DeckCards>
+	</div>
+</section>
+
+{#if deck.guideHtml.trim()}
+	<section class="grid gap-3 row">
+		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.guide()}</h2>
+		<Guide html={deck.guideHtml} />
 	</section>
+{/if}
 
-	{#if deck.guideHtml.trim()}
-		<section class="grid gap-3">
-			<h2 class="font-heading text-2xl font-normal tracking-tight">{m.guide()}</h2>
-			<Guide html={deck.guideHtml} />
-		</section>
-	{/if}
-
-	<section class="grid gap-3">
-		<div class="grid gap-1">
-			<h2 class="font-heading text-2xl font-normal tracking-tight">{m.live_stats()}</h2>
-			<p class="text-sm text-muted-foreground">{m.live_stats_text()}</p>
-		</div>
-		<div class="grid gap-3 sm:grid-cols-2">
+<section class="rows">
+	<div class="grid gap-1 row">
+		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.live_stats()}</h2>
+		<p class="text-sm text-muted-foreground">{m.live_stats_text()}</p>
+	</div>
+	<div>
+		<div class="cells grid sm:grid-cols-2">
 			{#each stats as [label, s] (label)}
-				<div class="grid gap-3 rounded-xl border bg-card p-4">
+				<div class="grid gap-3 px-4 py-6 sm:px-6">
 					<h3 class="eyebrow text-muted-foreground">{label}</h3>
 					<dl class="grid grid-cols-3 gap-2">
 						<div class="grid gap-0.5">
@@ -171,78 +173,78 @@
 				</div>
 			{/each}
 		</div>
-	</section>
+	</div>
+</section>
 
-	{#if open}
-		<section class="grid gap-3">
-			<h2 class="font-heading text-2xl font-normal tracking-tight">
-				{m.comments()}
-				<span class="text-muted-foreground tabular-nums">{data.comments.length}</span>
-			</h2>
-			{#if data.comments.length}
-				<ul class="grid gap-3">
-					{#each data.comments as c (c.id)}
-						<li class="grid gap-2 rounded-xl border bg-card p-4">
-							<div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-								<Author name={c.authorName} avatar={c.authorAvatar} />
-								<Time iso={c.createdAt} class="text-xs text-muted-foreground" />
-								{#if c.updatedAt !== c.createdAt}
-									<span class="text-xs text-muted-foreground">{m.edited()}</span>
-								{/if}
-							</div>
-							<p class="text-sm leading-6 wrap-anywhere whitespace-pre-line">{c.body}</p>
-							{#if me?.id === c.authorId}
-								<div class="flex flex-wrap items-start gap-2">
-									<details class="open:basis-full">
-										<summary class={buttonVariants({ variant: 'ghost', size: 'sm' })}
-											>{m.edit()}</summary
-										>
-										<form
-											method="POST"
-											action="?/editComment"
-											use:enhance={closeAfter}
-											class="mt-2 grid gap-2"
-										>
-											<input type="hidden" name="id" value={c.id} />
-											<label class="grid gap-1.5 text-sm">
-												<span class="font-medium">{m.your_comment()}</span>
-												<Textarea name="body" required value={c.body} />
-											</label>
-											<Button type="submit" size="sm" class="justify-self-start">{m.save()}</Button>
-										</form>
-									</details>
-									<form method="POST" action="?/deleteComment" use:enhance={closeAfter}>
-										<input type="hidden" name="id" value={c.id} />
-										<Button type="submit" variant="ghost" size="sm">{m.delete()}</Button>
-									</form>
-								</div>
-							{:else if me}
-								<div class="flex flex-wrap items-center gap-2">
-									<Report type="comment" id={c.id} />
-								</div>
+{#if open}
+	<section class="rows">
+		<h2 class="row font-heading text-2xl font-normal tracking-tight">
+			{m.comments()}
+			<span class="text-muted-foreground tabular-nums">{data.comments.length}</span>
+		</h2>
+		{#if data.comments.length}
+			<ul class="divide-y">
+				{#each data.comments as c (c.id)}
+					<li class="grid gap-2 px-4 py-4 sm:px-6">
+						<div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+							<Author name={c.authorName} avatar={c.authorAvatar} />
+							<Time iso={c.createdAt} class="text-xs text-muted-foreground" />
+							{#if c.updatedAt !== c.createdAt}
+								<span class="text-xs text-muted-foreground">{m.edited()}</span>
 							{/if}
-							{@render alert(`comment-${c.id}`)}
-						</li>
-					{/each}
-				</ul>
-			{:else}
-				<p class="text-sm text-muted-foreground">{m.no_comments()}</p>
-			{/if}
+						</div>
+						<p class="text-sm leading-6 wrap-anywhere whitespace-pre-line">{c.body}</p>
+						{#if me?.id === c.authorId}
+							<div class="flex flex-wrap items-start gap-2">
+								<details class="open:basis-full">
+									<summary class={buttonVariants({ variant: 'ghost', size: 'sm' })}
+										>{m.edit()}</summary
+									>
+									<form
+										method="POST"
+										action="?/editComment"
+										use:enhance={closeAfter}
+										class="mt-2 grid gap-2"
+									>
+										<input type="hidden" name="id" value={c.id} />
+										<label class="grid gap-1.5 text-sm">
+											<span class="font-medium">{m.your_comment()}</span>
+											<Textarea name="body" required value={c.body} />
+										</label>
+										<Button type="submit" size="sm" class="justify-self-start">{m.save()}</Button>
+									</form>
+								</details>
+								<form method="POST" action="?/deleteComment" use:enhance={closeAfter}>
+									<input type="hidden" name="id" value={c.id} />
+									<Button type="submit" variant="ghost" size="sm">{m.delete()}</Button>
+								</form>
+							</div>
+						{:else if me}
+							<div class="flex flex-wrap items-center gap-2">
+								<Report type="comment" id={c.id} />
+							</div>
+						{/if}
+						{@render alert(`comment-${c.id}`)}
+					</li>
+				{/each}
+			</ul>
+		{:else}
+			<p class="row text-sm text-muted-foreground">{m.no_comments()}</p>
+		{/if}
 
-			{#if me}
-				<form method="POST" action="?/comment" use:enhance={closeAfter} class="grid gap-2">
-					<label for="comment-body" class="text-sm font-medium">{m.add_comment()}</label>
-					<Textarea id="comment-body" name="body" required rows={3} />
-					{@render alert('comment')}
-					<Button type="submit" class="justify-self-start">{m.post_comment()}</Button>
-				</form>
-			{:else}
-				<p class="text-sm">
-					<a class="underline underline-offset-4" href={loginHref(page.url)} rel="external"
-						>{m.login_to_comment()}</a
-					>
-				</p>
-			{/if}
-		</section>
-	{/if}
-</div>
+		{#if me}
+			<form method="POST" action="?/comment" use:enhance={closeAfter} class="grid gap-2 row">
+				<label for="comment-body" class="text-sm font-medium">{m.add_comment()}</label>
+				<Textarea id="comment-body" name="body" required rows={3} />
+				{@render alert('comment')}
+				<Button type="submit" class="justify-self-start">{m.post_comment()}</Button>
+			</form>
+		{:else}
+			<p class="row text-sm">
+				<a class="underline underline-offset-4" href={loginHref(page.url)} rel="external"
+					>{m.login_to_comment()}</a
+				>
+			</p>
+		{/if}
+	</section>
+{/if}

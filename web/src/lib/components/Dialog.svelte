@@ -21,7 +21,7 @@
 <dialog
 	{id}
 	aria-labelledby="{id}-title"
-	class="m-auto w-[calc(100%-2rem)] max-w-md rounded-xl border bg-popover p-6 text-popover-foreground backdrop:bg-black/60"
+	class="m-auto w-[calc(100%-2rem)] max-w-md border bg-popover p-6 text-popover-foreground backdrop:bg-black/60"
 >
 	<h2 id="{id}-title" class="mb-3 font-heading text-2xl font-normal tracking-tight">{title}</h2>
 	{@render children()}

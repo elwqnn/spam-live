@@ -100,7 +100,7 @@
 </svelte:head>
 
 <div class="flex h-dvh flex-col overflow-hidden">
-	<header class="relative h-[132px] flex-none overflow-hidden text-on-shader">
+	<header class="relative h-[132px] flex-none overflow-hidden border-b text-on-shader">
 		<ShaderBackground />
 		<div class="grain absolute inset-0 opacity-[.08]" aria-hidden="true"></div>
 		<div class="absolute inset-0 band-scrim" aria-hidden="true"></div>
@@ -134,8 +134,8 @@
 	</header>
 
 	{#if status}
-		<main class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-5 pt-1 pb-4">
-			{#if error}<p role="alert" class="wrap-anywhere text-destructive">{error}</p>{/if}
+		<main class="flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
+			{#if error}<p role="alert" class="px-5 py-2.5 wrap-anywhere text-destructive">{error}</p>{/if}
 
 			{#if status.update}
 				<div class="panel" role="status">
@@ -199,7 +199,7 @@
 				</div>
 				{#if status.folder}
 					<code
-						class="rounded-md border bg-background px-2.5 py-[7px] font-mono text-xs break-all text-foreground/85"
+						class="border bg-background px-2.5 py-[7px] font-mono text-xs break-all text-foreground/85"
 						>{status.folder}</code
 					>
 					{#if !status.found}<p class="text-destructive">{m.folder_missing()}</p>{/if}
@@ -270,29 +270,28 @@
 				{/if}
 			</section>
 
-			<div class="flex items-center gap-3 px-0.5 py-1">
+			<div class="flex items-center gap-3 px-5 py-3">
 				<span id="autostart" class="flex-1 text-foreground/85">{m.autostart()}</span>
 				<button
 					type="button"
 					role="switch"
 					aria-checked={status.autostart}
 					aria-labelledby="autostart"
-					class="group el-nature relative h-[22px] w-[38px] flex-none cursor-pointer rounded-full bg-white/14 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 aria-checked:bg-(--el)"
+					class="group el-nature relative h-[22px] w-[38px] flex-none cursor-pointer rounded-sm bg-white/14 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 aria-checked:bg-(--el)"
 					onclick={() => run('set_autostart', { on: !status?.autostart })}
 				>
 					<span
-						class="absolute top-[3px] left-[3px] size-4 rounded-full bg-foreground transition-[translate] duration-300 ease-spring group-aria-checked:translate-x-4"
+						class="absolute top-[3px] left-[3px] size-4 rounded-full bg-foreground transition-[translate] duration-150 ease-out group-aria-checked:translate-x-4"
 					></span>
 				</button>
 			</div>
 
-			<p class="text-xs text-muted-foreground">{m.disclaimer()}</p>
+			<p class="px-5 py-3 text-xs text-muted-foreground">{m.disclaimer()}</p>
 		</main>
 
 		<footer class="flex flex-none items-center gap-3 border-t px-5 py-3.5">
 			<Button onclick={() => open('site')}
 				>{m.open_site()}<svg
-					class="spring motion-safe:group-hover/button:translate-x-[3px]"
 					viewBox="0 0 24 24"
 					fill="none"
 					stroke="currentColor"

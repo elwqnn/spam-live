@@ -19,7 +19,7 @@
 
 <ul
 	class={cn(
-		'grid gap-3 sm:gap-4',
+		'cells grid',
 		columns ? COLUMNS[columns] : 'grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]',
 		className
 	)}

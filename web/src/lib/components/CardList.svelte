@@ -36,7 +36,7 @@
 	] as const;
 </script>
 
-<div class="grid gap-4">
+<div class="px-4 py-3 sm:px-6">
 	<FilterBar {filters}>
 		{#snippet actions()}
 			{@render extra?.()}
@@ -54,20 +54,22 @@
 			{/if}
 		{/snippet}
 	</FilterBar>
+</div>
 
-	{#if !cards.length}
-		<p class="text-sm text-muted-foreground">{m.no_cards()}</p>
-	{:else if mode === 'rows'}
-		<CardStack>
+{#if !cards.length}
+	<p class="row text-sm text-muted-foreground">{m.no_cards()}</p>
+{:else if mode === 'rows'}
+	<CardStack>
+		{#each cards as card (card.id)}
+			<CardRow {card} stats={stats?.get(card.id)} />
+		{/each}
+	</CardStack>
+{:else}
+	<div>
+		<CardGrid {columns}>
 			{#each cards as card (card.id)}
-				<CardRow {card} stats={stats?.get(card.id)} />
-			{/each}
-		</CardStack>
-	{:else}
-		<CardGrid {columns} class="rounded-2xl border board p-3 sm:p-5">
-			{#each cards as card, i (card.id)}
-				<li><CardTile {card} index={i} stats={stats?.get(card.id)} /></li>
+				<li><CardTile {card} stats={stats?.get(card.id)} /></li>
 			{/each}
 		</CardGrid>
-	{/if}
-</div>
+	</div>
+{/if}

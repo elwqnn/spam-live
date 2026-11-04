@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { entryName, href, percent, type CardDetail, type Schemas } from '#lib';
-	import * as Card from '#lib/components/ui/card/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import CardArt from './CardArt.svelte';
 	import CardBadge from './CardBadge.svelte';
@@ -28,7 +27,7 @@
 </script>
 
 {#snippet stat(label: string, value: string | number)}
-	<div class="grid gap-1 rounded-xl border bg-card p-4">
+	<div class="grid gap-1 p-4">
 		<dt class="eyebrow text-muted-foreground">{label}</dt>
 		<dd class="text-2xl tabular-nums">{value}</dd>
 	</div>
@@ -38,15 +37,20 @@
 	<h2 class="font-heading text-2xl font-normal tracking-tight">{title}</h2>
 {/snippet}
 
-<article class="grid gap-10">
-	<div class="grid gap-6 sm:grid-cols-[18rem_minmax(0,1fr)] sm:items-start md:gap-10">
+{#snippet name(title: string)}
+	<h3 class="text-[15px] leading-snug font-semibold">{title}</h3>
+{/snippet}
+
+<article class="rows">
+	<div class="grid gap-6 row sm:grid-cols-[18rem_minmax(0,1fr)] sm:items-start md:gap-10">
 		<div class="w-full max-w-72 sm:sticky sm:top-8" aria-hidden="true">
 			<CardArt {card} interactive />
 		</div>
 		<div class="grid min-w-0 content-start gap-8">
 			<div class="grid gap-3">
-				<a class="eyebrow text-muted-foreground hover:text-foreground" href={href('/cards')}
-					><span aria-hidden="true">←</span> {m.all_cards()}</a
+				<a
+					class="eyebrow text-muted-foreground transition-colors hover:text-foreground"
+					href={href('/cards')}><span aria-hidden="true">←</span> {m.all_cards()}</a
 				>
 				<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
 					{card.name ?? card.id}
@@ -73,39 +77,43 @@
 			{#if card.tox.length}
 				<section class="grid gap-3">
 					{@render heading(m.tox())}
-					{#each card.tox as tox (tox.id)}
-						<Card.Root size="sm">
-							<Card.Header><Card.Title>{entryName(tox)}</Card.Title></Card.Header>
-							{#if tox.description}
-								<Card.Content><Description text={tox.description} entry={tox} /></Card.Content>
-							{/if}
-						</Card.Root>
-					{/each}
+					<ul class="divide-y border bg-card text-sm">
+						{#each card.tox as tox (tox.id)}
+							<li class="grid gap-3 p-4">
+								{@render name(entryName(tox))}
+								{#if tox.description}<Description text={tox.description} entry={tox} />{/if}
+							</li>
+						{/each}
+					</ul>
 				</section>
 			{/if}
 
 			<section class="grid gap-3">
 				{@render heading(m.abilities())}
-				{#each card.abilities as { ability, cooldown } (ability.id)}
-					<Card.Root size="sm">
-						<Card.Header>
-							<Card.Title>{entryName(ability)}</Card.Title>
-							<Card.Action><CardBadge type="cooldown" value={cooldown} /></Card.Action>
-						</Card.Header>
-						<Card.Content><Description text={ability.description} entry={ability} /></Card.Content>
-					</Card.Root>
-				{/each}
+				<ul class="divide-y border bg-card text-sm">
+					{#each card.abilities as { ability, cooldown } (ability.id)}
+						<li class="grid gap-3 p-4">
+							<div class="flex items-start justify-between gap-2">
+								{@render name(entryName(ability))}
+								<CardBadge type="cooldown" value={cooldown} />
+							</div>
+							<Description text={ability.description} entry={ability} />
+						</li>
+					{/each}
+				</ul>
 			</section>
 
 			<section class="grid gap-3">
 				{@render heading(m.talents())}
-				<div class="grid gap-3 lg:grid-cols-3">
-					{#each card.talents as talent (talent.id)}
-						<Card.Root size="sm">
-							<Card.Header><Card.Title>{entryName(talent)}</Card.Title></Card.Header>
-							<Card.Content><Description text={talent.description} entry={talent} /></Card.Content>
-						</Card.Root>
-					{/each}
+				<div class="border bg-card text-sm">
+					<ul class="cells grid lg:grid-cols-3">
+						{#each card.talents as talent (talent.id)}
+							<li class="grid content-start gap-3 p-4">
+								{@render name(entryName(talent))}
+								<Description text={talent.description} entry={talent} />
+							</li>
+						{/each}
+					</ul>
 				</div>
 			</section>
 
@@ -114,18 +122,20 @@
 					{@render heading(m.stats())}
 					<VersionSelect {versions} />
 				</div>
-				<dl class="grid grid-cols-3 gap-3">
-					{@render stat(m.games(), stats?.games ?? 0)}
-					{@render stat(m.play_rate(), percent(stats?.playRate))}
-					{@render stat(m.win_rate(), percent(stats?.winRate))}
-				</dl>
+				<div class="border bg-card">
+					<dl class="cells grid grid-cols-3">
+						{@render stat(m.games(), stats?.games ?? 0)}
+						{@render stat(m.play_rate(), percent(stats?.playRate))}
+						{@render stat(m.win_rate(), percent(stats?.winRate))}
+					</dl>
+				</div>
 			</section>
 		</div>
 	</div>
 
 	{#if decks.length}
-		<section class="grid gap-3">
-			<div class="flex flex-wrap items-end justify-between gap-2">
+		<section class="rows">
+			<div class="flex flex-wrap items-end justify-between gap-2 row">
 				{@render heading(m.decks_with_card())}
 				<a
 					class="eyebrow text-muted-foreground transition-colors hover:text-foreground"
@@ -142,9 +152,11 @@
 	{/if}
 
 	{#if card.description}
-		<section class="grid gap-2">
+		<section class="grid gap-2 row">
 			{@render heading(m.lore())}
-			<p class="text-sm leading-6 whitespace-pre-line text-muted-foreground">{card.description}</p>
+			<p class="text-sm leading-6 whitespace-pre-line text-muted-foreground">
+				{card.description}
+			</p>
 		</section>
 	{/if}
 </article>

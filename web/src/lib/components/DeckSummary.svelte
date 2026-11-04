@@ -27,26 +27,23 @@
 	] as const);
 </script>
 
-<section
-	class="grid gap-6 rounded-xl border bg-card p-5 sm:p-6 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] md:gap-8"
-	aria-label={m.deck_summary()}
->
-	<div class="grid content-start gap-1">
+<section class="grid md:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]" aria-label={m.deck_summary()}>
+	<div class="grid content-start gap-1 border-b px-4 py-6 sm:px-6 md:border-r md:border-b-0">
 		<span class="eyebrow text-muted-foreground"
 			>{m.win_rate()} · {m.version_label({ version: deck.stats.version })}</span
 		>
 		<span class="text-5xl font-medium tracking-tight tabular-nums">{percent(stats.winRate)}</span>
 		<span class="text-sm text-muted-foreground tabular-nums">{m.games()} {stats.games}</span>
 	</div>
-	<div class="grid content-start gap-5">
-		<dl class="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+	<div class="grid min-w-0 content-start">
+		<dl class="cells grid grid-cols-2 sm:grid-cols-4">
 			{#each metrics as [label, value] (label)}
-				<div class="grid gap-1">
+				<div class="grid gap-1 px-4 py-4 sm:px-6">
 					<dt class="eyebrow text-[10px] text-muted-foreground">{label}</dt>
 					<dd class="text-xl tabular-nums">{num(value)}</dd>
 				</div>
 			{/each}
-			<div class="col-span-full grid gap-1.5">
+			<div class="col-span-full grid gap-1.5 px-4 py-4 sm:px-6">
 				<dt class="eyebrow text-[10px] text-muted-foreground">{m.element_mix()}</dt>
 				<dd>
 					<CardBadgeStack>
@@ -59,20 +56,20 @@
 				</dd>
 			</div>
 		</dl>
-		<ul class="flex flex-wrap gap-2" aria-label={m.cards_title()}>
+		<ul class="flex flex-wrap gap-2 border-t px-4 py-4 sm:px-6" aria-label={m.cards_title()}>
 			{#each known as card (card.id)}
 				<li>
 					<a
 						href={href(`/cards/${card.id}`)}
 						title={card.name ?? card.id}
-						class="block rounded-sm spring motion-safe:hover:-translate-y-0.5"
+						class="group block rounded-xs"
 					>
 						<img
 							src="/art/avatar/{card.id}.webp"
 							alt=""
 							loading="lazy"
 							decoding="async"
-							class="el-{card.element} size-11 rounded-sm border-2 border-(--el) bg-(--el)"
+							class="el-{card.element} size-11 rounded-xs border-2 border-(--el) bg-(--el) transition-colors group-hover:border-foreground"
 						/>
 						<span class="sr-only">{card.name ?? card.id}</span>
 					</a>

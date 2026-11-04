@@ -73,7 +73,6 @@
 	--color-straw: var(--straw);
 	--color-slate: var(--slate);
 	--color-moss: var(--moss);
-	--ease-spring: cubic-bezier(0.3, 1.6, 0.5, 1);
 	--color-on-shader: #fbf8f0;
 	--color-ring: var(--ring);
 	--color-input: var(--input);
@@ -95,28 +94,17 @@
 	--color-row-hover: var(--row-hover);
 	--color-foreground: var(--foreground);
 	--color-background: var(--background);
-	--radius-sm: 3px;
-	--radius-md: 4px;
-	--radius-lg: 10px;
-	--radius-xl: 12px;
-	--radius-2xl: 14px;
+	--radius-*: initial;
+	--radius-xs: 2px;
+	--radius-sm: 4px;
 }
 
 @utility panel {
-	@apply flex flex-col gap-2.5 rounded-xl border bg-card px-4 py-3.5;
+	@apply flex flex-col gap-2.5 px-5 py-3.5;
 }
 
 @utility eyebrow {
 	@apply font-sans text-[10px] font-medium tracking-[.08em] text-muted-foreground uppercase;
-}
-
-@utility spring {
-	transition:
-		translate 0.3s --theme(--ease-spring),
-		scale 0.3s --theme(--ease-spring),
-		background-color 0.15s,
-		border-color 0.15s,
-		color 0.15s;
 }
 
 @utility grain {
