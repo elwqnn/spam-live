@@ -3,6 +3,9 @@ name = "api"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+seed = []
+
 [dependencies]
 ammonia = "4.2.4"
 axum = { version = "0.8.9", features = ["multipart"] }

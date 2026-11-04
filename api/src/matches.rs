@@ -90,7 +90,7 @@ struct LoadingMe {
     stars: Option<i32>,
 }
 
-struct Match {
+pub(crate) struct Match {
     game_uid: String,
     app_version: String,
     account_id: Uuid,
@@ -125,7 +125,7 @@ fn sorted(ids: &[Uuid]) -> Vec<Uuid> {
     ids
 }
 
-fn parse_entry(raw: Value, now: DateTime<Utc>) -> Result<Match, String> {
+pub(crate) fn parse_entry(raw: Value, now: DateTime<Utc>) -> Result<Match, String> {
     match raw.get("FormatVersion").and_then(Value::as_i64) {
         Some(2) => {}
         v => {
@@ -300,7 +300,7 @@ async fn link_account(db: &PgPool, user_id: i64, account_id: Uuid) -> Result<Res
     }
 }
 
-async fn store(db: &PgPool, catalog: &Catalog, user_id: i64, m: &Match) -> Result<Status, sqlx::Error> {
+pub(crate) async fn store(db: &PgPool, catalog: &Catalog, user_id: i64, m: &Match) -> Result<Status, sqlx::Error> {
     let mut stars = [None, None];
     stars[m.seat as usize] = m.stars;
     let mut tx = db.begin().await?;

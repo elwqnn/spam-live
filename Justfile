@@ -75,6 +75,11 @@ session admin="": db
     echo "session=$token"
 
 [group('dev')]
+[doc('Fill the local database with fake data. Run it again to refresh the dates.')]
+seed: db
+    cd api && cargo run --features seed -- --seed
+
+[group('dev')]
 [doc('Regenerate web/src/lib/api.d.ts from the API.')]
 api-types:
     cd api && cargo run -q -- --openapi | (cd ../web && bunx openapi-typescript --empty-objects-unknown -o src/lib/api.d.ts)

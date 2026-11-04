@@ -182,6 +182,11 @@ impl Catalog {
         &self.versions[0].name
     }
 
+    #[cfg(feature = "seed")]
+    pub fn card_ids(&self) -> Vec<Uuid> {
+        self.versions[0].cards.iter().map(|c| c.id).collect()
+    }
+
     pub fn previous(&self, version: &str) -> Option<&str> {
         let key = &self.versions.iter().find(|v| v.name == version)?.key;
         self.versions.iter().find(|v| v.key < *key).map(|v| v.name.as_str())

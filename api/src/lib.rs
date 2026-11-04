@@ -4,6 +4,8 @@ pub mod catalog;
 pub mod decks;
 pub mod matches;
 pub mod release;
+#[cfg(feature = "seed")]
+pub mod seed;
 pub mod stats;
 
 use std::{sync::Arc, time::Duration};

@@ -13,11 +13,28 @@ fn required(key: &str) -> Result<String, String> {
     env(key).ok_or_else(|| format!("{key} is not set"))
 }
 
+#[cfg(feature = "seed")]
+async fn seed() -> Result<(), Box<dyn Error>> {
+    let options = api::seed::check_host(&required("DATABASE_URL")?)?;
+    let catalog = catalog::Catalog::load(&PathBuf::from(env("CATALOG_DIR").unwrap_or_else(|| "catalog".into())))?;
+    let db = PgPoolOptions::new().max_connections(2).connect_with(options).await?;
+    sqlx::migrate!().run(&db).await?;
+    api::seed::run(&db, &catalog).await?;
+    for (table, n) in api::seed::counts(&db).await? {
+        println!("{table}: {n}");
+    }
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     if std::env::args().any(|a| a == "--openapi") {
         println!("{}", api::ApiDoc::openapi().to_pretty_json()?);
         return Ok(());
+    }
+    #[cfg(feature = "seed")]
+    if std::env::args().any(|a| a == "--seed") {
+        return seed().await;
     }
     tracing_subscriber::fmt().init();
 
