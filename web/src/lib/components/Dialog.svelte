@@ -10,14 +10,14 @@
 		children
 	}: {
 		id: string;
-		label: string;
+		label?: string;
 		title: string;
 		variant?: ButtonVariant;
 		children: Snippet;
 	} = $props();
 </script>
 
-<Button {variant} size="sm" commandfor={id} command="show-modal">{label}</Button>
+{#if label}<Button {variant} size="sm" commandfor={id} command="show-modal">{label}</Button>{/if}
 <dialog
 	{id}
 	aria-labelledby="{id}-title"

@@ -1,18 +1,25 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { Download04Icon, Moon02Icon, Sun03Icon } from '@hugeicons/core-free-icons';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { api, href, loginHref } from '#lib';
+	import CommandPalette, { type Action } from '#lib/components/CommandPalette.svelte';
+	import Dialog from '#lib/components/Dialog.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale, locales, localizeHref } from '#lib/paraglide/runtime.js';
+	import { GO, isMac, shortcut } from '#lib/shortcut.js';
 	import favicon from '#lib/assets/favicon.svg';
 	import './layout.css';
 	import type { LayoutProps } from './$types';
 
 	let { children, data }: LayoutProps = $props();
 
+	const DOWNLOAD = 'https://github.com/elwqnn/spam-live/releases/latest';
 	const login = $derived(loginHref(page.url));
+	const languages = new Intl.DisplayNames([getLocale()], { type: 'language' });
 
 	async function logout() {
 		await api(fetch, location.origin).POST('/api/auth/logout');
@@ -20,16 +27,53 @@
 	}
 
 	const nav = [
-		['/decks', m.nav_decks],
-		['/cards', m.nav_cards],
-		['/stats', m.nav_stats],
-		['/glossary', m.nav_glossary],
-		['/import', m.nav_import]
+		['d', m.nav_decks],
+		['c', m.nav_cards],
+		['s', m.nav_stats],
+		['l', m.nav_glossary],
+		['i', m.nav_import]
 	] as const;
 	function toggleTheme() {
 		localStorage.theme = document.documentElement.classList.toggle('dark') ? 'dark' : 'light';
 	}
+
+	const actions: Action[] = $derived([
+		{ id: 'theme', label: m.theme_toggle(), run: toggleTheme },
+		...locales
+			.filter((locale) => locale !== getLocale())
+			.map((locale) => ({
+				id: `locale-${locale}`,
+				label: m.palette_language({ name: languages.of(locale) ?? locale }),
+				run: () => location.assign(localizeHref(page.url.pathname + page.url.search, { locale }))
+			})),
+		data.me
+			? { id: 'logout', label: m.logout(), run: logout }
+			: { id: 'login', label: m.login_steam(), run: () => location.assign(login) },
+		{ id: 'download', label: m.import_app_download(), run: () => location.assign(DOWNLOAD) }
+	]);
+
+	let mac = $state(false);
+	let palette = $state<ReturnType<typeof CommandPalette>>();
+	let g: number | null = null;
+	onMount(() => (mac = isMac()));
+
+	function onkeydown(e: KeyboardEvent) {
+		if (e.defaultPrevented || document.querySelector('dialog[open]')) return;
+		const action = shortcut(e, g, mac);
+		g = action === 'g' ? e.timeStamp : null;
+		if (!action) return;
+		e.preventDefault();
+		const search =
+			action === 'search' && document.querySelector<HTMLElement>('main input[type="search"]');
+		if (search) search.focus();
+		else if (action === 'palette' || action === 'search') palette?.open();
+		else if (action === 'help')
+			document.querySelector<HTMLDialogElement>('#shortcuts')?.showModal();
+		else if (action !== 'g') goto(href(action));
+	}
 </script>
+
+<svelte:window {onkeydown} />
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
@@ -43,14 +87,21 @@
 				>SPAM<span class="text-muted-foreground">.live</span></a
 			>
 			<nav class="flex flex-wrap gap-x-6 gap-y-2">
-				{#each nav as [path, label] (path)}
+				{#each nav as [key, label] (key)}
 					<a
-						class="eyebrow text-xs text-muted-foreground transition-colors hover:text-foreground"
-						href={href(path)}>{label()}</a
+						class="group relative eyebrow text-xs text-muted-foreground transition-colors hover:text-foreground"
+						href={href(GO[key])}
+						aria-keyshortcuts="g {key}"
+						>{label()}<kbd
+							aria-hidden="true"
+							class="pointer-events-none absolute top-full left-1/2 mt-1.5 hidden -translate-x-1/2 bg-background whitespace-nowrap lg:group-hover:inline-flex lg:group-focus-visible:inline-flex"
+							>g {key}</kbd
+						></a
 					>
 				{/each}
 			</nav>
-			<div class="ml-auto flex min-w-0 items-center gap-3">
+			<div class="ml-auto flex min-w-0 flex-wrap items-center gap-3">
+				<CommandPalette bind:this={palette} {actions} {mac} />
 				{#if data.me}
 					{#if data.me.isAdmin}
 						<a class="eyebrow text-xs hover:underline" href={href('/admin')}>{m.nav_admin()}</a>
@@ -69,7 +120,7 @@
 				{:else}
 					<Button variant="outline" size="sm" href={login} rel="external">{m.login_steam()}</Button>
 				{/if}
-				<Button size="sm" href="https://github.com/elwqnn/spam-live/releases/latest" rel="external"
+				<Button size="sm" href={DOWNLOAD} rel="external"
 					><HugeiconsIcon icon={Download04Icon} />{m.nav_download()}</Button
 				>
 			</div>
@@ -108,4 +159,23 @@
 		</footer>
 	</div>
 </div>
+<Dialog id="shortcuts" title={m.shortcuts_title()}>
+	<dl class="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-6 gap-y-2.5 text-sm">
+		<dt class="flex items-center gap-1"><kbd>{mac ? '⌘' : 'Ctrl'}</kbd><kbd>K</kbd></dt>
+		<dd>{m.shortcut_palette()}</dd>
+		<dt><kbd>/</kbd></dt>
+		<dd>{m.shortcut_search()}</dd>
+		{#each nav as [key, label] (key)}
+			<dt class="flex items-center gap-1.5 text-xs text-muted-foreground">
+				<kbd>g</kbd>{m.shortcut_then()}<kbd>{key}</kbd>
+			</dt>
+			<dd>{m.shortcut_go({ page: label() })}</dd>
+		{/each}
+		<dt><kbd>?</kbd></dt>
+		<dd>{m.shortcut_help()}</dd>
+	</dl>
+	<div class="mt-5 flex justify-end">
+		<Button variant="ghost" size="sm" commandfor="shortcuts" command="close">{m.close()}</Button>
+	</div>
+</Dialog>
 <div class="grain fixed inset-0 z-50 opacity-(--grain) mix-blend-overlay" aria-hidden="true"></div>

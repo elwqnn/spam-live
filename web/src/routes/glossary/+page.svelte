@@ -53,6 +53,13 @@
 		}));
 	});
 	const entries = $derived(matches.find((g) => g.type === type)?.list ?? []);
+	const target = $derived.by(() => {
+		try {
+			return decodeURIComponent(page.url.hash.slice(1));
+		} catch {
+			return '';
+		}
+	});
 
 	const filters: Filter[] = $derived([
 		{
@@ -104,7 +111,7 @@
 				id={anchor}
 				class={[
 					'grid gap-3 px-4 py-5 transition-colors target:bg-row sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-6 sm:px-6',
-					page.url.hash === `#${anchor}` && 'bg-row'
+					target === anchor && 'bg-row'
 				]}
 			>
 				<h2 class="text-[15px] leading-6 font-semibold wrap-anywhere">{entryName(entry)}</h2>
