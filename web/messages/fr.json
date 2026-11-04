@@ -47,6 +47,7 @@
 	"hp": "PV",
 	"gold_income": "Revenu de Spamton",
 	"resistances": "Résistances",
+	"resistance": "Résistance {element} {value}",
 	"abilities": "Capacités",
 	"cooldown": "Recharge : {turns}",
 	"tox": "Tox",

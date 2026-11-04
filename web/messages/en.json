@@ -47,6 +47,7 @@
 	"hp": "HP",
 	"gold_income": "Spamton income",
 	"resistances": "Resistances",
+	"resistance": "{element} resistance {value}",
 	"abilities": "Abilities",
 	"cooldown": "Cooldown: {turns}",
 	"tox": "Tox",

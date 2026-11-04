@@ -3,7 +3,7 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import ArtistCredit from './ArtistCredit.svelte';
 	import CardArt from './CardArt.svelte';
-	import CardBadge from './CardBadge.svelte';
+	import CardBadge, { ELEMENTS } from './CardBadge.svelte';
 	import CardBadgeStack from './CardBadgeStack.svelte';
 	import Change from './Change.svelte';
 	import DeckTile from './DeckTile.svelte';
@@ -80,8 +80,14 @@
 				{@render heading(m.resistances())}
 				<CardBadgeStack>
 					{#each resistances as [element, value] (element)}
-						<CardBadge type="element" value={element}
-							><span class="tabular-nums">{value > 0 ? `+${value}` : value}</span></CardBadge
+						{@const text = percent(value / 100)}
+						<CardBadge
+							type="element"
+							value={element}
+							display="compact"
+							box
+							label={m.resistance({ element: ELEMENTS[element]?.() ?? element, value: text })}
+							><span class="tabular-nums" aria-hidden="true">{text}</span></CardBadge
 						>
 					{/each}
 				</CardBadgeStack>
@@ -110,7 +116,7 @@
 						<li class="grid gap-3 p-4">
 							<div class="flex items-start justify-between gap-2">
 								{@render name(entryName(ability))}
-								<CardBadge type="cooldown" value={cooldown} />
+								<CardBadge type="cooldown" value={cooldown} display="compact" />
 							</div>
 							<Description text={ability.description} entry={ability} {keywords} />
 						</li>

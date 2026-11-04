@@ -29,12 +29,14 @@
 		value,
 		display = 'full',
 		label,
+		box = false,
 		children
 	}: {
 		type: 'element' | 'rarity' | 'hp' | 'income' | 'cooldown';
 		value: string | number;
 		display?: 'full' | 'compact';
 		label?: string;
+		box?: boolean;
 		children?: Snippet;
 	} = $props();
 
@@ -53,7 +55,7 @@
 	const full = $derived(number ? `${name} ${key}` : name);
 	const compact = $derived(display === 'compact');
 	const sprite = $derived(type === 'element' && Object.hasOwn(ELEMENTS, key));
-	const bare = $derived(compact && (type === 'rarity' || sprite));
+	const bare = $derived(compact && !box && (type === 'rarity' || sprite));
 </script>
 
 <span
