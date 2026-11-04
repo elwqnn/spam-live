@@ -7,6 +7,7 @@
 	import { coverage, type Count } from '#lib/coverage.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { ELEMENTS, RARITIES } from './CardBadge.svelte';
+	import { cardPreview } from './CardPreview.svelte';
 	import RarityMark from './RarityMark.svelte';
 
 	let { cards, stats }: { cards: Schemas['CardBase'][]; stats: Schemas['CardStats'][] } = $props();
@@ -86,8 +87,8 @@
 									<li>
 										<a
 											href={href(`/cards/${card.id}`)}
-											title={card.name ?? card.id}
 											class="group block rounded-xs"
+											{@attach cardPreview(card)}
 										>
 											<img
 												src="/art/avatar/{card.id}.webp"

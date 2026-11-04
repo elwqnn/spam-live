@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { api, href, loginHref } from '#lib';
+	import CardPreview from '#lib/components/CardPreview.svelte';
 	import CommandPalette, { type Action } from '#lib/components/CommandPalette.svelte';
 	import Dialog from '#lib/components/Dialog.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
@@ -206,4 +207,5 @@
 		<Button variant="ghost" size="sm" commandfor="shortcuts" command="close">{m.close()}</Button>
 	</div>
 </Dialog>
+<CardPreview />
 <div class="grain fixed inset-0 z-50 opacity-(--grain) mix-blend-overlay" aria-hidden="true"></div>

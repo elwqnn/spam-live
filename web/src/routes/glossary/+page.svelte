@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { entryName, fold, href, queryHref } from '#lib';
+	import { cardPreview } from '#lib/components/CardPreview.svelte';
 	import CardStack from '#lib/components/CardStack.svelte';
 	import Description from '#lib/components/Description.svelte';
 	import FilterBar from '#lib/components/FilterBar.svelte';
@@ -133,7 +134,7 @@
 										<a
 											class="block rounded-xs focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 											href={href(`/cards/${id}`)}
-											title={card.name ?? id}
+											{@attach cardPreview(card)}
 											><img
 												src="/art/avatar/{id}.webp"
 												alt={card.name ?? id}

@@ -2,6 +2,7 @@
 	import { href, type Schemas } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
 	import { ELEMENTS } from './CardBadge.svelte';
+	import { cardPreview } from './CardPreview.svelte';
 
 	let { id, card }: { id: string; card?: Schemas['CardBase'] } = $props();
 
@@ -12,8 +13,8 @@
 {#if card}
 	<a
 		href={href(`/cards/${id}`)}
-		title={name}
 		class="group relative block aspect-[1432/2048] rounded-xs outline-offset-4 el-{card.element} focus-visible:outline-2"
+		{@attach cardPreview(card)}
 	>
 		<span
 			class={['absolute -inset-0.5 bg-(--el) transition-colors group-hover:bg-foreground', shape]}

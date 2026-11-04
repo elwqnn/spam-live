@@ -18,13 +18,15 @@ export const load: PageLoad = async ({ fetch, url, params, untrack }) => {
 		client.GET('/api/decks', { params: { query: { card: params.id, limit: 6 } } }),
 		client.GET('/api/glossary/keywords', { params: { query: { lang } } })
 	]);
+	const cardStats = ok(stats);
 	const list = decks.data ?? [];
 	const cards = list.length
 		? (await client.GET('/api/cards', { params: { query: { lang } } })).data
 		: [];
 	return {
 		card: ok(card),
-		stats: ok(stats).find((s) => s.card === params.id) ?? null,
+		stats: cardStats.find((s) => s.card === params.id) ?? null,
+		cardStats,
 		versions: ok(versions).map((v) => v.version),
 		decks: cards ? list : [],
 		cards: cards ?? [],
