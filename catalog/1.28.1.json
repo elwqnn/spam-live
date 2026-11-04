@@ -30646,6 +30646,892 @@
       "waterResistance": 5
     }
   ],
+  "effects": [
+    {
+      "description": {
+        "de": "Verändert die Grundwerte von Schaden und Heilung",
+        "en": "Changes the base values of damage and healing",
+        "es": "Modifica los valores base de daño y curación",
+        "fr": "Modifie les valeurs de base des dégâts et des soins",
+        "it": "Modifica i valori base di danni e cure",
+        "pt": "Modifica os valores base de dano e cura",
+        "pt-BR": "Modifica os valores base de dano e cura"
+      },
+      "id": "BaseDamage",
+      "name": {
+        "de": "Grundschaden",
+        "en": "Base damage",
+        "es": "Daño de base",
+        "fr": "Dégâts de base",
+        "it": "Danni di base",
+        "pt": "Dano de base",
+        "pt-BR": "Dano de base"
+      }
+    },
+    {
+      "description": {
+        "de": "Verstärkt das Element ERDE[TERRE]",
+        "en": "Boosts the EARTH[TERRE] element",
+        "es": "Potencia el elemento TIERRA[TERRE]",
+        "fr": "Boost l'élément TERRE[TERRE]",
+        "it": "Potenzia l'elemento TERRA[TERRE]",
+        "pt": "Potencia o elemento TERRA[TERRE]",
+        "pt-BR": "Potencia o elemento TERRA[TERRE]"
+      },
+      "id": "BoostEarth",
+      "name": {
+        "de": "Erdboost",
+        "en": "Earth boost",
+        "es": "Boost Tierra",
+        "fr": "Boost terre",
+        "it": "Boost terra",
+        "pt": "Boost Terra",
+        "pt-BR": "Boost Terra"
+      }
+    },
+    {
+      "description": {
+        "de": "Verstärkt das Element FEUER[FEU]",
+        "en": "Boosts the FIRE[FEU] element",
+        "es": "Potencia el elemento FUEGO[FEU]",
+        "fr": "Boost l'élément FEU[FEU]",
+        "it": "Potenzia l'elemento FUOCO[FEU]",
+        "pt": "Potencia o elemento FOGO[FEU]",
+        "pt-BR": "Potencia o elemento FOGO[FEU]"
+      },
+      "id": "BoostFire",
+      "name": {
+        "de": "Feuerboost",
+        "en": "Fire boost",
+        "es": "Boost Fuego",
+        "fr": "Boost feu",
+        "it": "Boost fuoco",
+        "pt": "Boost Fogo",
+        "pt-BR": "Boost Fogo"
+      }
+    },
+    {
+      "description": {
+        "de": "Verstärkt das Element LICHT[LUMIERE]",
+        "en": "Boosts the LIGHT[LUMIERE] element",
+        "es": "Potencia el elemento LUZ[LUMIERE]",
+        "fr": "Boost l'élément LUMIÈRE[LUMIERE]",
+        "it": "Potenzia l'elemento LUCE[LUMIERE]",
+        "pt": "Potencia o elemento LUZ[LUMIERE]",
+        "pt-BR": "Potencia o elemento LUZ[LUMIERE]"
+      },
+      "id": "BoostLight",
+      "name": {
+        "de": "Lichtboost",
+        "en": "Light boost",
+        "es": "Boost Luz",
+        "fr": "Boost lumière",
+        "it": "Boost luce",
+        "pt": "Boost Luz",
+        "pt-BR": "Boost Luz"
+      }
+    },
+    {
+      "description": {
+        "de": "Verstärkt das Element NATUR[NATURE]",
+        "en": "Boosts the NATURE[NATURE] element",
+        "es": "Potencia el elemento NATURALEZA[NATURE]",
+        "fr": "Boost l'élément NATURE[NATURE]",
+        "it": "Potenzia l'elemento NATURA[NATURE]",
+        "pt": "Potencia o elemento NATUREZA[NATURE]",
+        "pt-BR": "Potencia o elemento NATUREZA[NATURE]"
+      },
+      "id": "BoostNature",
+      "name": {
+        "de": "Naturboost",
+        "en": "Nature boost",
+        "es": "Boost Naturaleza",
+        "fr": "Boost nature",
+        "it": "Boost natura",
+        "pt": "Boost Natureza",
+        "pt-BR": "Boost Natureza"
+      }
+    },
+    {
+      "description": {
+        "de": "Verstärkt das Element SCHATTEN[OMBRE]",
+        "en": "Boosts the SHADOW[OMBRE] element",
+        "es": "Potencia el elemento SOMBRA[OMBRE]",
+        "fr": "Boost l'élément OMBRE[OMBRE]",
+        "it": "Potenzia l'elemento OMBRA[OMBRE]",
+        "pt": "Potencia o elemento SOMBRA[OMBRE]",
+        "pt-BR": "Potencia o elemento SOMBRA[OMBRE]"
+      },
+      "id": "BoostShadow",
+      "name": {
+        "de": "Schattenboost",
+        "en": "Shadow boost",
+        "es": "Boost Sombra",
+        "fr": "Boost ombre",
+        "it": "Boost ombra",
+        "pt": "Boost Sombra",
+        "pt-BR": "Boost Sombra"
+      }
+    },
+    {
+      "description": {
+        "de": "Verstärkt das Element WASSER[EAU]",
+        "en": "Boosts the WATER[EAU] element",
+        "es": "Potencia el elemento AGUA[EAU]",
+        "fr": "Boost l'élément EAU[EAU]",
+        "it": "Potenzia l'elemento ACQUA[EAU]",
+        "pt": "Potencia o elemento ÁGUA[EAU]",
+        "pt-BR": "Potencia o elemento ÁGUA[EAU]"
+      },
+      "id": "BoostWater",
+      "name": {
+        "de": "Wasserboost",
+        "en": "Water boost",
+        "es": "Boost Agua",
+        "fr": "Boost eau",
+        "it": "Boost acqua",
+        "pt": "Boost Água",
+        "pt-BR": "Boost Água"
+      }
+    },
+    {
+      "description": {
+        "de": "Entfernt Statusveränderungen und Wertänderungen von der anvisierten Karte",
+        "en": "Removes status ailments and stat changes from the targeted card",
+        "es": "Elimina las alteraciones de estado y los cambios de estadísticas de la carta objetivo",
+        "fr": "Enlève les altérations de statut et les changements de statistiques de la carte ciblée",
+        "it": "Rimuove le alterazioni di stato e i cambiamenti di statistiche dalla carta bersagliata",
+        "pt": "Remove as alterações de estado e as mudanças de estatísticas da carta alvo",
+        "pt-BR": "Remove as alterações de estado e as mudanças de estatísticas da carta alvo"
+      },
+      "id": "Cleanse",
+      "name": {
+        "de": "Reinigung",
+        "en": "Cleanse",
+        "es": "Purga",
+        "fr": "Purge",
+        "it": "Purga",
+        "pt": "Purga",
+        "pt-BR": "Purga"
+      }
+    },
+    {
+      "description": {
+        "de": "Erleidet 50% des dem Ziel zugefügten Schadens.",
+        "en": "Takes 50% of the damage dealt to the target.",
+        "es": "Sufre el 50% del daño infligido al objetivo.",
+        "fr": "Subit 50% des dégâts infligés à la cible.",
+        "it": "Subisce il 50% dei danni inflitti al bersaglio.",
+        "pt": "Sofre 50% do dano causado ao alvo.",
+        "pt-BR": "Sofre 50% do dano causado ao alvo."
+      },
+      "id": "Contrecoup",
+      "name": {
+        "de": "Rückstoß",
+        "en": "Aftershock",
+        "es": "Contragolpe",
+        "fr": "Contrecoup",
+        "it": "Contraccolpo",
+        "pt": "Repercussão",
+        "pt-BR": "Repercussão"
+      }
+    },
+    {
+      "description": {
+        "de": "Erfordert das Zahlen von Kosten, um die Fähigkeit einzusetzen",
+        "en": "Requires paying a cost to use the ability",
+        "es": "Requiere pagar un costo para usar la habilidad",
+        "fr": "Nécessite de dépenser un coût pour pouvoir utiliser la compétence",
+        "it": "Richiede il pagamento di un costo per usare l'abilità",
+        "pt": "Requer pagar um custo para usar a habilidade",
+        "pt-BR": "Requer pagar um custo para usar a habilidade"
+      },
+      "id": "Cost",
+      "name": {
+        "de": "Kosten",
+        "en": "Cost",
+        "es": "Costo",
+        "fr": "Coût",
+        "it": "Costo",
+        "pt": "Custo",
+        "pt-BR": "Custo"
+      }
+    },
+    {
+      "description": {
+        "de": "Verändert die kritische Trefferchance von Karten",
+        "en": "Changes cards' critical hit chance",
+        "es": "Modifica la probabilidad de golpe crítico de las cartas",
+        "fr": "Modifie les chances de coup critique des cartes",
+        "it": "Modifica la probabilità di colpo critico delle carte",
+        "pt": "Modifica a probabilidade de golpe crítico das cartas",
+        "pt-BR": "Modifica a chance de golpe crítico das cartas"
+      },
+      "id": "Critical",
+      "name": {
+        "de": "Kritisch",
+        "en": "Critical",
+        "es": "Crítico",
+        "fr": "Critique",
+        "it": "Critico",
+        "pt": "Crítico",
+        "pt-BR": "Crítico"
+      }
+    },
+    {
+      "description": {
+        "de": "Verändert die Stärke kritischer Treffer und Heilungen der Karten",
+        "en": "Changes the strength of cards' critical damage and healing",
+        "es": "Modifica la potencia de los efectos críticos de daño y curación de las cartas",
+        "fr": "Modifie la puissance des dégâts et des soins critiques des cartes",
+        "it": "Modifica la potenza degli effetti critici di danno e cura delle carte",
+        "pt": "Modifica a potência dos efeitos críticos de dano e cura das cartas",
+        "pt-BR": "Modifica a potência dos efeitos críticos de dano e cura das cartas"
+      },
+      "id": "CriticalDamage",
+      "name": {
+        "de": "Kritstärke",
+        "en": "Critical Power",
+        "es": "Potencia crítica",
+        "fr": "Puissance Critique",
+        "it": "Potenza critica",
+        "pt": "Poder crítico",
+        "pt-BR": "Poder crítico"
+      }
+    },
+    {
+      "description": {
+        "de": "Karten, die heilen oder sich heilen: Heilfähigkeiten sowie die Passive Vampirismus und Primitive Heilung",
+        "en": "Cards that heal others or themselves: healing abilities and the Vampirism and Ancient Healing passives",
+        "es": "Cartas que curan o se curan: habilidades de curación y pasivos Vampirismo y Curación Primitiva",
+        "fr": "Cartes qui soignent ou se soignent : compétences de soin et passifs Vampirisme et Soin primitif",
+        "it": "Carte che curano o si curano: abilità di cura e passivi Vampirismo e Cura Primitiva",
+        "pt": "Cartas que curam ou se curam: habilidades de cura e passivos Vampirismo e Cura Primitiva",
+        "pt-BR": "Cartas que curam ou se curam: habilidades de cura e passivos Vampirismo e Cura Primitiva"
+      },
+      "id": "Heal",
+      "name": {
+        "de": "Heilung",
+        "en": "Healing",
+        "es": "Curación",
+        "fr": "Soin",
+        "it": "Cura",
+        "pt": "Cura",
+        "pt-BR": "Cura"
+      }
+    },
+    {
+      "description": {
+        "de": "Fähigkeiten können pro Spiel nur begrenzt oft eingesetzt werden.",
+        "en": "Abilities can only be used a limited number of times per game.",
+        "es": "Las habilidades solo pueden usarse un número limitado de veces por partida.",
+        "fr": "Les compétences ne peuvent être utilisées qu'un certain nombre de fois par partie.",
+        "it": "Le abilità possono essere usate solo un numero limitato di volte per partita.",
+        "pt": "As habilidades só podem ser usadas um número limitado de vezes por partida.",
+        "pt-BR": "As habilidades só podem ser usadas um número limitado de vezes por partida."
+      },
+      "id": "LimitedUse",
+      "name": {
+        "de": "Begrenzte Nutzung",
+        "en": "Limited use",
+        "es": "Uso Limitado",
+        "fr": "Usage limité",
+        "it": "Uso limitato",
+        "pt": "Uso Limitado",
+        "pt-BR": "Uso Limitado"
+      }
+    },
+    {
+      "description": {
+        "de": "Verändert die Präzision von Karten",
+        "en": "Changes cards' accuracy",
+        "es": "Modifica la precisión de las cartas",
+        "fr": "Modifie la précision des cartes",
+        "it": "Modifica la precisione delle carte",
+        "pt": "Modifica a precisão das cartas",
+        "pt-BR": "Modifica a precisão das cartas"
+      },
+      "id": "Precision",
+      "name": {
+        "de": "Präzision",
+        "en": "Accuracy",
+        "es": "Precisión",
+        "fr": "Précision",
+        "it": "Precisione",
+        "pt": "Precisão",
+        "pt-BR": "Precisão"
+      }
+    },
+    {
+      "description": {
+        "de": "Wählt ein zufälliges Ziel. Kann verbündete, gegnerische oder alle Karten anvisieren",
+        "en": "Picks a random target. Can target allied cards, enemy cards or all cards",
+        "es": "Elige un objetivo aleatorio. Puede apuntar a cartas aliadas, enemigas o a todas las cartas",
+        "fr": "Choisit une cible aléatoire. Peut cibler les cartes alliées, ennemies ou toutes les cartes",
+        "it": "Sceglie un bersaglio casuale. Può bersagliare carte alleate, nemiche o tutte le carte",
+        "pt": "Escolhe um alvo aleatório. Pode visar cartas aliadas, inimigas ou todas as cartas",
+        "pt-BR": "Escolhe um alvo aleatório. Pode mirar cartas aliadas, inimigas ou todas as cartas"
+      },
+      "id": "Random",
+      "name": {
+        "de": "Zufällig",
+        "en": "Random",
+        "es": "Aleatorio",
+        "fr": "Aléatoire",
+        "it": "Casuale",
+        "pt": "Aleatório",
+        "pt-BR": "Aleatório"
+      }
+    }
+  ],
+  "keywords": [
+    {
+      "description": {
+        "de": "Überträgt Schaden oder Heilung entsprechend dem angegebenen Prozentsatz auf die Karten neben dem Ziel.",
+        "en": "Spreads damage or healing to cards adjacent to the target, according to the indicated percentage.",
+        "es": "Extiende el daño o la curación a las cartas adyacentes al objetivo, según el porcentaje indicado.",
+        "fr": "Étend les dégâts ou les soins aux cartes adjacentes à la cible, selon le pourcentage indiqué.",
+        "it": "Estende i danni o le cure alle carte adiacenti al bersaglio, secondo la percentuale indicata.",
+        "pt": "Propaga o dano ou a cura às cartas adjacentes ao alvo, de acordo com a percentagem indicada.",
+        "pt-BR": "Propaga o dano ou a cura às cartas adjacentes ao alvo, de acordo com a porcentagem indicada."
+      },
+      "id": "AOE",
+      "name": {
+        "de": "Flächenschaden",
+        "en": "Area damage",
+        "es": "Daño de área",
+        "fr": "Dégâts de zone",
+        "it": "Danno ad area",
+        "pt": "Dano em área",
+        "pt-BR": "Dano em área"
+      }
+    },
+    {
+      "description": {
+        "de": "Zerstört die Zielkarte und erhält LP und maximale LP entsprechend den Werten der Zielkarte.",
+        "en": "Kills the targeted card and gains HP and max HP equal to the target’s.",
+        "es": "Mata a la carta objetivo y gana PV y PV máximos iguales a los suyos",
+        "fr": "Tue la carte ciblée et gagne des PV et PV max égaux aux siens",
+        "it": "Uccide la carta bersaglio e guadagna PV e PV massimi pari ai suoi",
+        "pt": "Mata a carta alvo e ganha PV e PV máximos iguais aos dela",
+        "pt-BR": "Mata a carta alvo e ganha PV e PV máximos iguais aos dela"
+      },
+      "id": "absorb",
+      "name": {
+        "de": "Absorbiert",
+        "en": "Absorb",
+        "es": "Absorbe",
+        "fr": "Absorbe",
+        "it": "Assorbe",
+        "pt": "Absorve",
+        "pt-BR": "Absorve"
+      }
+    },
+    {
+      "description": {
+        "de": "Wahrscheinlichkeit, dass ein Fähigkeitseffekt gelingt",
+        "en": "Chance for an ability effect to succeed",
+        "es": "Probabilidad de que un efecto de una habilidad tenga éxito",
+        "fr": "Probabilité de réussite d’un effet de compétence",
+        "it": "Probabilità che un effetto di un'abilità riesca",
+        "pt": "Probabilidade de um efeito de habilidade ser bem-sucedido",
+        "pt-BR": "Chance de um efeito de habilidade ser bem-sucedido"
+      },
+      "id": "accuracy",
+      "name": {
+        "de": "Trefferchance",
+        "en": "Accuracy",
+        "es": "Precisión",
+        "fr": "Précision",
+        "it": "Precisione",
+        "pt": "Precisão",
+        "pt-BR": "Precisão"
+      }
+    },
+    {
+      "description": {
+        "de": "Überträgt Schaden oder Heilung entsprechend dem angegebenen Prozentsatz auf die Karten neben dem Ziel.",
+        "en": "Spreads damage or healing to cards adjacent to the target, according to the indicated percentage.",
+        "es": "Extiende el daño o la curación a las cartas adyacentes al objetivo, según el porcentaje indicado.",
+        "fr": "Étend les dégâts ou les soins aux cartes adjacentes à la cible, selon le pourcentage indiqué.",
+        "it": "Estende i danni o le cure alle carte adiacenti al bersaglio, secondo la percentuale indicata.",
+        "pt": "Propaga o dano ou a cura às cartas adjacentes ao alvo, de acordo com a percentagem indicada.",
+        "pt-BR": "Propaga o dano ou a cura às cartas adjacentes ao alvo, de acordo com a porcentagem indicada."
+      },
+      "id": "aoe2",
+      "name": {
+        "de": "AOE II",
+        "en": "AOE II",
+        "es": "AOE II",
+        "fr": "Dégâts de zone II",
+        "it": "AOE II",
+        "pt": "AOE II",
+        "pt-BR": "AOE II"
+      }
+    },
+    {
+      "description": {
+        "de": "Zusätzlicher Schaden, der nicht von Elementarboni, aber von Berserk und Resistenzen beeinflusst wird",
+        "en": "Additional damage not affected by elemental bonuses, but affected by Berserk and resistances",
+        "es": "Daño adicional no afectado por los bonos elementales, pero afectado por los Berserk y las resistencias",
+        "fr": "Dégâts supplémentaires non affectés par les bonus élémentaires, mais affectés par les Berserk et les résistances",
+        "it": "Danni aggiuntivi non influenzati dai bonus elementali, ma influenzati dai Berserk e dalle resistenze",
+        "pt": "Dano adicional não afetado pelos bónus elementais, mas afetado pelos Berserk e pelas resistências",
+        "pt-BR": "Dano adicional não afetado pelos bônus elementais, mas afetado pelos Berserk e pelas resistências"
+      },
+      "id": "bonus",
+      "name": {
+        "de": "Bonusschaden",
+        "en": "Bonus damage",
+        "es": "Daño adicional",
+        "fr": "Dégâts bonus",
+        "it": "Danni bonus",
+        "pt": "Dano adicional",
+        "pt-BR": "Dano adicional"
+      }
+    },
+    {
+      "description": {
+        "de": "Die Karte kann nicht anvisiert werden. Sie ist bis zu ihrem nächsten Zug enttarnt, wenn sie angreift oder einen Tox erhält. Die Tarnung verschwindet, wenn sie als letzte Karte ihrer Seite lebt oder die Erschöpfung sie trifft.",
+        "en": "The card can't be targeted. It is revealed until its next turn when it attacks or receives a tox. Camouflage is lost when it is the last card alive on its side or when Fatigue hits it.",
+        "es": "La carta no puede ser objetivo. Queda al descubierto hasta su próximo turno cuando ataca o recibe un tox. El Camuflaje desaparece cuando queda sola con vida en su bando o cuando la Fatiga la alcanza.",
+        "fr": "La carte ne peut pas être ciblée. Elle se dévoile jusqu'à son prochain tour quand elle attaque ou reçoit un tox. Le Camouflage disparaît quand elle reste seule vivante dans son camp ou que la Fatigue la touche.",
+        "it": "La carta non può essere bersagliata. Si rivela fino al suo prossimo turno quando attacca o riceve un tox. Il Camuffamento sparisce quando resta l'unica carta in vita nel suo schieramento o quando la Fatica la colpisce.",
+        "pt": "A carta não pode ser alvo. Fica a descoberto até ao seu próximo turno quando ataca ou recebe um tox. A Camuflagem desaparece quando fica sozinha viva no seu lado ou quando a Fadiga a atinge.",
+        "pt-BR": "A carta não pode ser alvo. Fica revelada até o seu próximo turno quando ataca ou recebe um tox. A Camuflagem desaparece quando ela fica sozinha viva no seu lado ou quando a Fadiga a atinge."
+      },
+      "id": "camouflage",
+      "name": {
+        "de": "Tarnung",
+        "en": "Camouflage",
+        "es": "Camuflaje",
+        "fr": "Camouflage",
+        "it": "Camuffamento",
+        "pt": "Camuflagem",
+        "pt-BR": "Camuflagem"
+      }
+    },
+    {
+      "description": {
+        "de": "Der Spieler wählt aus mehreren angebotenen Optionen",
+        "en": "The player chooses among several offered options",
+        "es": "El jugador elige entre varias opciones propuestas",
+        "fr": "Le joueur choisit parmi plusieurs options proposées",
+        "it": "Il giocatore sceglie tra diverse opzioni proposte",
+        "pt": "O jogador escolhe entre várias opções propostas",
+        "pt-BR": "O jogador escolhe entre várias opções propostas"
+      },
+      "id": "choice",
+      "name": {
+        "de": "Wahl",
+        "en": "Choice",
+        "es": "Elección",
+        "fr": "Choix",
+        "it": "Scelta",
+        "pt": "Escolha",
+        "pt-BR": "Escolha"
+      }
+    },
+    {
+      "description": {
+        "de": "Was die Fähigkeit verbraucht, um eingesetzt zu werden",
+        "en": "What the ability consumes in order to be used",
+        "es": "Lo que la habilidad consume para ser lanzada",
+        "fr": "Ce que la compétence consomme pour être lancée",
+        "it": "Ciò che l'abilità consuma per essere lanciata",
+        "pt": "O que a habilidade consome para ser usada",
+        "pt-BR": "O que a habilidade consome para ser usada"
+      },
+      "id": "cost",
+      "name": {
+        "de": "Kosten",
+        "en": "Cost",
+        "es": "Costo",
+        "fr": "Coût",
+        "it": "Costo",
+        "pt": "Custo",
+        "pt-BR": "Custo"
+      }
+    },
+    {
+      "description": {
+        "de": "Wahrscheinlichkeit für kritischen Schaden oder kritische Heilung durch eine Fähigkeit",
+        "en": "Chance for an ability's damage or healing to be critical",
+        "es": "Probabilidad de que el daño o la curación de una habilidad sean críticos",
+        "fr": "Probabilité que les dégâts ou les soins d'une compétence soient critiques",
+        "it": "Probabilità che i danni o le cure di un'abilità siano critici",
+        "pt": "Probabilidade de os danos ou as curas de uma habilidade serem críticos",
+        "pt-BR": "Chance de que os danos ou as curas de uma habilidade sejam críticos"
+      },
+      "id": "critical",
+      "name": {
+        "de": "Kritisch",
+        "en": "Critical",
+        "es": "Crítico",
+        "fr": "Critique",
+        "it": "Critico",
+        "pt": "Crítico",
+        "pt-BR": "Crítico"
+      }
+    },
+    {
+      "description": {
+        "de": "Multiplikator für kritischen Schaden und kritische Heilung",
+        "en": "Multiplier applied to critical damage and healing",
+        "es": "Multiplicador de los efectos críticos de daño y curación",
+        "fr": "Multiplicateur appliqué aux dégâts et aux soins critiques",
+        "it": "Moltiplicatore degli effetti critici di danno e cura",
+        "pt": "Multiplicador dos efeitos críticos de dano e cura",
+        "pt-BR": "Multiplicador dos efeitos críticos de dano e cura"
+      },
+      "id": "criticalDamage",
+      "name": {
+        "de": "Kritstärke",
+        "en": "Critical Power",
+        "es": "Potencia crítica",
+        "fr": "Puissance Critique",
+        "it": "Potenza critica",
+        "pt": "Poder crítico",
+        "pt-BR": "Poder crítico"
+      }
+    },
+    {
+      "description": {
+        "de": "Wahrscheinlichkeit, dass die Fähigkeit nach dem Einsatz verfügbar bleibt",
+        "en": "Chance for the ability to remain available after use",
+        "es": "Probabilidad de que la habilidad siga disponible tras su uso",
+        "fr": "Probabilité que la compétence reste disponible après utilisation",
+        "it": "Probabilità che l'abilità resti disponibile dopo l'uso",
+        "pt": "Probabilidade de a habilidade continuar disponível após a utilização",
+        "pt-BR": "Chance de a habilidade continuar disponível após o uso"
+      },
+      "id": "echo",
+      "name": {
+        "de": "Echo",
+        "en": "Echo",
+        "es": "Eco",
+        "fr": "Écho",
+        "it": "Eco",
+        "pt": "Eco",
+        "pt-BR": "Eco"
+      }
+    },
+    {
+      "description": {
+        "de": "Reduziert die max. LP des Ziels im Verhältnis zum verursachten Schaden",
+        "en": "Reduces the target's max HP in proportion to the damage dealt",
+        "es": "Reduce los PV máximos del objetivo en proporción al daño infligido",
+        "fr": "Réduit les PV max de la cible, proportionnellement aux dégâts infligés",
+        "it": "Riduce i PV massimi del bersaglio in proporzione ai danni inflitti",
+        "pt": "Reduz os PV máximos do alvo proporcionalmente ao dano causado",
+        "pt-BR": "Reduz os PV máximos do alvo proporcionalmente ao dano causado"
+      },
+      "id": "erosion",
+      "name": {
+        "de": "Erosion",
+        "en": "Erosion",
+        "es": "Erosión",
+        "fr": "Érosion",
+        "it": "Erosione",
+        "pt": "Erosão",
+        "pt-BR": "Erosão"
+      }
+    },
+    {
+      "description": {
+        "de": "Erhöht die Abklingzeiten des Ziels um 1",
+        "en": "Increases the target's cooldowns by 1",
+        "es": "Aumenta en 1 los tiempos de recarga del objetivo",
+        "fr": "Augmente de 1 les temps de recharge de la cible",
+        "it": "Aumenta di 1 i tempi di ricarica del bersaglio",
+        "pt": "Aumenta em 1 os tempos de recarga do alvo",
+        "pt-BR": "Aumenta em 1 os tempos de recarga do alvo"
+      },
+      "id": "eternity",
+      "name": {
+        "de": "Ewigkeit",
+        "en": "Eternity",
+        "es": "Eternidad",
+        "fr": "Éternité",
+        "it": "Eternità",
+        "pt": "Eternidade",
+        "pt-BR": "Eternidade"
+      }
+    },
+    {
+      "description": {
+        "de": "Vom Gegner eingefroren, kann eine Karte während ihres nächsten Zuges nicht handeln; von der eigenen Seite eingefroren, bis zum Ende des nächsten gegnerischen Zuges. Schaden, Heilung oder ein neues Tox zerbricht das Eis und fügt ihr Schaden beim Auftauen zu",
+        "en": "Frozen by the opponent, a card cannot act during its next turn; frozen by its own side, until the end of the opponent's next turn. Damage, a heal or a new Tox shatters the ice and deals thaw damage to it",
+        "es": "Congelada por el adversario, una carta no puede actuar durante su próximo turno; congelada por su propio bando, hasta el final del próximo turno del adversario. Un daño, una curación o un nuevo Tox rompe el hielo y le inflige daño de deshielo",
+        "fr": "Gelée par l'adversaire, une carte ne peut pas agir pendant son prochain tour ; gelée par son propre camp, jusqu'à la fin du prochain tour adverse. Un dégât, un soin ou un nouveau Tox brise la glace et lui inflige des dégâts de dégel",
+        "it": "Congelata dall'avversario, una carta non può agire durante il suo prossimo turno; congelata dal proprio schieramento, fino alla fine del prossimo turno avversario. Un danno, una cura o un nuovo Tox rompe il ghiaccio e le infligge danni da disgelo",
+        "pt": "Congelada pelo adversário, uma carta não pode agir durante o seu próximo turno; congelada pelo seu próprio lado, até ao fim do próximo turno do adversário. Um dano, uma cura ou um novo Tox quebra o gelo e inflige-lhe dano de degelo",
+        "pt-BR": "Congelada pelo adversário, uma carta não pode agir durante o próximo turno; congelada pelo próprio lado, até o fim do próximo turno do adversário. Um dano, uma cura ou um novo Tox quebra o gelo e causa dano de degelo a ela"
+      },
+      "id": "freeze",
+      "name": {
+        "de": "Einfrieren",
+        "en": "Freeze",
+        "es": "Congelación",
+        "fr": "Gel",
+        "it": "Congelamento",
+        "pt": "Congelamento",
+        "pt-BR": "Congelamento"
+      }
+    },
+    {
+      "description": {
+        "de": "Verbleibende Nutzungen vom erlaubten Gesamtwert",
+        "en": "Uses remaining out of the allowed total",
+        "es": "Usos restantes sobre el total permitido",
+        "fr": "Nombre d'utilisations restantes sur le total autorisé",
+        "it": "Utilizzi rimanenti sul totale consentito",
+        "pt": "Utilizações restantes do total permitido",
+        "pt-BR": "Usos restantes do total permitido"
+      },
+      "id": "limitedUse",
+      "name": {
+        "de": "Begrenzte Nutzung",
+        "en": "Limited Use",
+        "es": "Uso limitado",
+        "fr": "Usage limité",
+        "it": "Uso limitato",
+        "pt": "Uso limitado",
+        "pt-BR": "Uso limitado"
+      }
+    },
+    {
+      "description": {
+        "de": "Eine vergiftete Karte erleidet zu Beginn ihres Zuges Giftschaden, basierend auf ihren max. LP zum Zeitpunkt der Vergiftung",
+        "en": "A poisoned card takes poison damage at the start of its turn, based on its max HP at the time of poisoning",
+        "es": "Una carta envenenada sufre daño de veneno al comienzo de su turno, según sus PV máximos en el momento del envenenamiento",
+        "fr": "Une carte empoisonnée subit des dégâts d'empoisonnement au début de son tour, en fonction de ses PV max au moment de l'empoisonnement",
+        "it": "Una carta avvelenata subisce danni da veleno all'inizio del suo turno, in base ai suoi PV massimi al momento dell'avvelenamento",
+        "pt": "Uma carta envenenada sofre dano de veneno no início do seu turno, com base nos seus PV máximos no momento do envenenamento",
+        "pt-BR": "Uma carta envenenada sofre dano de veneno no início de seu turno, com base em seus PV máximos no momento do envenenamento"
+      },
+      "id": "poison",
+      "name": {
+        "de": "Gift",
+        "en": "Poison",
+        "es": "Veneno",
+        "fr": "Poison",
+        "it": "Veleno",
+        "pt": "Veneno",
+        "pt-BR": "Veneno"
+      }
+    },
+    {
+      "description": {
+        "de": "Eine Provokation erzwingt die Zielwahl des Gegners, schränkt aber verbündete Ziele nicht ein",
+        "en": "A taunt forces the opponent's targeting but does not constrain allied targeting",
+        "es": "Una provocación fuerza los objetivos del adversario pero no restringe los objetivos aliados",
+        "fr": "Une provocation force les ciblages de l'adversaire mais ne contraint pas les ciblages alliés",
+        "it": "Una provocazione forza i bersagli dell'avversario ma non vincola i bersagli alleati",
+        "pt": "Uma provocação força os alvos do adversário mas não restringe os alvos aliados",
+        "pt-BR": "Uma provocação força os alvos do adversário mas não restringe os alvos aliados"
+      },
+      "id": "provocation",
+      "name": {
+        "de": "Provokation",
+        "en": "Taunt",
+        "es": "Provocación",
+        "fr": "Provocation",
+        "it": "Provocazione",
+        "pt": "Provocação",
+        "pt-BR": "Provocação"
+      }
+    },
+    {
+      "description": {
+        "de": "Das Ziel oder der Effekt wird zufällig gewählt",
+        "en": "The target or effect is picked at random",
+        "es": "El objetivo o el efecto se elige al azar",
+        "fr": "La cible ou l'effet est tiré au hasard",
+        "it": "Il bersaglio o l'effetto è scelto a caso",
+        "pt": "O alvo ou o efeito é escolhido ao acaso",
+        "pt-BR": "O alvo ou o efeito é escolhido ao acaso"
+      },
+      "id": "random",
+      "name": {
+        "de": "Zufällig",
+        "en": "Random",
+        "es": "Aleatorio",
+        "fr": "Aléatoire",
+        "it": "Casuale",
+        "pt": "Aleatório",
+        "pt-BR": "Aleatório"
+      }
+    },
+    {
+      "description": {
+        "de": "Die Ziele werden zufällig unter den gegnerischen Karten gewählt",
+        "en": "Targets are picked at random among enemy cards",
+        "es": "Los objetivos se eligen al azar entre las cartas enemigas",
+        "fr": "Les cibles sont tirées au hasard parmi les cartes adverses",
+        "it": "I bersagli sono scelti a caso tra le carte nemiche",
+        "pt": "Os alvos são escolhidos ao acaso entre as cartas inimigas",
+        "pt-BR": "Os alvos são escolhidos ao acaso entre as cartas inimigas"
+      },
+      "id": "randomEnemies",
+      "name": {
+        "de": "Zufällige Gegner",
+        "en": "Random enemies",
+        "es": "Enemigos aleatorios",
+        "fr": "Ennemis aléatoires",
+        "it": "Nemici casuali",
+        "pt": "Inimigos aleatórios",
+        "pt-BR": "Inimigos aleatórios"
+      }
+    },
+    {
+      "description": {
+        "de": "Prozentsatz des reduzierten Schadens pro Element",
+        "en": "Percentage of damage reduced for each element",
+        "es": "Porcentaje de daño reducido para cada elemento",
+        "fr": "Pourcentage de dégâts réduits pour chaque élément",
+        "it": "Percentuale di danni ridotti per ogni elemento",
+        "pt": "Percentagem de dano reduzido para cada elemento",
+        "pt-BR": "Porcentagem de dano reduzido para cada elemento"
+      },
+      "id": "resistance",
+      "name": {
+        "de": "Resistenz",
+        "en": "Resistance",
+        "es": "Resistencia",
+        "fr": "Résistance",
+        "it": "Resistenza",
+        "pt": "Resistência",
+        "pt-BR": "Resistência"
+      }
+    },
+    {
+      "description": {
+        "de": "Der Effekt wird nach einmaliger Auslösung verbraucht",
+        "en": "The effect is consumed after it triggers once",
+        "es": "El efecto se consume tras activarse una vez",
+        "fr": "L'effet est consommé après son premier déclenchement",
+        "it": "L'effetto viene consumato dopo essersi attivato una volta",
+        "pt": "O efeito é consumido após a primeira ativação.",
+        "pt-BR": "O efeito é consumido após a primeira ativação."
+      },
+      "id": "singleUse",
+      "name": {
+        "de": "Einmalige Nutzung",
+        "en": "Single use",
+        "es": "Uso único",
+        "fr": "Usage unique",
+        "it": "Uso singolo",
+        "pt": "Uso único",
+        "pt-BR": "Uso único"
+      }
+    },
+    {
+      "description": {
+        "de": "Vernebelt das verbündete Feld nach dem Einsatz eines Angriffs oder einer Heilung",
+        "en": "Enshrouds the allied field after using an attack or a heal",
+        "es": "Enfuma el campo aliado después de usar un ataque o una curación",
+        "fr": "Enfume le terrain allié après l'utilisation d'une attaque ou d'un soin",
+        "it": "Avvolge di fumo il campo alleato dopo l'uso di un attacco o di una cura",
+        "pt": "Enfuma o campo aliado após usar um ataque ou uma cura",
+        "pt-BR": "Enfuma o campo aliado após usar um ataque ou uma cura"
+      },
+      "id": "smoked",
+      "name": {
+        "de": "Vernebelt",
+        "en": "Smoked",
+        "es": "Humo",
+        "fr": "Fumée",
+        "it": "Fumo",
+        "pt": "Fumo",
+        "pt-BR": "Fumaça"
+      }
+    },
+    {
+      "description": {
+        "de": "Ein betäubtes Ziel kann keine Fähigkeiten einsetzen",
+        "en": "A stunned target cannot use abilities",
+        "es": "Un objetivo aturdido no puede lanzar habilidades",
+        "fr": "Une cible étourdie ne peut pas lancer de compétence",
+        "it": "Un bersaglio stordito non può usare abilità",
+        "pt": "Um alvo atordoado não pode usar habilidades",
+        "pt-BR": "Um alvo atordoado não pode usar habilidades"
+      },
+      "id": "stun",
+      "name": {
+        "de": "Betäubung",
+        "en": "Stun",
+        "es": "Aturdimiento",
+        "fr": "Étourdissement",
+        "it": "Stordimento",
+        "pt": "Atordoamento",
+        "pt-BR": "Atordoamento"
+      }
+    },
+    {
+      "description": {
+        "de": "Verringert die Abklingzeiten des Ziels um 1",
+        "en": "Decreases the target's cooldowns by 1",
+        "es": "Reduce en 1 los tiempos de recarga del objetivo",
+        "fr": "Diminue de 1 les temps de recharge de la cible",
+        "it": "Riduce di 1 i tempi di ricarica del bersaglio",
+        "pt": "Diminui em 1 os tempos de recarga do alvo",
+        "pt-BR": "Diminui em 1 os tempos de recarga do alvo"
+      },
+      "id": "temporality",
+      "name": {
+        "de": "Temporalität",
+        "en": "Temporality",
+        "es": "Temporalidad",
+        "fr": "Temporalité",
+        "it": "Temporalità",
+        "pt": "Temporalidade",
+        "pt-BR": "Temporalidade"
+      }
+    },
+    {
+      "description": {
+        "de": "Heilt den Wirker um einen Betrag, der vom verursachten Schaden abhängt",
+        "en": "Heals the caster for an amount tied to the damage dealt",
+        "es": "Cura al lanzador en una cantidad ligada al daño infligido",
+        "fr": "Soigne le lanceur d'un montant lié aux dégâts infligés",
+        "it": "Cura il lanciatore di un valore legato ai danni inflitti",
+        "pt": "Cura o lançador num valor ligado ao dano causado",
+        "pt-BR": "Cura o lançador em um valor ligado ao dano causado"
+      },
+      "id": "vampirism",
+      "name": {
+        "de": "Vampirismus",
+        "en": "Vampirism",
+        "es": "Vampirismo",
+        "fr": "Vampirisme",
+        "it": "Vampirismo",
+        "pt": "Vampirismo",
+        "pt-BR": "Vampirismo"
+      }
+    },
+    {
+      "description": {
+        "de": "Entfernt das letzte Passiv des Ziels",
+        "en": "Removes the target's last passive",
+        "es": "Elimina la última pasiva del objetivo",
+        "fr": "Supprime le dernier passif de la cible",
+        "it": "Rimuove l'ultimo passivo del bersaglio",
+        "pt": "Remove a última passiva do alvo",
+        "pt-BR": "Remove a última passiva do alvo"
+      },
+      "id": "vanish",
+      "name": {
+        "de": "Verschwinden",
+        "en": "Vanish",
+        "es": "Desaparición",
+        "fr": "Disparition",
+        "it": "Svanimento",
+        "pt": "Desaparecimento",
+        "pt-BR": "Desaparecimento"
+      }
+    }
+  ],
   "languages": [
     "de",
     "en",

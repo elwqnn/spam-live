@@ -23,6 +23,7 @@
 		['/decks', m.nav_decks],
 		['/cards', m.nav_cards],
 		['/stats', m.nav_stats],
+		['/glossary', m.nav_glossary],
 		['/import', m.nav_import]
 	] as const;
 	function toggleTheme() {

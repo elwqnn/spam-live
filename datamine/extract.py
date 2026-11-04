@@ -50,6 +50,7 @@ TEXT_KEYS = {
     "talents": lambda r: ("Talent.Name." + r["id"], "Talent.Description." + r["id"]),
     "tox": lambda r: ("Card.Passif." + r["title"].split("_")[0], "Card.PassifDesc." + r["title"].split("_")[0]),
 }
+GLOSSARY = {"keywords": ("Keyword.Title.", "Keyword.Desc."), "effects": ("Card.Effect.", "Card.EffectDesc.")}
 
 
 def camel(name):
@@ -176,6 +177,18 @@ def main(data_dir, out_dir):
         return cells
 
     catalog = {"appVersion": version, "languages": sorted(LANGS.values()), **{name: [] for name in OUT.values()}}
+    skipped = []
+    for name, (title, desc) in GLOSSARY.items():
+        keys = {k[len(p):] for p in (title, desc) for k in texts if k.startswith(p)}
+        catalog[name] = []
+        for key in sorted(keys):
+            record = {"id": key, "name": localize(title + key), "description": localize(desc + key)}
+            if not record["name"] or not record["description"]:
+                skipped.append(f"{name}:{key}")
+                continue
+            if not all(record[field][lang] for field in ("name", "description") for lang in ("en", "fr")):
+                sys.exit(f"{name} {key}: no en or fr text")
+            catalog[name].append(record)
     removed = {name: 0 for name in OUT.values()}
     for key, (full, tree) in trees.items():
         if full not in OUT:
@@ -214,6 +227,7 @@ def main(data_dir, out_dir):
     print(path, *(f"{name}={len(catalog[name])}" for name in OUT.values()))
     print("removed", *(f"{name}={count}" for name, count in removed.items()))
     print("null names", *(f"{name}={sum(1 for r in catalog[name] if not r['name'])}" for name in OUT.values()))
+    print(*(f"{name}={len(catalog[name])}" for name in GLOSSARY), "skipped", *skipped)
 
 
 if __name__ == "__main__":

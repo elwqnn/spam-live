@@ -298,5 +298,14 @@
 	"by_element": "By element",
 	"never_played": "Never played",
 	"more_cards": "{n} more cards",
-	"no_coverage": "No card has a game in this version."
+	"no_coverage": "No card has a game in this version.",
+	"nav_glossary": "Glossary",
+	"glossary_title": "Glossary",
+	"glossary_text": "The keywords, effects, abilities, talents and Tox of the game, with the cards that use them.",
+	"glossary_type": "Type",
+	"glossary_keywords": "Keywords",
+	"glossary_effects": "Effects",
+	"glossary_search": "Search the glossary",
+	"glossary_empty": "No entry matches the search.",
+	"glossary_cards": "Cards"
 }

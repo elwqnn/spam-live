@@ -129,7 +129,7 @@
 					<p class="eyebrow text-[10px] text-muted-foreground">{m.talent()}</p>
 					{#if talent}
 						<p class="text-sm font-semibold">{entryName(talent)}</p>
-						<Description text={talent.description} entry={talent} />
+						<Description text={talent.description} entry={talent} keywords={data.keywords} />
 					{:else}
 						<p class="text-sm">{m.talent_n({ n: deck.talents[i] + 1 })}</p>
 					{/if}

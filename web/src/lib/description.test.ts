@@ -1,11 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { formatDescription } from './description';
+import { formatDescription, matchKeyword } from './description';
 
 type Raw = { id: string; description: Record<string, string | null> | null };
-const catalog: Record<'abilities' | 'talents' | 'tox', Raw[]> = JSON.parse(
-	readFileSync(new URL('../../../catalog/1.28.1.json', import.meta.url), 'utf8')
-);
+type Keyword = { id: string; name: Record<string, string> };
+const catalog: Record<'abilities' | 'talents' | 'tox', Raw[]> & { keywords: Keyword[] } =
+	JSON.parse(readFileSync(new URL('../../../catalog/1.28.1.json', import.meta.url), 'utf8'));
 
 function fmt(kind: 'abilities' | 'talents' | 'tox', id: string, lang: 'en' | 'fr') {
 	const entry = catalog[kind].find((e) => e.id === id);
@@ -172,5 +172,45 @@ describe('formatDescription', () => {
 				}
 			}
 		}
+	});
+});
+
+describe('matchKeyword', () => {
+	const match = (text: string, lang: 'en' | 'fr') =>
+		matchKeyword(
+			text,
+			catalog.keywords.map((k) => ({ id: k.id, name: k.name[lang] }))
+		)?.id ?? null;
+
+	it('matches en keywords by name, then by the longest prefix', () => {
+		const cases = {
+			Taunt: 'provocation',
+			Freeze: 'freeze',
+			Eternity: 'eternity',
+			Random: 'random',
+			Choice: 'choice',
+			'Random enemies': 'randomEnemies',
+			Temporality: 'temporality',
+			Vampirism: 'vampirism',
+			Vanish: 'vanish',
+			Smoked: 'smoked',
+			'AOE II': 'aoe2',
+			'Cost 100 HP': 'cost',
+			'Random enemy': 'random',
+			CHANCE: null,
+			Immunity: null,
+			Mystery: null
+		};
+		for (const [text, id] of Object.entries(cases)) expect(match(text, 'en'), text).toBe(id);
+	});
+
+	it('matches fr keywords on folded text', () => {
+		expect(match('Coût 100 PV', 'fr')).toBe('cost');
+		expect(match('Ennemis Aléatoires', 'fr')).toBe('randomEnemies');
+		expect(match('Ennemi aléatoire', 'fr')).toBe(null);
+	});
+
+	it('needs a space after a prefix', () => {
+		expect(match('Randomly', 'en')).toBe(null);
 	});
 });

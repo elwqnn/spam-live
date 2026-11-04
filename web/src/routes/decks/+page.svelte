@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { href, queryHref } from '#lib';
 	import CardStack from '#lib/components/CardStack.svelte';
@@ -6,6 +7,7 @@
 	import FilterBar from '#lib/components/FilterBar.svelte';
 	import FilterMenu from '#lib/components/FilterMenu.svelte';
 	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
 	import type { Filter } from '#lib/filter.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
@@ -15,6 +17,14 @@
 
 	const catalog = $derived(new Map(data.cards.map((c) => [c.id, c])));
 	const reset = { offset: null, before: null };
+	const kept = $derived(
+		[...page.url.searchParams].filter(([key]) => !['q', 'offset', 'before'].includes(key))
+	);
+	function search(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
+		e.preventDefault();
+		const q = String(new FormData(e.currentTarget).get('q') ?? '').trim();
+		goto(queryHref(page.url, { ...reset, q: [...q].length >= 2 ? q : null }), { reset: false });
+	}
 	const link = (active: boolean) =>
 		buttonVariants({ variant: active ? 'secondary' : 'ghost', size: 'sm' });
 	const filters: Filter[] = $derived([
@@ -64,6 +74,18 @@
 			>
 		</nav>
 	{/if}
+	<form method="GET" role="search" class="w-full sm:w-56" onsubmit={search}>
+		{#each kept as [key, value], i (i)}<input type="hidden" name={key} {value} />{/each}
+		<Input
+			type="search"
+			name="q"
+			maxlength={64}
+			class="h-8"
+			placeholder={m.search()}
+			aria-label={m.search()}
+			value={page.url.searchParams.get('q') ?? ''}
+		/>
+	</form>
 	<div class="min-w-0 flex-1">
 		<FilterBar {filters} {reset}>
 			{#snippet actions()}

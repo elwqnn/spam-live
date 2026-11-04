@@ -97,6 +97,23 @@ function parse(text: string, data: Data, out: Segment[]) {
 	pushText(out, text.slice(last));
 }
 
+export const fold = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase();
+
+export function matchKeyword<T extends { name: string }>(text: string, keywords: readonly T[]) {
+	const needle = fold(text);
+	let best: T | undefined;
+	let length = 0;
+	for (const keyword of keywords) {
+		const name = fold(keyword.name);
+		if (name === needle) return keyword;
+		if (name.length > length && needle.startsWith(`${name} `)) {
+			best = keyword;
+			length = name.length;
+		}
+	}
+	return best;
+}
+
 export function formatDescription(text: string, entry: { data: object }): Segment[] {
 	const out: Segment[] = [];
 	parse(text, entry.data as Data, out);

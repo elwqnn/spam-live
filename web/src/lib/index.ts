@@ -72,4 +72,4 @@ export const closeAfter: SubmitFunction =
 		await update();
 	};
 
-export const fold = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase();
+export { fold } from './description.js';

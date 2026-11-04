@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { api, entryName, fold, type Card, type CardDetail } from '#lib';
+	import { api, entryName, fold, type Card, type CardDetail, type Schemas } from '#lib';
 	import { GUIDE_MAX, chars, issues, pick, type Slot } from '#lib/deck.js';
 	import Description from '#lib/components/Description.svelte';
 	import CardBadge, { ELEMENTS, RARITIES } from '#lib/components/CardBadge.svelte';
@@ -19,11 +19,13 @@
 		cards,
 		deck,
 		details: loaded = [],
+		keywords = [],
 		error
 	}: {
 		cards: Card[];
 		deck?: Deck;
 		details?: (CardDetail | null)[];
+		keywords?: Schemas['Term'][];
 		error?: string | null;
 	} = $props();
 
@@ -175,7 +177,9 @@
 											/>
 											<div class="grid min-w-0 gap-0.5">
 												<label for={tid} class="text-sm font-medium">{entryName(t)}</label>
-												<div id="{tid}-text"><Description text={t.description} entry={t} /></div>
+												<div id="{tid}-text">
+													<Description text={t.description} entry={t} {keywords} />
+												</div>
 											</div>
 										</div>
 									{/each}

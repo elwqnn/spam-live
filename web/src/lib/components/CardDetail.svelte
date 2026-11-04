@@ -14,13 +14,15 @@
 		stats,
 		versions,
 		decks,
-		catalog
+		catalog,
+		keywords
 	}: {
 		card: CardDetail;
 		stats: Schemas['CardStats'] | null;
 		versions: string[];
 		decks: Schemas['DeckItem'][];
 		catalog: ReadonlyMap<string, Schemas['CardBase']>;
+		keywords: Schemas['Term'][];
 	} = $props();
 
 	const resistances = $derived(Object.entries(card.resistances));
@@ -81,7 +83,9 @@
 						{#each card.tox as tox (tox.id)}
 							<li class="grid gap-3 p-4">
 								{@render name(entryName(tox))}
-								{#if tox.description}<Description text={tox.description} entry={tox} />{/if}
+								{#if tox.description}
+									<Description text={tox.description} entry={tox} {keywords} />
+								{/if}
 							</li>
 						{/each}
 					</ul>
@@ -97,7 +101,7 @@
 								{@render name(entryName(ability))}
 								<CardBadge type="cooldown" value={cooldown} />
 							</div>
-							<Description text={ability.description} entry={ability} />
+							<Description text={ability.description} entry={ability} {keywords} />
 						</li>
 					{/each}
 				</ul>
@@ -110,7 +114,7 @@
 						{#each card.talents as talent (talent.id)}
 							<li class="grid content-start gap-3 p-4">
 								{@render name(entryName(talent))}
-								<Description text={talent.description} entry={talent} />
+								<Description text={talent.description} entry={talent} {keywords} />
 							</li>
 						{/each}
 					</ul>

@@ -19,5 +19,11 @@
 	<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">{m.edit_deck()}</h1>
 </div>
 {#key data.deck.id}
-	<DeckForm cards={data.cards} deck={data.deck} details={data.details} error={form?.error} />
+	<DeckForm
+		cards={data.cards}
+		deck={data.deck}
+		details={data.details}
+		keywords={data.keywords}
+		error={form?.error}
+	/>
 {/key}

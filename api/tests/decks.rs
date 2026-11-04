@@ -396,6 +396,37 @@ async fn list_decks_filters(pool: PgPool) {
 }
 
 #[sqlx::test]
+async fn list_decks_search(pool: PgPool) {
+    let app = app(pool.clone());
+    let (_, a) = user(&pool, "76561190000000001").await;
+    let fire = create(&app, &a, "Fire Rush", SEAT0_CARDS).await;
+    let water = create(&app, &a, "Water rush", SEAT1_CARDS).await;
+    let full = create(&app, &a, "100% win", SEAT0_CARDS).await;
+    let plain = create(&app, &a, "100 wins", SEAT1_CARDS).await;
+    let draft = create(&app, &a, "Rush draft", SEAT0_CARDS).await;
+    for id in [fire, water, full, plain] {
+        action(&app, &a, id, "publish").await;
+    }
+    sqlx::query("UPDATE decks SET published_at = now() - make_interval(hours => id::int) WHERE status = 'public'")
+        .execute(&pool)
+        .await
+        .unwrap();
+    let search = |q: &str| get(&format!("/api/decks?sort=recent&q={q}"), "");
+    assert_eq!(ids(&send(&app, search("RUSH")).await.body), [fire, water]);
+    assert_eq!(ids(&send(&app, search("%20%20ush%20")).await.body), [fire, water]);
+    assert_eq!(ids(&send(&app, search("0%25")).await.body), [full]);
+    assert_eq!(ids(&send(&app, search("0_")).await.body), Vec::<i64>::new());
+    assert_eq!(ids(&send(&app, search("rush&limit=1")).await.body), [fire]);
+    assert_eq!(ids(&send(&app, search(&format!("rush&card={}", SEAT1_CARDS[0]))).await.body), [water]);
+    assert_eq!(ids(&send(&app, get("/api/decks?author=me&sort=recent&q=draft", &a)).await.body), [draft]);
+    assert_eq!(ids(&send(&app, search("draft")).await.body), Vec::<i64>::new());
+    for bad in ["r", "%20r%20", "", &"r".repeat(65)] {
+        assert_eq!(send(&app, search(bad)).await.status, StatusCode::BAD_REQUEST, "{bad}");
+    }
+    assert_eq!(send(&app, search(&"r".repeat(64))).await.status, StatusCode::OK);
+}
+
+#[sqlx::test]
 async fn votes(pool: PgPool) {
     let app = app(pool.clone());
     let (_, a) = user(&pool, "76561190000000001").await;

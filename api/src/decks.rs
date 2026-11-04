@@ -385,6 +385,8 @@ pub struct DeckQuery {
     #[param(maximum = 10_000)]
     pub offset: Option<i64>,
     pub before: Option<DateTime<Utc>>,
+    #[param(min_length = 2, max_length = 64)]
+    pub q: Option<String>,
 }
 
 #[utoipa::path(get, path = "/api/decks", tag = "decks", params(DeckQuery),
@@ -392,7 +394,7 @@ pub struct DeckQuery {
         description = "Public decks. author=me lists the decks of the caller with drafts. \
             Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. \
             games, wins and winRate are the stats of the deck key for the latest catalog version. \
-            winRate is null below 20 games."),
+            winRate is null below 20 games. q matches part of the deck name, without case."),
         (status = 400, body = ErrorBody), (status = 401, body = ErrorBody)))]
 pub async fn list_decks(
     State(s): State<AppState>,
@@ -411,6 +413,13 @@ pub async fn list_decks(
     if !(0..=MAX_OFFSET).contains(&offset) {
         return Err(bad(format!("offset must be from 0 to {MAX_OFFSET}")));
     }
+    let name = match q.q.as_deref().map(str::trim) {
+        None => None,
+        Some(t) if (2..=64).contains(&t.chars().count()) => {
+            Some(format!("%{}%", t.replace('\\', "\\\\").replace('%', "\\%").replace('_', "\\_")))
+        }
+        Some(_) => return Err(bad("q must have 2 to 64 characters")),
+    };
     let order = match q.sort.unwrap_or_default() {
         DeckSort::Votes => "votes DESC, d.id DESC",
         DeckSort::Recent => "COALESCE(d.published_at, d.created_at) DESC, d.id DESC",
@@ -427,6 +436,7 @@ pub async fn list_decks(
          WHERE ($1::bigint IS NULL OR d.author_id = $1) AND (d.status = 'public' OR $2)
              AND ($3::uuid IS NULL OR $3 = ANY (d.cards))
              AND ($4::timestamptz IS NULL OR COALESCE(d.published_at, d.created_at) < $4)
+             AND ($8::text IS NULL OR d.name ILIKE $8)
          ORDER BY {order} LIMIT $5 OFFSET $7"
     )))
     .bind(author)
@@ -436,6 +446,7 @@ pub async fn list_decks(
     .bind(q.limit.unwrap_or(50).clamp(1, 100))
     .bind(s.catalog.latest())
     .bind(offset)
+    .bind(name)
     .fetch_all(&s.db)
     .await?;
     Ok(Json(decks))

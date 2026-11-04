@@ -420,6 +420,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/glossary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["glossary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/glossary/keywords": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["glossary_keywords"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/matches": {
         parameters: {
             query?: never;
@@ -744,6 +776,16 @@ export interface components {
             name: string;
             rarity?: string | null;
         };
+        Glossary: {
+            abilities: components["schemas"]["GlossaryEntry"][];
+            effects: components["schemas"]["Term"][];
+            keywords: components["schemas"]["Term"][];
+            talents: components["schemas"]["GlossaryEntry"][];
+            tox: components["schemas"]["GlossaryEntry"][];
+        };
+        GlossaryEntry: components["schemas"]["Entry"] & {
+            cards: string[];
+        };
         GuideHtml: {
             html: string;
         };
@@ -870,6 +912,11 @@ export interface components {
         Status: "new" | "known" | "rejected";
         /** @enum {string} */
         TargetType: "deck" | "comment";
+        Term: {
+            description?: string | null;
+            id: string;
+            name: string;
+        };
         UnknownCard: {
             /** Format: uuid */
             cardId: string;
@@ -1404,6 +1451,7 @@ export interface operations {
                 limit?: number;
                 offset?: number;
                 before?: string;
+                q?: string;
             };
             header?: never;
             path?: never;
@@ -1411,7 +1459,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Public decks. author=me lists the decks of the caller with drafts. Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. games, wins and winRate are the stats of the deck key for the latest catalog version. winRate is null below 20 games. */
+            /** @description Public decks. author=me lists the decks of the caller with drafts. Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. games, wins and winRate are the stats of the deck key for the latest catalog version. winRate is null below 20 games. q matches part of the deck name, without case. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2045,6 +2093,83 @@ export interface operations {
             };
             /** @description error is authorization_pending, expired_token or invalid_grant */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    glossary: {
+        parameters: {
+            query?: {
+                version?: string;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Keywords, effects, and the abilities, talents and Tox that cards use. cards is sorted by card order. Entries without a name are left out. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Glossary"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    glossary_keywords: {
+        parameters: {
+            query?: {
+                version?: string;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Term"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

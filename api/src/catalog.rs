@@ -25,6 +25,10 @@ struct File {
     abilities: Vec<RawEntry>,
     talents: Vec<RawEntry>,
     tox: Vec<RawEntry>,
+    #[serde(default)]
+    keywords: Vec<RawEntry>,
+    #[serde(default)]
+    effects: Vec<RawEntry>,
 }
 
 #[derive(Deserialize)]
@@ -66,6 +70,8 @@ struct Version {
     abilities: HashMap<String, RawEntry>,
     talents: HashMap<String, RawEntry>,
     tox: HashMap<String, RawEntry>,
+    keywords: Vec<RawEntry>,
+    effects: Vec<RawEntry>,
 }
 
 pub struct Catalog {
@@ -114,7 +120,17 @@ impl Version {
                 return Err(format!("card {} refers to unknown id {id:?}", card.id));
             }
         }
-        Ok(Self { name: file.app_version, key, languages: file.languages, cards: file.cards, abilities, talents, tox })
+        Ok(Self {
+            name: file.app_version,
+            key,
+            languages: file.languages,
+            cards: file.cards,
+            abilities,
+            talents,
+            tox,
+            keywords: file.keywords,
+            effects: file.effects,
+        })
     }
 }
 
@@ -168,7 +184,7 @@ impl Catalog {
 
 fn tr(text: &Text, lang: &str) -> Option<String> {
     let text = text.as_ref()?;
-    let get = |l: &str| text.get(l).cloned().flatten();
+    let get = |l: &str| text.get(l).cloned().flatten().filter(|t| !t.is_empty());
     get(lang).or_else(|| get("en"))
 }
 
@@ -322,6 +338,79 @@ fn entry(e: &RawEntry, lang: &str) -> Entry {
     Entry { id: e.id.clone(), name: tr(&e.name, lang), description: tr(&e.description, lang), data: e.data.clone() }
 }
 
+#[derive(Serialize, ToSchema)]
+pub struct Term {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct GlossaryEntry {
+    #[serde(flatten)]
+    pub entry: Entry,
+    pub cards: Vec<Uuid>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct Glossary {
+    pub keywords: Vec<Term>,
+    pub effects: Vec<Term>,
+    pub abilities: Vec<GlossaryEntry>,
+    pub talents: Vec<GlossaryEntry>,
+    pub tox: Vec<GlossaryEntry>,
+}
+
+fn terms(list: &[RawEntry], lang: &str) -> Vec<Term> {
+    list.iter()
+        .filter_map(|e| {
+            Some(Term { id: e.id.clone(), name: tr(&e.name, lang)?, description: tr(&e.description, lang) })
+        })
+        .collect()
+}
+
+fn used(
+    list: &HashMap<String, RawEntry>,
+    cards: &[&RawCard],
+    lang: &str,
+    has: impl Fn(&RawCard, &str) -> bool,
+) -> Vec<GlossaryEntry> {
+    let mut out: Vec<_> = list
+        .values()
+        .filter_map(|e| {
+            let ids: Vec<Uuid> = cards.iter().filter(|c| has(c, &e.id)).map(|c| c.id).collect();
+            let entry = entry(e, lang);
+            (!ids.is_empty() && entry.name.is_some()).then_some(GlossaryEntry { entry, cards: ids })
+        })
+        .collect();
+    out.sort_by(|a, b| a.entry.id.cmp(&b.entry.id));
+    out
+}
+
+#[utoipa::path(get, path = "/api/glossary", tag = "catalog", params(CardQuery),
+    responses((status = 200, body = Glossary, description = "Keywords, effects, and the abilities, talents and Tox \
+        that cards use. cards is sorted by card order. Entries without a name are left out."),
+        (status = 400, body = crate::ErrorBody), (status = 404, body = crate::ErrorBody)))]
+pub async fn glossary(State(s): State<AppState>, Query(q): Query<CardQuery>) -> Result<Response, ApiError> {
+    let (v, lang) = s.catalog.select(&q)?;
+    let mut cards: Vec<&RawCard> = v.cards.iter().collect();
+    cards.sort_by_key(|c| c.order);
+    Ok(public(Glossary {
+        keywords: terms(&v.keywords, lang),
+        effects: terms(&v.effects, lang),
+        abilities: used(&v.abilities, &cards, lang, |c, id| c.active_abilities.iter().any(|a| a.id == id)),
+        talents: used(&v.talents, &cards, lang, |c, id| c.talents.iter().any(|t| t == id)),
+        tox: used(&v.tox, &cards, lang, |c, id| c.passive_abilities.iter().any(|t| t == id)),
+    }))
+}
+
+#[utoipa::path(get, path = "/api/glossary/keywords", tag = "catalog", params(CardQuery),
+    responses((status = 200, body = Vec<Term>), (status = 400, body = crate::ErrorBody), (status = 404, body = crate::ErrorBody)))]
+pub async fn glossary_keywords(State(s): State<AppState>, Query(q): Query<CardQuery>) -> Result<Response, ApiError> {
+    let (v, lang) = s.catalog.select(&q)?;
+    Ok(public(terms(&v.keywords, lang)))
+}
+
 #[utoipa::path(get, path = "/api/catalog/versions", tag = "catalog",
     responses((status = 200, body = Vec<CatalogVersion>, description = "Newest version first")))]
 pub async fn versions(State(s): State<AppState>) -> Response {
@@ -382,4 +471,6 @@ pub fn routes() -> Router<AppState> {
         .route("/api/catalog/versions", get(versions))
         .route("/api/cards", get(list_cards))
         .route("/api/cards/{id}", get(get_card))
+        .route("/api/glossary", get(glossary))
+        .route("/api/glossary/keywords", get(glossary_keywords))
 }

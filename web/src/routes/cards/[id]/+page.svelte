@@ -14,4 +14,11 @@
 	{#if card.description}<meta name="description" content={card.description} />{/if}
 </svelte:head>
 
-<CardDetail {card} stats={data.stats} versions={data.versions} decks={data.decks} {catalog} />
+<CardDetail
+	{card}
+	stats={data.stats}
+	versions={data.versions}
+	decks={data.decks}
+	{catalog}
+	keywords={data.keywords}
+/>

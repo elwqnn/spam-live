@@ -22,6 +22,8 @@ export const load: PageLoad = async ({ fetch, url, parent, untrack }) => {
 			: Math.min(MAX_OFFSET, Math.max(0, Math.floor(Number(query.get('offset')) || 0)));
 	const before = (sort === 'recent' && query.get('before')) || undefined;
 	const card = query.get('card') || undefined;
+	const q = query.get('q')?.trim() ?? '';
+	const search = [...q].length >= 2 && [...q].length <= 64 ? q : undefined;
 	const [cards, decks] = await Promise.all([
 		client.GET('/api/cards', { params: { query: { lang: getLocale() } } }),
 		client.GET('/api/decks', {
@@ -32,6 +34,7 @@ export const load: PageLoad = async ({ fetch, url, parent, untrack }) => {
 					offset: offset || undefined,
 					before,
 					author: mine ? 'me' : undefined,
+					q: search,
 					limit: PAGE_SIZE + 1
 				}
 			}

@@ -8,6 +8,9 @@ export const load: PageLoad = async ({ fetch, url, params, untrack }) => {
 		untrack(() => url.origin)
 	);
 	const path = { params: { path: { id: Number(params.id) } } };
+	const keywords = client.GET('/api/glossary/keywords', {
+		params: { query: { lang: getLocale() } }
+	});
 	const deck = ok(await client.GET('/api/decks/{id}', path));
 	const [comments, ...cards] = await Promise.all([
 		deck.status === 'public'
@@ -20,5 +23,5 @@ export const load: PageLoad = async ({ fetch, url, params, untrack }) => {
 			return data ?? null;
 		})
 	]);
-	return { deck, cards, comments: comments ?? [] };
+	return { deck, cards, comments: comments ?? [], keywords: (await keywords).data ?? [] };
 };

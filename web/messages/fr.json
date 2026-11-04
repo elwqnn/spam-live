@@ -298,5 +298,14 @@
 	"by_element": "Par élément",
 	"never_played": "Jamais jouées",
 	"more_cards": "{n} autres cartes",
-	"no_coverage": "Aucune carte n'a de partie dans cette version."
+	"no_coverage": "Aucune carte n'a de partie dans cette version.",
+	"nav_glossary": "Glossaire",
+	"glossary_title": "Glossaire",
+	"glossary_text": "Les mots-clés, effets, capacités, talents et Tox du jeu, avec les cartes qui les utilisent.",
+	"glossary_type": "Type",
+	"glossary_keywords": "Mots-clés",
+	"glossary_effects": "Effets",
+	"glossary_search": "Rechercher dans le glossaire",
+	"glossary_empty": "Aucune entrée ne correspond à la recherche.",
+	"glossary_cards": "Cartes"
 }

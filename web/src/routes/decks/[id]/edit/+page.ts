@@ -8,9 +8,10 @@ export const load: PageLoad = async ({ fetch, url, params, parent }) => {
 	if (!me) redirect(303, loginHref(url));
 	const client = api(fetch, url.origin);
 	const lang = getLocale();
-	const [cards, deck] = await Promise.all([
+	const [cards, deck, keywords] = await Promise.all([
 		client.GET('/api/cards', { params: { query: { lang } } }),
-		client.GET('/api/decks/{id}', { params: { path: { id: Number(params.id) } } })
+		client.GET('/api/decks/{id}', { params: { path: { id: Number(params.id) } } }),
+		client.GET('/api/glossary/keywords', { params: { query: { lang } } })
 	]);
 	const detail = ok(deck);
 	if (detail.authorId !== me.id) error(404, 'Not Found');
@@ -22,5 +23,5 @@ export const load: PageLoad = async ({ fetch, url, params, parent }) => {
 			return data ?? null;
 		})
 	);
-	return { cards: ok(cards), deck: detail, details };
+	return { cards: ok(cards), deck: detail, details, keywords: keywords.data ?? [] };
 };
