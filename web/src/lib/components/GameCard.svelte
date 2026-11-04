@@ -25,7 +25,7 @@
 </script>
 
 <div class={cn('card', className)} data-element={card.element}>
-	<div class="outline"></div>
+	<div class="rim"></div>
 	<div class="masked">
 		<img class="art" src="/art/card/{card.id}.webp" alt="" loading="lazy" decoding="async" />
 		<div class="header"></div>
@@ -36,7 +36,7 @@
 	<img class="badge" src="/art/ui/element_{card.element}.webp" alt="" />
 	<img class="gem" src="/art/ui/card_rarity_{tier(card.rarity)}.webp" alt="" />
 	{#each rows as row, i (i)}
-		<div class="row" style:top="{ROWS[i]}%">
+		<div class="slot" style:top="{ROWS[i]}%">
 			{#if row.tox === undefined}
 				<div class="ability-bg"></div>
 				{#if row.element}
@@ -86,10 +86,10 @@
 	}
 	.card > *,
 	.masked > *,
-	.row > * {
+	.slot > * {
 		position: absolute;
 	}
-	.outline {
+	.rim {
 		inset: -1.201% -1.753%;
 		background: #000;
 		mask: url(/art/ui/card_mask.webp) 0 0 / 100% 100%;
@@ -146,7 +146,7 @@
 		width: 30%;
 		height: 10.488%;
 	}
-	.row {
+	.slot {
 		left: 2.5%;
 		width: 95%;
 		height: 10.64%;
