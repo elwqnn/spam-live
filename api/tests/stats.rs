@@ -106,8 +106,11 @@ async fn deck_stats(pool: PgPool) {
     let res = send(&app, get("/api/stats/decks", "")).await;
     assert_eq!(res.status, StatusCode::OK);
     assert_eq!(res.headers["cache-control"], "public, max-age=300");
-    let current =
-        json!([row(&d.a, 20, 12, Some(12.0 / 20.0)), row(&d.b, 23, 8, Some(8.0 / 23.0)), row(&d.c, 3, 2, None),]);
+    let current = json!([
+        row(&d.c, 3, 2, Some(2.0 / 3.0)),
+        row(&d.a, 20, 12, Some(12.0 / 20.0)),
+        row(&d.b, 23, 8, Some(8.0 / 23.0)),
+    ]);
     assert_eq!(res.body, current);
     assert_eq!(send(&app, get("/api/stats/decks?version=1.28.1&sort=winrate", "")).await.body, current);
 
@@ -122,10 +125,10 @@ async fn deck_stats(pool: PgPool) {
     let all = send(&app, get("/api/stats/decks?version=all", "")).await.body;
     assert_eq!(
         all,
-        json!([row(&d.a, 22, 12, Some(12.0 / 22.0)), row(&d.b, 23, 8, Some(8.0 / 23.0)), row(&d.c, 5, 4, None)])
+        json!([row(&d.c, 5, 4, Some(0.8)), row(&d.a, 22, 12, Some(12.0 / 22.0)), row(&d.b, 23, 8, Some(8.0 / 23.0))])
     );
     let old = send(&app, get("/api/stats/decks?version=1.27.0", "")).await.body;
-    assert_eq!(old, json!([row(&d.a, 2, 0, None), row(&d.c, 2, 2, None)]));
+    assert_eq!(old, json!([row(&d.c, 2, 2, Some(1.0)), row(&d.a, 2, 0, Some(0.0))]));
     assert_eq!(send(&app, get("/api/stats/decks?version=9.9.9", "")).await.body, json!([]));
     assert_eq!(send(&app, get("/api/stats/decks?version=latest", "")).await.status, StatusCode::BAD_REQUEST);
 }
@@ -149,8 +152,8 @@ async fn card_stats(pool: PgPool) {
         a(2),
         a(3),
         a(4),
-        card(k(9), 3, 2, None, t),
-        card(k(10), 3, 2, None, t),
+        card(k(9), 3, 2, Some(2.0 / 3.0), t),
+        card(k(10), 3, 2, Some(2.0 / 3.0), t),
     ]);
     assert_eq!(res.body, expected);
     assert_eq!(send(&app, get("/api/stats/cards?version=1.28.1", "")).await.body, expected);
@@ -158,10 +161,10 @@ async fn card_stats(pool: PgPool) {
     let all = send(&app, get("/api/stats/cards?version=all", "")).await.body;
     let find = |id: Uuid| all.as_array().unwrap().iter().find(|c| c["card"] == json!(id)).unwrap().clone();
     assert_eq!(find(k(1)), card(k(1), 27, 16, Some(16.0 / 27.0), 50.0));
-    assert_eq!(find(k(9)), card(k(9), 5, 4, None, 50.0));
+    assert_eq!(find(k(9)), card(k(9), 5, 4, Some(0.8), 50.0));
     assert_eq!(all.as_array().unwrap().len(), 10);
     let old = send(&app, get("/api/stats/cards?version=1.27.0", "")).await.body;
-    assert_eq!(old[0], card(k(1), 4, 2, None, 4.0));
+    assert_eq!(old[0], card(k(1), 4, 2, Some(0.5), 4.0));
     assert_eq!(old.as_array().unwrap().len(), 7);
 }
 
@@ -174,7 +177,7 @@ async fn deck_detail_stats_and_winrate_sort(pool: PgPool) {
     let shuffled = [d.a[2], d.a[0], d.a[3], d.a[1]];
     let other = [k(11), k(12), k(13), k(14)];
     let mut ids = Vec::new();
-    for cards in [&shuffled[..], &d.b, &d.c, &other] {
+    for cards in [&shuffled[..], &d.b, &d.c, &other, &d.c] {
         let body = json!({ "name": "S", "cards": cards, "talents": [0, 0, 0, 0] });
         ids.push(send(&app, req("POST", "/api/decks", &a, Some(body))).await.body["id"].as_i64().unwrap());
     }
@@ -194,18 +197,24 @@ async fn deck_detail_stats_and_winrate_sort(pool: PgPool) {
     send(&app, req("PUT", &format!("/api/decks/{}/vote", ids[2]), &b, None)).await;
     let sorted = send(&app, get("/api/decks?sort=winrate", "")).await.body;
     let order: Vec<_> = sorted.as_array().unwrap().iter().map(|d| d["id"].as_i64().unwrap()).collect();
-    assert_eq!(order, [ids[0], ids[1], ids[2], ids[3]]);
+    assert_eq!(order, [ids[2], ids[4], ids[0], ids[1], ids[3]]);
     let list_stats: Vec<Value> =
         sorted.as_array().unwrap().iter().map(|d| json!([d["games"], d["wins"], d["winRate"]])).collect();
     assert_eq!(
         list_stats,
-        [json!([20, 12, 0.6]), json!([23, 8, 8.0 / 23.0]), json!([3, 2, null]), json!([0, 0, null])]
+        [
+            json!([3, 2, 2.0 / 3.0]),
+            json!([3, 2, 2.0 / 3.0]),
+            json!([20, 12, 0.6]),
+            json!([23, 8, 8.0 / 23.0]),
+            json!([0, 0, null])
+        ]
     );
     let page = |offset: i64| get(&format!("/api/decks?sort=winrate&limit=2&offset={offset}"), "");
     let pages = [send(&app, page(0)).await.body, send(&app, page(2)).await.body, send(&app, page(4)).await.body];
     let paged: Vec<Vec<i64>> =
         pages.iter().map(|p| p.as_array().unwrap().iter().map(|d| d["id"].as_i64().unwrap()).collect()).collect();
-    assert_eq!(paged, [vec![ids[0], ids[1]], vec![ids[2], ids[3]], vec![]]);
+    assert_eq!(paged, [vec![ids[2], ids[4]], vec![ids[0], ids[1]], vec![ids[3]]]);
 }
 
 fn ids(cards: [&str; 4]) -> Vec<Uuid> {
@@ -221,6 +230,10 @@ fn pts(win: f64, play: f64) -> [Option<f64>; 2] {
     [win, play].map(|v| Some((v * 1e9).round()))
 }
 
+fn at(days: i32, seat0: &[Uuid], seat1: &[Uuid], winner: i16) -> M {
+    M { days, ..m(seat0, seat1, Some(winner)) }
+}
+
 fn without_changes(body: &Value) -> Vec<Value> {
     let strip = |c: &Value| json!([c["card"], c["games"], c["wins"], c["winRate"], c["playRate"]]);
     body.as_array().unwrap().iter().map(strip).collect()
@@ -231,7 +244,6 @@ async fn card_stats_week_trend(pool: PgPool) {
     let (a, b) = (ids(SEAT0_CARDS), ids(SEAT1_CARDS));
     let c = vec![a[0], a[1], b[0], b[1]];
     let n = &mut 0;
-    let at = |days, seat0: &[Uuid], seat1: &[Uuid], winner| M { days, ..m(seat0, seat1, Some(winner)) };
     add(&pool, n, at(1, &a, &b, 0), 12).await;
     add(&pool, n, at(1, &a, &b, 1), 8).await;
     add(&pool, n, at(1, &c, &b, 0), 5).await;
@@ -247,7 +259,7 @@ async fn card_stats_week_trend(pool: PgPool) {
     assert_eq!(res.headers["cache-control"], "public, max-age=300");
     assert_eq!(changes(&res.body, a[2]), pts(12.0 / 20.0 - 8.0 / 20.0, 20.0 / 50.0 - 20.0 / 40.0));
     assert_eq!(changes(&res.body, a[0]), pts(17.0 / 25.0 - 8.0 / 21.0, 25.0 / 50.0 - 21.0 / 40.0));
-    assert_eq!(changes(&res.body, b[2]), [None, None]);
+    assert_eq!(changes(&res.body, b[2]), pts(8.0 / 25.0 - 12.0 / 19.0, 25.0 / 50.0 - 19.0 / 40.0));
     assert_eq!(send(&app, get("/api/stats/cards?trend=week&version=1.28.1", "")).await.body, res.body);
 
     let all = send(&app, get("/api/stats/cards?version=all", "")).await.body;
@@ -255,6 +267,23 @@ async fn card_stats_week_trend(pool: PgPool) {
     let old = send(&app, get("/api/stats/cards?version=1.27.0", "")).await.body;
     assert_eq!(changes(&old, a[2]), [None, None]);
     assert_eq!(send(&app, get("/api/stats/cards?trend=other", "")).await.status, StatusCode::BAD_REQUEST);
+}
+
+#[sqlx::test]
+async fn card_stats_week_trend_one_game(pool: PgPool) {
+    let deck = |s: u32| (s..s + 4).map(k).collect::<Vec<_>>();
+    let (a, b, c, d) = (deck(1), deck(5), deck(9), deck(13));
+    let n = &mut 0;
+    add(&pool, n, at(1, &a, &b, 0), 1).await;
+    add(&pool, n, at(8, &a, &b, 1), 1).await;
+    add(&pool, n, at(1, &c, &d, 0), 1).await;
+    let app = app(pool.clone());
+
+    let res = send(&app, get("/api/stats/cards", "")).await.body;
+    assert_eq!(changes(&res, a[0]), pts(1.0 / 1.0 - 0.0 / 1.0, 1.0 / 4.0 - 1.0 / 2.0));
+    assert_eq!(changes(&res, b[0]), pts(0.0 / 1.0 - 1.0 / 1.0, 1.0 / 4.0 - 1.0 / 2.0));
+    assert_eq!(changes(&res, c[0]), [None, None]);
+    assert_eq!(changes(&res, d[0]), [None, None]);
 }
 
 fn test_catalog(versions: &[&str]) -> Catalog {

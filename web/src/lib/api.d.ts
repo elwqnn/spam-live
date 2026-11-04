@@ -1495,7 +1495,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Public decks. author=me lists the decks of the caller with drafts. Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. games, wins and winRate are the stats of the deck key for the latest catalog version. winRate is null below 20 games. q matches part of the deck name, without case. */
+            /** @description Public decks. author=me lists the decks of the caller with drafts. Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. games, wins and winRate are the stats of the deck key for the latest catalog version. winRate is null at 0 games. q matches part of the deck name, without case. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2514,7 +2514,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description playRate = deck results with the card / all deck results. winRate is null below 20 games. winRateChange and playRateChange = period A - period B, as fractions. trend week (default): A is the last 7 days and B is the 7 days before, on the match end time, in the selected version. trend version: A is the selected version and B is the catalog version before it. The changes are null below 20 games in A or in B, and in version mode for all or a version that is not in the catalog. */
+            /** @description playRate = deck results with the card / all deck results. winRate is null at 0 games. winRateChange and playRateChange = period A - period B, as fractions. trend week (default): A is the last 7 days and B is the 7 days before, on the match end time, in the selected version. trend version: A is the selected version and B is the catalog version before it. The changes are null when A or B has 0 games, and in version mode for all, for the oldest version and for a version that is not in the catalog. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2547,7 +2547,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Ranked human matches, not disputed, no mirror. winRate is null below 20 games. */
+            /** @description Ranked human matches, not disputed, no mirror. winRate is null at 0 games. */
             200: {
                 headers: {
                     [name: string]: unknown;

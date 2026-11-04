@@ -394,7 +394,7 @@ pub struct DeckQuery {
         description = "Public decks. author=me lists the decks of the caller with drafts. \
             Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. \
             games, wins and winRate are the stats of the deck key for the latest catalog version. \
-            winRate is null below 20 games. q matches part of the deck name, without case."),
+            winRate is null at 0 games. q matches part of the deck name, without case."),
         (status = 400, body = ErrorBody), (status = 401, body = ErrorBody)))]
 pub async fn list_decks(
     State(s): State<AppState>,

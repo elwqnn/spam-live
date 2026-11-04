@@ -14,7 +14,7 @@ export const load: PageLoad = async ({ fetch, url, untrack }) => {
 	]);
 	return {
 		cards: cards.data ?? [],
-		top: (top.data ?? []).filter((d) => d.winRate != null),
+		top: top.data ?? [],
 		recent: recent.data ?? []
 	};
 };

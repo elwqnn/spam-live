@@ -98,7 +98,7 @@ pub struct CardStats {
 
 #[utoipa::path(get, path = "/api/stats/decks", tag = "stats", params(DeckStatsQuery),
     responses((status = 200, body = Vec<DeckKeyStats>,
-        description = "Ranked human matches, not disputed, no mirror. winRate is null below 20 games."),
+        description = "Ranked human matches, not disputed, no mirror. winRate is null at 0 games."),
         (status = 400, body = ErrorBody)))]
 pub async fn deck_stats(State(s): State<AppState>, Query(q): Query<DeckStatsQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
@@ -121,11 +121,11 @@ pub async fn deck_stats(State(s): State<AppState>, Query(q): Query<DeckStatsQuer
 
 #[utoipa::path(get, path = "/api/stats/cards", tag = "stats", params(CardStatsQuery),
     responses((status = 200, body = Vec<CardStats>,
-        description = "playRate = deck results with the card / all deck results. winRate is null below 20 games. \
+        description = "playRate = deck results with the card / all deck results. winRate is null at 0 games. \
             winRateChange and playRateChange = period A - period B, as fractions. trend week (default): A is the last \
             7 days and B is the 7 days before, on the match end time, in the selected version. trend version: A is the \
-            selected version and B is the catalog version before it. The changes are null below 20 games in A or in \
-            B, and in version mode for all or a version that is not in the catalog."),
+            selected version and B is the catalog version before it. The changes are null when A or B has 0 games, \
+            and in version mode for all, for the oldest version and for a version that is not in the catalog."),
         (status = 400, body = ErrorBody)))]
 pub async fn card_stats(State(s): State<AppState>, Query(q): Query<CardStatsQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
@@ -150,7 +150,7 @@ pub async fn card_stats(State(s): State<AppState>, Query(q): Query<CardStatsQuer
          )
          SELECT g.card, games, wins, win_rate(games, wins) AS win_rate, games::float8 / t.n AS play_rate,
              win_rate(ga, wa) - win_rate(gb, wb) AS win_rate_change,
-             CASE WHEN ga >= 20 AND gb >= 20 THEN ga::float8 / t.na - gb::float8 / t.nb END AS play_rate_change
+             CASE WHEN ga > 0 AND gb > 0 THEN ga::float8 / t.na - gb::float8 / t.nb END AS play_rate_change
          FROM g CROSS JOIN t WHERE games > 0 ORDER BY games DESC, g.card",
     )
     .bind(version)
