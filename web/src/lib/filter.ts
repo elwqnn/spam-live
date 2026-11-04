@@ -1,0 +1,16 @@
+export type FilterOption = { value: string; label: string; count?: number };
+
+export type Filter = {
+	id: string;
+	label: string;
+	multiple?: boolean;
+	default?: string;
+	options: FilterOption[];
+};
+
+export const selection = (param: string | null) => param?.split(',').filter(Boolean) ?? [];
+
+export function toggle(values: string[], value: string) {
+	const next = values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
+	return next.length ? next.join(',') : null;
+}

@@ -203,7 +203,7 @@
 					<Table.Row>
 						<Table.Cell class="font-mono text-xs break-all whitespace-normal">{c.cardId}</Table.Cell
 						>
-						<Table.Cell class="text-right font-mono tabular-nums">{c.seenCount}</Table.Cell>
+						<Table.Cell class="text-right tabular-nums">{c.seenCount}</Table.Cell>
 						<Table.Cell><Time iso={c.firstSeen} /></Table.Cell>
 						<Table.Cell><Time iso={c.lastSeen} /></Table.Cell>
 					</Table.Row>

@@ -16,5 +16,5 @@
 			></span>
 		{/if}
 	</span>
-	<span class="w-14 text-right font-mono text-[13px] tabular-nums">{percent(value)}</span>
+	<span class="w-14 text-right text-[13px] tabular-nums">{percent(value)}</span>
 </span>

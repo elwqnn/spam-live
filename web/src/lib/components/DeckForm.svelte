@@ -3,9 +3,8 @@
 	import { api, entryName, fold, type Card, type CardDetail } from '#lib';
 	import { GUIDE_MAX, chars, issues, pick, type Slot } from '#lib/deck.js';
 	import Description from '#lib/components/Description.svelte';
-	import ElementBadge, { ELEMENTS } from '#lib/components/ElementBadge.svelte';
+	import CardBadge, { ELEMENTS, RARITIES } from '#lib/components/CardBadge.svelte';
 	import Guide from '#lib/components/Guide.svelte';
-	import RarityBadge, { RARITIES } from '#lib/components/RarityBadge.svelte';
 	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import * as NativeSelect from '#lib/components/ui/native-select/index.js';
@@ -123,7 +122,7 @@
 	<section class="grid gap-3" aria-labelledby="slots-title">
 		<h2 id="slots-title" class="font-heading text-2xl font-medium tracking-tight">
 			{m.your_cards()}
-			<span class="font-mono text-muted-foreground tabular-nums">{picked.length}/4</span>
+			<span class="text-muted-foreground tabular-nums">{picked.length}/4</span>
 		</h2>
 		<ol class="grid gap-3 md:grid-cols-2">
 			{#each slots as slot, i (i)}
@@ -143,11 +142,9 @@
 								{card ? (card.name ?? slot.id) : `${m.unknown_card()} ${slot.id.slice(0, 8)}`}
 							</span>
 							{#if card}
-								<ElementBadge element={card.element} />
-								<RarityBadge rarity={card.rarity} />
-								<span class="font-mono text-xs text-muted-foreground tabular-nums"
-									>{m.hp()} {card.hp}</span
-								>
+								<CardBadge type="element" value={card.element} />
+								<CardBadge type="rarity" value={card.rarity} />
+								<span class="text-xs text-muted-foreground tabular-nums">{m.hp()} {card.hp}</span>
 							{/if}
 						</div>
 						<div class="flex flex-wrap gap-2">
@@ -231,11 +228,9 @@
 				{@const action = chosen ? m.picked() : target !== null ? m.replace() : m.add()}
 				<li class="flex flex-wrap items-center gap-2 px-3 py-2">
 					<span class="text-sm font-medium">{card.name ?? card.id}</span>
-					<ElementBadge element={card.element} />
-					<RarityBadge rarity={card.rarity} />
-					<span class="font-mono text-xs text-muted-foreground tabular-nums"
-						>{m.hp()} {card.hp}</span
-					>
+					<CardBadge type="element" value={card.element} />
+					<CardBadge type="rarity" value={card.rarity} />
+					<span class="text-xs text-muted-foreground tabular-nums">{m.hp()} {card.hp}</span>
 					<Button
 						variant="outline"
 						size="xs"

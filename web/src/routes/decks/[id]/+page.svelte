@@ -4,6 +4,7 @@
 	import { closeAfter, entryName, href, loginHref, percent } from '#lib';
 	import Author from '#lib/components/Author.svelte';
 	import DeckCards from '#lib/components/DeckCards.svelte';
+	import DeckSummary from '#lib/components/DeckSummary.svelte';
 	import Description from '#lib/components/Description.svelte';
 	import Dialog from '#lib/components/Dialog.svelte';
 	import Guide from '#lib/components/Guide.svelte';
@@ -39,7 +40,7 @@
 
 <div class="grid gap-8">
 	<div class="grid gap-3">
-		<a class="mono-label text-muted-foreground hover:text-foreground" href={href('/decks')}
+		<a class="eyebrow text-muted-foreground hover:text-foreground" href={href('/decks')}
 			><span aria-hidden="true">←</span> {m.all_decks()}</a
 		>
 		<div class="flex flex-wrap items-center gap-2">
@@ -49,9 +50,9 @@
 			{#if !open}<Badge variant="secondary">{m.draft()}</Badge>{/if}
 		</div>
 		<div
-			class="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-muted-foreground"
+			class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground tabular-nums"
 		>
-			<span class="flex min-w-0 font-sans text-sm text-foreground">
+			<span class="flex min-w-0 text-sm text-foreground">
 				<Author name={deck.authorName} avatar={deck.authorAvatar} />
 			</span>
 			<span>{m.version_label({ version: deck.appVersion })}</span>
@@ -82,7 +83,7 @@
 					</Button>
 				</form>
 			{:else}
-				<span class="font-mono text-sm tabular-nums">{m.votes()}: {deck.votes}</span>
+				<span class="text-sm tabular-nums">{m.votes()}: {deck.votes}</span>
 			{/if}
 			{#if me && open && !author}<Report type="deck" id={deck.id} />{/if}
 			{#if author}
@@ -117,13 +118,15 @@
 		{@render alert('delete')}
 	</div>
 
+	<DeckSummary {deck} cards={data.cards} />
+
 	<section class="grid gap-3">
 		<h2 class="font-heading text-2xl font-medium tracking-tight">{m.cards_title()}</h2>
 		<DeckCards tiles cards={deck.cards} {catalog}>
 			{#snippet below(i)}
 				{@const talent = data.cards[i]?.talents[deck.talents[i]]}
 				<div class="grid gap-1">
-					<p class="mono-label text-[10px] text-muted-foreground">{m.talent()}</p>
+					<p class="eyebrow text-[10px] text-muted-foreground">{m.talent()}</p>
 					{#if talent}
 						<p class="text-sm font-semibold">{entryName(talent)}</p>
 						<Description text={talent.description} entry={talent} />
@@ -150,19 +153,19 @@
 		<div class="grid gap-3 sm:grid-cols-2">
 			{#each stats as [label, s] (label)}
 				<div class="grid gap-3 rounded-xl border bg-card p-4">
-					<h3 class="mono-label text-muted-foreground">{label}</h3>
+					<h3 class="eyebrow text-muted-foreground">{label}</h3>
 					<dl class="grid grid-cols-3 gap-2">
 						<div class="grid gap-0.5">
-							<dt class="mono-label text-[10px] text-muted-foreground">{m.games()}</dt>
-							<dd class="font-mono text-2xl tabular-nums">{s.games}</dd>
+							<dt class="eyebrow text-[10px] text-muted-foreground">{m.games()}</dt>
+							<dd class="text-2xl tabular-nums">{s.games}</dd>
 						</div>
 						<div class="grid gap-0.5">
-							<dt class="mono-label text-[10px] text-muted-foreground">{m.wins()}</dt>
-							<dd class="font-mono text-2xl tabular-nums">{s.wins}</dd>
+							<dt class="eyebrow text-[10px] text-muted-foreground">{m.wins()}</dt>
+							<dd class="text-2xl tabular-nums">{s.wins}</dd>
 						</div>
 						<div class="grid gap-0.5">
-							<dt class="mono-label text-[10px] text-muted-foreground">{m.win_rate()}</dt>
-							<dd class="font-mono text-2xl tabular-nums">{percent(s.winRate)}</dd>
+							<dt class="eyebrow text-[10px] text-muted-foreground">{m.win_rate()}</dt>
+							<dd class="text-2xl tabular-nums">{percent(s.winRate)}</dd>
 						</div>
 					</dl>
 				</div>
@@ -174,7 +177,7 @@
 		<section class="grid gap-3">
 			<h2 class="font-heading text-2xl font-medium tracking-tight">
 				{m.comments()}
-				<span class="font-mono text-muted-foreground tabular-nums">{data.comments.length}</span>
+				<span class="text-muted-foreground tabular-nums">{data.comments.length}</span>
 			</h2>
 			{#if data.comments.length}
 				<ul class="grid gap-3">

@@ -1,9 +1,10 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn-svelte/tailwind.css';
-@import '@fontsource-variable/funnel-sans';
-@import '@fontsource-variable/lora';
-@import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource-variable/dm-sans';
+@import '@fontsource/dm-serif-display';
+@import '@fontsource/dm-mono/400.css';
+@import '@fontsource/dm-mono/500.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -42,6 +43,11 @@
 	--el-shadow: #9a7fd0;
 	--el-light: #e8c95a;
 	--el-divine: #d987b4;
+	--plum: #543b78;
+	--terra: #e36140;
+	--straw: #edc966;
+	--slate: #4585b3;
+	--moss: #6b9e5e;
 }
 
 .dark {
@@ -99,9 +105,14 @@
 }
 
 @theme inline {
-	--font-sans: 'Funnel Sans Variable', ui-sans-serif, system-ui, sans-serif;
-	--font-heading: 'Lora Variable', Georgia, serif;
-	--font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+	--font-sans: 'DM Sans Variable', ui-sans-serif, system-ui, sans-serif;
+	--font-heading: 'DM Serif Display', Georgia, serif;
+	--font-mono: 'DM Mono', ui-monospace, monospace;
+	--color-plum: var(--plum);
+	--color-terra: var(--terra);
+	--color-straw: var(--straw);
+	--color-slate: var(--slate);
+	--color-moss: var(--moss);
 	--color-tile: var(--tile);
 	--color-row: var(--row);
 	--color-board: var(--board);
@@ -152,8 +163,8 @@
 	}
 }
 
-@utility mono-label {
-	font-family: var(--font-mono);
+@utility eyebrow {
+	font-family: var(--font-sans);
 	font-size: 11px;
 	font-weight: 500;
 	letter-spacing: 0.06em;

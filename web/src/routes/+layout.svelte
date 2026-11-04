@@ -49,7 +49,7 @@
 				{#each nav as [path, label] (path)}
 					<a
 						class={[
-							'mono-label text-xs transition-colors',
+							'eyebrow text-xs transition-colors',
 							hero
 								? 'underline-offset-4 hover:underline'
 								: 'text-muted-foreground hover:text-foreground'
@@ -61,7 +61,7 @@
 			<div class="ml-auto flex min-w-0 items-center gap-3">
 				{#if data.me}
 					{#if data.me.isAdmin}
-						<a class="mono-label text-xs hover:underline" href={href('/admin')}>{m.nav_admin()}</a>
+						<a class="eyebrow text-xs hover:underline" href={href('/admin')}>{m.nav_admin()}</a>
 					{/if}
 					<a
 						class="flex min-w-0 items-center gap-2 text-sm hover:underline"
@@ -104,7 +104,7 @@
 			<p class="basis-full text-[13px] text-muted-foreground sm:basis-auto">
 				{m.footer_disclaimer()}
 			</p>
-			<a class="mono-label text-muted-foreground hover:text-foreground" href={href('/privacy')}
+			<a class="eyebrow text-muted-foreground hover:text-foreground" href={href('/privacy')}
 				>{m.footer_privacy()}</a
 			>
 			<div class="flex items-center gap-3 sm:ml-auto">
@@ -115,7 +115,7 @@
 						hreflang={locale}
 						rel="external"
 						aria-current={locale === getLocale() ? 'true' : undefined}
-						class="mono-label text-muted-foreground hover:text-foreground aria-current:text-foreground"
+						class="eyebrow text-muted-foreground hover:text-foreground aria-current:text-foreground"
 						>{locale}</a
 					>
 				{/each}

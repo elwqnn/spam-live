@@ -32,7 +32,7 @@ export const queryHref = (
 		if (value) params.set(key, value);
 		else params.delete(key);
 	}
-	const search = params.toString();
+	const search = params.toString().replaceAll('%2C', ',');
 	return resolve((url.pathname + (search ? `?${search}` : '')) as Path);
 };
 

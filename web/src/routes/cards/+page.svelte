@@ -2,28 +2,30 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { fold, queryHref } from '#lib';
-	import CardTile from '#lib/components/CardTile.svelte';
-	import { ELEMENTS } from '#lib/components/ElementBadge.svelte';
-	import { RARITIES } from '#lib/components/RarityBadge.svelte';
+	import { ELEMENTS, RARITIES } from '#lib/components/CardBadge.svelte';
+	import CardList from '#lib/components/CardList.svelte';
+	import FilterMenu from '#lib/components/FilterMenu.svelte';
 	import { Input } from '#lib/components/ui/input/index.js';
-	import * as NativeSelect from '#lib/components/ui/native-select/index.js';
+	import { selection, type Filter } from '#lib/filter.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
-	const q = $derived(page.url.searchParams.get('q') ?? '');
-	const element = $derived(page.url.searchParams.get('element') ?? '');
-	const rarity = $derived(page.url.searchParams.get('rarity') ?? '');
-	const sort = $derived(page.url.searchParams.get('sort') ?? 'order');
+	const query = $derived(page.url.searchParams);
+	const q = $derived(query.get('q') ?? '');
+	const elements = $derived(selection(query.get('element')));
+	const rarities = $derived(selection(query.get('rarity')).map((r) => `rarity-${r}`));
+	const sort = $derived(query.get('sort') ?? 'order');
+	const stats = $derived(new Map(data.stats.map((s) => [s.card, s])));
 
 	const cards = $derived.by(() => {
 		const needle = fold(q.trim());
 		const list = data.cards.filter(
 			(c) =>
-				(!element || c.element === element) &&
-				(!rarity || c.rarity === `rarity-${rarity}`) &&
+				(!elements.length || elements.includes(c.element)) &&
+				(!rarities.length || rarities.includes(c.rarity)) &&
 				(!needle || fold(c.name ?? c.id).includes(needle))
 		);
 		if (sort === 'name')
@@ -32,12 +34,42 @@
 		return list.sort((a, b) => a.order - b.order);
 	});
 
-	function set(key: string, value: string) {
-		goto(queryHref(page.url, { [key]: value === (key === 'sort' ? 'order' : '') ? null : value }), {
-			replace: true,
-			reset: false
-		});
-	}
+	const count = (key: 'element' | 'rarity', value: string) =>
+		data.cards.filter((c) => c[key] === value).length;
+
+	const filters: Filter[] = $derived([
+		{
+			id: 'element',
+			label: m.filter_element(),
+			multiple: true,
+			options: Object.entries(ELEMENTS).map(([value, [label]]) => ({
+				value,
+				label: label(),
+				count: count('element', value)
+			}))
+		},
+		{
+			id: 'rarity',
+			label: m.filter_rarity(),
+			multiple: true,
+			options: Object.entries(RARITIES).map(([key, label]) => ({
+				value: key.replace('rarity-', ''),
+				label: label(),
+				count: count('rarity', key)
+			}))
+		}
+	]);
+
+	const sorts: Filter = $derived({
+		id: 'sort',
+		label: m.sort(),
+		default: 'order',
+		options: [
+			{ value: 'order', label: m.sort_order() },
+			{ value: 'name', label: m.sort_name() },
+			{ value: 'hp', label: m.sort_hp() }
+		]
+	});
 </script>
 
 <svelte:head>
@@ -45,57 +77,25 @@
 </svelte:head>
 
 <div class="grid gap-6">
-	<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.cards_title()}</h1>
-
-	<div class="flex flex-wrap gap-2">
+	<div class="flex flex-wrap items-end justify-between gap-4">
+		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.cards_title()}</h1>
 		<Input
 			type="search"
 			class="w-full sm:w-64"
 			placeholder={m.search()}
 			aria-label={m.search()}
 			value={q}
-			oninput={(e) => set('q', e.currentTarget.value)}
+			oninput={(e) =>
+				goto(queryHref(page.url, { q: e.currentTarget.value || null }), {
+					replace: true,
+					reset: false
+				})}
 		/>
-		<NativeSelect.Root
-			aria-label={m.filter_element()}
-			value={element}
-			onchange={(e) => set('element', e.currentTarget.value)}
-		>
-			<NativeSelect.Option value="">{m.all_elements()}</NativeSelect.Option>
-			{#each Object.entries(ELEMENTS) as [key, [name]] (key)}
-				<NativeSelect.Option value={key}>{name()}</NativeSelect.Option>
-			{/each}
-		</NativeSelect.Root>
-		<NativeSelect.Root
-			aria-label={m.filter_rarity()}
-			value={rarity}
-			onchange={(e) => set('rarity', e.currentTarget.value)}
-		>
-			<NativeSelect.Option value="">{m.all_rarities()}</NativeSelect.Option>
-			{#each Object.entries(RARITIES) as [key, name] (key)}
-				<NativeSelect.Option value={key.replace('rarity-', '')}>{name()}</NativeSelect.Option>
-			{/each}
-		</NativeSelect.Root>
-		<NativeSelect.Root
-			aria-label={m.sort()}
-			value={sort}
-			onchange={(e) => set('sort', e.currentTarget.value)}
-		>
-			<NativeSelect.Option value="order">{m.sort_order()}</NativeSelect.Option>
-			<NativeSelect.Option value="name">{m.sort_name()}</NativeSelect.Option>
-			<NativeSelect.Option value="hp">{m.sort_hp()}</NativeSelect.Option>
-		</NativeSelect.Root>
 	</div>
 
-	{#if cards.length}
-		<ul
-			class="grid grid-cols-2 gap-3 rounded-2xl border board p-3 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] sm:gap-4 sm:p-5"
-		>
-			{#each cards as card, i (card.id)}
-				<li><CardTile {card} index={i} /></li>
-			{/each}
-		</ul>
-	{:else}
-		<p class="text-sm text-muted-foreground">{m.no_cards()}</p>
-	{/if}
+	<CardList {cards} {stats} {filters}>
+		{#snippet actions()}
+			<FilterMenu filter={sorts} />
+		{/snippet}
+	</CardList>
 </div>

@@ -71,9 +71,7 @@
 							<span class="font-medium">{modeName(match.gameMode)}</span>
 							{#if match.isAi}<Badge variant="outline">{m.ai()}</Badge>{/if}
 							{#if match.disputed}<Badge variant="destructive">{m.disputed()}</Badge>{/if}
-							<span
-								class="flex flex-wrap gap-x-3 font-mono text-xs text-muted-foreground tabular-nums"
-							>
+							<span class="flex flex-wrap gap-x-3 text-xs text-muted-foreground tabular-nums">
 								<Time iso={match.startUtc} />
 								<span>{m.version_label({ version: match.appVersion })}</span>
 								<span>{m.duration({ time: duration(match.durationMs) })}</span>

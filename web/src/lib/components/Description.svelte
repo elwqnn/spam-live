@@ -2,7 +2,7 @@
 	import { Badge } from '#lib/components/ui/badge/index.js';
 	import { formatDescription } from '#lib/description.js';
 	import { m } from '#lib/paraglide/messages.js';
-	import ElementBadge from './ElementBadge.svelte';
+	import CardBadge from './CardBadge.svelte';
 
 	let { text, entry }: { text?: string | null; entry: { data: object } } = $props();
 
@@ -11,8 +11,9 @@
 
 <p class="text-sm leading-6">
 	{#each segments as s, i (i)}{#if s.type === 'text'}{s.text}{:else if s.type === 'br'}<br
-			/>{:else if s.type === 'element'}<ElementBadge
-				element={s.element}
+			/>{:else if s.type === 'element'}<CardBadge
+				type="element"
+				value={s.element}
 				label={s.label}
 			/>{:else if s.type === 'keyword'}<Badge variant="secondary">{s.text}</Badge
 			>{:else if s.type === 'value'}<span

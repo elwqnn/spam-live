@@ -4,10 +4,11 @@
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
 
 	export const buttonVariants = tv({
-		base: "group/button spring inline-flex shrink-0 items-center justify-center rounded-sm border border-transparent bg-clip-padding font-mono text-xs font-medium tracking-[.06em] whitespace-nowrap uppercase outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-96 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_[data-icon=inline-end]]:spring motion-safe:hover:[&_[data-icon=inline-end]]:translate-x-[3px] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		base: "group/button spring inline-flex shrink-0 items-center justify-center rounded-sm border border-transparent bg-clip-padding text-xs font-medium tracking-[.06em] whitespace-nowrap uppercase outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-96 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_[data-icon=inline-end]]:spring motion-safe:hover:[&_[data-icon=inline-end]]:translate-x-[3px] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 		variants: {
 			variant: {
-				default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+				default:
+					'relative isolate overflow-hidden bg-primary text-primary-foreground hover:bg-primary/90',
 				outline:
 					'border-foreground/25 hover:border-foreground/60 aria-expanded:border-foreground/60',
 				secondary:
@@ -46,6 +47,8 @@
 </script>
 
 <script lang="ts">
+	import LiveLines from '#lib/components/LiveLines.svelte';
+
 	let {
 		class: className,
 		variant = 'default',
@@ -70,6 +73,7 @@
 		tabindex={disabled ? -1 : undefined}
 		{...restProps}
 	>
+		{#if variant === 'default'}<LiveLines />{/if}
 		{@render children?.()}
 	</a>
 {:else}
@@ -81,6 +85,7 @@
 		{disabled}
 		{...restProps}
 	>
+		{#if variant === 'default'}<LiveLines />{/if}
 		{@render children?.()}
 	</button>
 {/if}

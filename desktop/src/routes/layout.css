@@ -1,9 +1,10 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn-svelte/tailwind.css';
-@import '@fontsource-variable/funnel-sans';
-@import '@fontsource-variable/lora';
-@import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource-variable/dm-sans';
+@import '@fontsource/dm-serif-display';
+@import '@fontsource/dm-mono/400.css';
+@import '@fontsource/dm-mono/500.css';
 
 :root {
 	color-scheme: dark;
@@ -34,6 +35,11 @@
 	--el-shadow: #9a7fd0;
 	--el-light: #e8c95a;
 	--el-divine: #d987b4;
+	--plum: #543b78;
+	--terra: #e36140;
+	--straw: #edc966;
+	--slate: #4585b3;
+	--moss: #6b9e5e;
 }
 
 .el-fire {
@@ -59,9 +65,14 @@
 }
 
 @theme inline {
-	--font-sans: 'Funnel Sans Variable', system-ui, sans-serif;
-	--font-heading: 'Lora Variable', Georgia, serif;
-	--font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+	--font-sans: 'DM Sans Variable', system-ui, sans-serif;
+	--font-heading: 'DM Serif Display', Georgia, serif;
+	--font-mono: 'DM Mono', ui-monospace, monospace;
+	--color-plum: var(--plum);
+	--color-terra: var(--terra);
+	--color-straw: var(--straw);
+	--color-slate: var(--slate);
+	--color-moss: var(--moss);
 	--ease-spring: cubic-bezier(0.3, 1.6, 0.5, 1);
 	--color-on-shader: #fbf8f0;
 	--color-ring: var(--ring);
@@ -96,7 +107,7 @@
 }
 
 @utility eyebrow {
-	@apply font-mono text-[10px] font-medium tracking-[.08em] text-muted-foreground uppercase;
+	@apply font-sans text-[10px] font-medium tracking-[.08em] text-muted-foreground uppercase;
 }
 
 @utility spring {
@@ -121,7 +132,7 @@
 }
 
 @utility shader-fallback {
-	background: linear-gradient(120deg, #54395f, #c9583a 55%, #d9a94c);
+	background: linear-gradient(120deg, var(--plum), var(--terra) 55%, var(--straw));
 }
 
 @utility pulse {

@@ -7,7 +7,9 @@ export const load: PageLoad = async ({ fetch, url, untrack }) => {
 		fetch,
 		untrack(() => url.origin)
 	);
-	return {
-		cards: ok(await client.GET('/api/cards', { params: { query: { lang: getLocale() } } }))
-	};
+	const [cards, stats] = await Promise.all([
+		client.GET('/api/cards', { params: { query: { lang: getLocale() } } }),
+		client.GET('/api/stats/cards')
+	]);
+	return { cards: ok(cards), stats: stats.data ?? [] };
 };

@@ -102,7 +102,7 @@
 <div class="flex h-dvh flex-col overflow-hidden">
 	<header class="relative h-[132px] flex-none overflow-hidden text-on-shader">
 		<ShaderBackground />
-		<div class="grain absolute inset-0 opacity-[.28]" aria-hidden="true"></div>
+		<div class="grain absolute inset-0 opacity-[.08]" aria-hidden="true"></div>
 		<div class="absolute inset-0 band-scrim" aria-hidden="true"></div>
 		<div class="relative flex flex-col gap-[18px] px-5 py-[18px]">
 			<div class="flex items-center gap-2">
@@ -113,7 +113,7 @@
 							type="button"
 							lang={locale}
 							aria-pressed={locale === getLocale()}
-							class="cursor-pointer px-1 py-0.5 font-mono text-[11px] font-normal tracking-[.06em] uppercase decoration-2 underline-offset-4 hover:underline aria-pressed:font-bold aria-pressed:underline"
+							class="cursor-pointer px-1 py-0.5 text-[11px] font-normal tracking-[.06em] uppercase decoration-2 underline-offset-4 hover:underline aria-pressed:font-bold aria-pressed:underline"
 							onclick={() => setLocale(locale)}>{locale}</button
 						>
 					{/each}
@@ -205,7 +205,12 @@
 					<p class="text-destructive">{m.folder_none()}</p>
 				{/if}
 				<form class="flex gap-2" onsubmit={save}>
-					<Input bind:value={path} aria-label={m.folder_input()} placeholder={m.folder_input()} />
+					<Input
+						bind:value={path}
+						class="font-mono"
+						aria-label={m.folder_input()}
+						placeholder={m.folder_input()}
+					/>
 					<Button type="submit" variant="outline" disabled={!path.trim()}>{m.folder_save()}</Button>
 				</form>
 				{#if status.custom}
@@ -227,7 +232,7 @@
 							{last.kind === 'matches' ? m.last_matches() : m.last_decks()}
 						</Badge>
 						<time
-							class="ml-auto font-mono text-[11px] text-muted-foreground tabular-nums"
+							class="ml-auto text-[11px] text-muted-foreground tabular-nums"
 							datetime={new Date(last.at).toISOString()}
 							>{new Date(last.at).toLocaleString(getLocale())}</time
 						>
@@ -247,7 +252,7 @@
 										]}
 									></span>
 									<span class="flex-1">{STATUS[key]?.() ?? key}</span>
-									<span class="font-mono text-xs tabular-nums">{n}</span>
+									<span class="text-xs tabular-nums">{n}</span>
 								</li>
 							{/each}
 							{#each last.reasons as reason (reason)}
@@ -294,7 +299,7 @@
 					aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg
 				></Button
 			>
-			<span class="ml-auto font-mono text-[11px] text-muted-foreground tabular-nums"
+			<span class="ml-auto text-[11px] text-muted-foreground tabular-nums"
 				>{m.version({ version: status.version })}</span
 			>
 		</footer>

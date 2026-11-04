@@ -13,7 +13,7 @@
 
 <div class="grid gap-6">
 	<div class="grid gap-2">
-		<a class="mono-label text-muted-foreground hover:text-foreground" href={href('/decks')}
+		<a class="eyebrow text-muted-foreground hover:text-foreground" href={href('/decks')}
 			><span aria-hidden="true">←</span> {m.all_decks()}</a
 		>
 		<h1 class="font-heading text-3xl font-medium tracking-tight sm:text-4xl">{m.new_deck()}</h1>
