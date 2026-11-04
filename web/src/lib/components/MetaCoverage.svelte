@@ -38,7 +38,20 @@
 			</span>
 			{@render bar(count.played / count.total, 'bg-foreground/70')}
 		{:else}
-			<span class="truncate">{ELEMENTS[key]?.[0]() ?? key}</span>
+			<span class="flex min-w-0 items-center gap-2">
+				<span class="flex w-10 shrink-0">
+					{#if Object.hasOwn(ELEMENTS, key)}
+						<img
+							src="/art/ui/element_{key}.webp"
+							alt=""
+							aria-hidden="true"
+							decoding="async"
+							class="size-5"
+						/>
+					{/if}
+				</span>
+				<span class="truncate">{ELEMENTS[key]?.() ?? key}</span>
+			</span>
 			{@render bar(count.played / count.total, `el-${key} bg-(--el)`)}
 		{/if}
 		<span class="text-right text-[13px] text-muted-foreground tabular-nums"

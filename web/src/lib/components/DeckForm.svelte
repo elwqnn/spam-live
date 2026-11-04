@@ -217,7 +217,7 @@
 				/>
 				<NativeSelect.Root aria-label={m.filter_element()} bind:value={element}>
 					<NativeSelect.Option value="">{m.all_elements()}</NativeSelect.Option>
-					{#each Object.entries(ELEMENTS) as [key, [label]] (key)}
+					{#each Object.entries(ELEMENTS) as [key, label] (key)}
 						<NativeSelect.Option value={key}>{label()}</NativeSelect.Option>
 					{/each}
 				</NativeSelect.Root>

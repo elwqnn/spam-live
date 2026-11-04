@@ -8,7 +8,7 @@
 	}: { rarity: string; tooltip?: boolean; class?: string } = $props();
 
 	const label = $derived(RARITIES[rarity]?.() ?? rarity);
-	const pips = $derived(Object.keys(RARITIES).indexOf(rarity) + 1);
+	const tier = $derived(rarity.replace(/^rarity-/, ''));
 </script>
 
 <span
@@ -16,23 +16,17 @@
 	title={tooltip ? label : undefined}
 	aria-hidden={tooltip ? undefined : 'true'}
 >
-	{#if pips}
-		<svg
-			class="h-[7px] w-auto"
-			viewBox="0 0 {pips * 9 - 2} 7"
-			fill="currentColor"
+	{#if Object.hasOwn(RARITIES, rarity)}
+		<img
+			src="/art/ui/card_rarity_{tier}.webp"
+			alt=""
 			aria-hidden="true"
-		>
-			{#each Array.from({ length: pips }, (_, i) => i * 9) as x (x)}
-				<path d="M{x + 3.5} 0l3.5 3.5-3.5 3.5-3.5-3.5z" />
-			{/each}
-		</svg>
+			decoding="async"
+			class="h-4 w-8 max-w-none object-contain"
+		/>
 	{:else}
 		<span class="text-[10px] leading-none font-semibold" aria-hidden="true"
-			>{rarity
-				.replace(/^rarity-/, '')
-				.charAt(0)
-				.toUpperCase()}</span
+			>{tier.charAt(0).toUpperCase()}</span
 		>
 	{/if}
 	{#if tooltip}<span class="sr-only">{label}</span>{/if}

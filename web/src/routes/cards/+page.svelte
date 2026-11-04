@@ -45,7 +45,7 @@
 			id: 'element',
 			label: m.filter_element(),
 			multiple: true,
-			options: Object.entries(ELEMENTS).map(([value, [label]]) => ({
+			options: Object.entries(ELEMENTS).map(([value, label]) => ({
 				value,
 				label: label(),
 				count: count('element', value)
