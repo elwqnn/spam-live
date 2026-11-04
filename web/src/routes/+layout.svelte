@@ -102,7 +102,7 @@
 	<title>{m.site_name()}</title>
 </svelte:head>
 
-<div class="flex min-h-dvh flex-col overflow-x-clip lg:px-8">
+<div class="sides flex min-h-dvh flex-col overflow-x-clip lg:px-8">
 	<header
 		class="head mx-auto flex w-full max-w-300 flex-wrap items-center gap-x-8 gap-y-3 px-4 py-4 sm:px-6 sm:py-5 lg:border-x"
 	>

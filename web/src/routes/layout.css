@@ -49,6 +49,10 @@
 	--straw: #edc966;
 	--slate: #4585b3;
 	--moss: #6b9e5e;
+	--side: clamp(1.5rem, (100vw - 75rem) / 6, 4rem);
+	--reach: 10rem;
+	--contour: color-mix(in oklab, var(--foreground) 12%, transparent);
+	--contour-glow: color-mix(in oklab, var(--terra) 28%, transparent);
 }
 
 .dark {
@@ -77,6 +81,8 @@
 	--grain: 0.05;
 	--el-mix: 100%;
 	--el-tint: #f2f1ea;
+	--contour: color-mix(in oklab, var(--foreground) 14%, transparent);
+	--contour-glow: color-mix(in oklab, var(--terra) 40%, transparent);
 	color-scheme: dark;
 }
 
@@ -177,18 +183,50 @@
 			content: '';
 			position: absolute;
 			top: -5px;
-			left: -5px;
+			left: calc(-5px - var(--reach));
 			z-index: 1;
-			width: 9px;
+			width: calc(9px + var(--reach));
 			height: 9px;
 			background:
-				linear-gradient(var(--cross), var(--cross)) center / 1px 100% no-repeat,
-				linear-gradient(var(--cross), var(--cross)) center / 100% 1px no-repeat;
+				linear-gradient(var(--cross), var(--cross)) right 4px top 0 / 1px 100% no-repeat,
+				linear-gradient(var(--cross), var(--cross)) right 0 center / 9px 1px no-repeat,
+				linear-gradient(var(--cross), var(--cross)) right calc(var(--side) + 3px) center / 3px 3px
+					no-repeat,
+				linear-gradient(to left, var(--border) calc(var(--side) - 4px), transparent) left center /
+					calc(100% - 9px) 1px no-repeat;
 			pointer-events: none;
 		}
 		& > * + *::after {
-			right: -5px;
+			right: calc(-5px - var(--reach));
 			left: auto;
+			transform: scaleX(-1);
+		}
+	}
+}
+
+@utility sides {
+	@variant lg {
+		position: relative;
+		&::before,
+		&::after {
+			content: '';
+			position: absolute;
+			inset-block: 0;
+			width: var(--side);
+			background: linear-gradient(var(--contour-glow), var(--contour) 40rem);
+			mask:
+				url(/contours.svg) 0 0 / 4rem 96rem repeat-y,
+				linear-gradient(#000 0 0) left / 1px 100% no-repeat;
+			pointer-events: none;
+		}
+		&::before {
+			right: calc(100% - max(2rem, 50% - 37.5rem));
+		}
+		&::after {
+			left: calc(100% - max(2rem, 50% - 37.5rem));
+			mask-position:
+				0 48rem,
+				right;
 		}
 	}
 }

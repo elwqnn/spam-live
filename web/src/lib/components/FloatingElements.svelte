@@ -6,7 +6,7 @@
 	const KEYS = Object.keys(ELEMENTS);
 	const SIDES: [string, number, Icon[]][] = [
 		[
-			'left-0 right-[calc(50%+37.5rem)]',
+			'left-0 right-[calc(50%+37.5rem+var(--side))]',
 			0,
 			[
 				[38, 9, 0.25, 9, 2],
@@ -19,7 +19,7 @@
 			]
 		],
 		[
-			'right-0 left-[calc(50%+37.5rem)]',
+			'right-0 left-[calc(50%+37.5rem+var(--side))]',
 			3,
 			[
 				[58, 13, 0.7, 12, 5],
