@@ -7,77 +7,105 @@
 	import { Button } from './ui/button/index.js';
 
 	let { version }: { version?: string | null } = $props();
+
+	const tagline = m.home_app_tagline();
 </script>
 
-<section class="track">
+<section class="track" data-cta>
+	<div class="snap" aria-hidden="true"></div>
 	<div class="stage relative isolate flex items-center justify-center text-[#fbf8f0]">
 		<div class="frame absolute inset-0 overflow-hidden">
 			<div class="media absolute inset-0"><ShaderBackground /></div>
 		</div>
+		<p
+			aria-hidden="true"
+			class="tagline absolute font-heading leading-none tracking-[-0.025em] whitespace-nowrap italic"
+			style:--n={tagline.length}
+		>
+			{tagline}
+		</p>
 		<div
-			class="relative flex w-full flex-col items-center gap-5 px-(--gutter) py-20 text-center sm:py-24"
+			class="rest relative flex w-full flex-col items-center gap-5 px-(--gutter) py-20 text-center sm:py-24"
 		>
 			<h2
-				class="title font-heading text-3xl/tight font-normal tracking-[-0.025em] text-balance italic sm:text-4xl/tight xl:text-5xl/tight"
+				class="font-heading text-3xl/tight font-normal tracking-[-0.025em] text-balance italic sm:text-4xl/tight xl:text-5xl/tight"
 			>
 				{m.home_app_title()}
 			</h2>
-			<div class="rest flex flex-col items-center gap-5">
-				<p class="max-w-xl text-lg text-balance">{m.home_app_text()}</p>
-				{#if version}
-					<p class="text-sm tabular-nums">{m.download_version({ version })}</p>
-				{/if}
-				<Button
-					size="lg"
-					href={href('/download')}
-					class="border-[#f2ead3] bg-[#f2ead3] text-[#171715] hover:bg-[#fbf4df]"
-					><HugeiconsIcon icon={Download04Icon} />{m.nav_download()}</Button
-				>
-			</div>
+			<p class="max-w-xl text-lg text-balance">{m.home_app_text()}</p>
+			{#if version}
+				<p class="text-sm tabular-nums">{m.download_version({ version })}</p>
+			{/if}
+			<Button
+				size="lg"
+				href={href('/download')}
+				class="border-[#f2ead3] bg-[#f2ead3] text-[#171715] hover:bg-[#fbf4df]"
+				><HugeiconsIcon icon={Download04Icon} />{m.nav_download()}</Button
+			>
 		</div>
 	</div>
 </section>
 
 <style>
+	.tagline {
+		display: none;
+		font-size: calc(min(100vw - 2 * var(--gutter), 1.2 * var(--bw)) / (var(--n) * 0.39));
+	}
+
 	@supports (animation-timeline: view()) {
 		@media (prefers-reduced-motion: no-preference) {
-			.track {
-				--stage: 100svh;
-				--top: 0px;
-				--x: 6%;
-				--y: 20%;
-				height: calc(var(--stage) * 2.4);
-				view-timeline: --cta block;
-				view-timeline-inset: var(--top) 0px;
+			:global(html:has([data-cta])) {
+				scroll-snap-type: y proximity;
 			}
-			@media (width >= 40rem) {
-				.track {
-					--stage: calc(100svh - var(--head, 7rem));
-					--top: var(--head, 7rem);
-				}
+			.track {
+				--stage: 100lvh;
+				--x: 14%;
+				--bw: 72vw;
+				--y: 42%;
+				position: relative;
+				height: calc(var(--stage) * 2.5);
+				view-timeline: --cta block;
 			}
 			@media (width >= 64rem) {
 				.track {
-					--x: 29%;
-					--y: 21%;
+					--x: 22%;
+					--bw: 56vw;
+					--y: 39%;
+				}
+			}
+			.snap {
+				position: absolute;
+				top: var(--stage);
+				right: 0;
+				left: 0;
+				height: 1px;
+				scroll-snap-align: start;
+				pointer-events: none;
+			}
+			@media (width >= 40rem) {
+				.snap {
+					top: calc(var(--stage) + 7rem);
 				}
 			}
 			.stage {
 				position: sticky;
-				top: var(--top);
+				top: 0;
 				z-index: 10;
 				width: 100vw;
 				height: var(--stage);
 				margin-left: calc(50% - 50vw);
 			}
+			.tagline {
+				display: block;
+			}
 			.frame,
 			.media,
-			.title,
+			.tagline,
 			.rest {
 				animation-timing-function: linear;
 				animation-fill-mode: both;
 				animation-timeline: --cta;
-				animation-range: contain 0% contain 80%;
+				animation-range: contain 0% contain 66.67%;
 			}
 			.frame {
 				animation-name: expand;
@@ -85,13 +113,33 @@
 			.media {
 				animation-name: zoom;
 			}
-			.title {
-				max-width: calc(100% - 2 * var(--x));
-				animation-name: lift;
+			.tagline {
+				animation-name: fade;
+				animation-range: contain 26.67% contain 58.67%;
 			}
 			.rest {
+				animation-range: contain 45.33% contain 66.67%;
+			}
+			.rest:not(:focus-within) {
 				animation-name: reveal;
-				animation-range: contain 55% contain 80%;
+			}
+			.stage:has(.rest:focus-within) .tagline {
+				animation: none;
+				opacity: 0;
+			}
+			@supports (timeline-scope: --cta) {
+				:global(html:has([data-cta])) {
+					timeline-scope: --cta;
+				}
+				@media (width >= 40rem) {
+					:global(html:has([data-cta]) header.head:not(:focus-within)) {
+						animation-name: hide;
+						animation-timing-function: linear;
+						animation-fill-mode: both;
+						animation-timeline: --cta;
+						animation-range: contain 56.67% contain 66.67%;
+					}
+				}
 			}
 		}
 	}
@@ -114,28 +162,38 @@
 		}
 	}
 
-	@keyframes lift {
+	@keyframes fade {
 		from {
-			translate: 0 5rem;
+			opacity: 1;
+			translate: 0 0;
+			scale: 1;
 		}
 		to {
-			translate: 0 0;
+			opacity: 0;
+			translate: 0 -2rem;
+			scale: 1.06;
 		}
 	}
 
 	@keyframes reveal {
 		from {
 			opacity: 0;
-			visibility: hidden;
-			translate: 0 1rem;
+			pointer-events: none;
+			translate: 0 1.125rem;
 		}
 		60% {
-			visibility: hidden;
+			pointer-events: none;
 		}
 		to {
 			opacity: 1;
-			visibility: visible;
+			pointer-events: auto;
 			translate: 0 0;
+		}
+	}
+
+	@keyframes hide {
+		to {
+			translate: 0 calc(-100% - 5px);
 		}
 	}
 </style>
