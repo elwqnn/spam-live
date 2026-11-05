@@ -6,6 +6,7 @@
 	import History from './History.svelte';
 	import Matchups from './Matchups.svelte';
 	import Pace from './Pace.svelte';
+	import Turns from './Turns.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -31,5 +32,7 @@
 <Matchups data={data.matchups} {catalog} />
 
 <Pace data={data.pace} {catalog} />
+
+<Turns data={data.turns} {catalog} />
 
 <History data={data.history} />

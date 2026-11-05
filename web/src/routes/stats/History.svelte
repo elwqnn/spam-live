@@ -5,6 +5,7 @@
 	import * as Chart from '#lib/components/ui/chart/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
+	import { rateDomain } from './turns.js';
 
 	let { data }: { data: Schemas['HistoryStats'] } = $props();
 
@@ -33,11 +34,9 @@
 			rate.push({ date, ...Object.fromEntries(keys.map((k) => [k, find(k)?.winRate ?? null])) });
 		}
 		const values = rate.flatMap((r) => keys.map((k) => r[k])).filter((v) => typeof v === 'number');
-		const lo = Math.max(0, Math.floor(Math.min(...values) * 20 - 1)) / 20;
-		const hi = Math.min(20, Math.ceil(Math.max(...values) * 20 + 1)) / 20;
 		return [
 			{ id: 'share', title: m.history_share(), rows: share, domain: undefined },
-			{ id: 'rate', title: m.win_rate(), rows: rate, domain: values.length ? [lo, hi] : undefined }
+			{ id: 'rate', title: m.win_rate(), rows: rate, domain: rateDomain(values) }
 		];
 	});
 	const dates = $derived(charts[0].rows.map((r) => r.date));

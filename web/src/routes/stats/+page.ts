@@ -8,11 +8,12 @@ export const load: PageLoad = async ({ fetch, url, untrack }) => {
 		untrack(() => url.origin)
 	);
 	const query = { params: { query: { version: url.searchParams.get('version') ?? undefined } } };
-	const [cards, versions, matchups, pace, history] = await Promise.all([
+	const [cards, versions, matchups, pace, turns, history] = await Promise.all([
 		client.GET('/api/cards', { params: { query: { lang: getLocale() } } }),
 		client.GET('/api/catalog/versions'),
 		client.GET('/api/stats/matchups', query),
 		client.GET('/api/stats/pace', query),
+		client.GET('/api/stats/turns', query),
 		client.GET('/api/stats/history')
 	]);
 	return {
@@ -20,6 +21,7 @@ export const load: PageLoad = async ({ fetch, url, untrack }) => {
 		versions: ok(versions).map((v) => v.version),
 		matchups: ok(matchups),
 		pace: ok(pace),
+		turns: ok(turns),
 		history: ok(history)
 	};
 };

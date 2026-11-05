@@ -486,5 +486,18 @@
 	"history_note": "Toutes les versions. Le filtre de version ne s'applique pas à cette section.",
 	"history_share": "Part de jeu",
 	"history_week": "Semaine du {date}",
-	"history_few": "Pas encore assez de semaines."
+	"history_few": "Pas encore assez de semaines.",
+	"turns_title": "Taux de victoire par nombre de tours",
+	"turns_text": "Le taux de victoire des 12 cartes les plus jouées selon le nombre de tours du match. Les tours sont regroupés par 3. Un point demande au moins {min} parties.",
+	"turns_point": [
+		{
+			"declarations": ["input range", "input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{range} tours · {count} partie",
+				"countPlural=*": "{range} tours · {count} parties"
+			}
+		}
+	],
+	"turns_few": "Pas encore assez de parties."
 }

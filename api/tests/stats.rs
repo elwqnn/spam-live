@@ -540,3 +540,57 @@ async fn history_stats(pool: PgPool) {
         })
     );
 }
+
+fn card_turns(id: u32, turns: &[(i32, i64, i64)]) -> Value {
+    let turns: Vec<Value> = turns.iter().map(|&(t, g, w)| json!({ "turns": t, "games": g, "wins": w })).collect();
+    json!({ "card": k(id), "turns": turns })
+}
+
+#[sqlx::test]
+async fn turn_stats(pool: PgPool) {
+    let app = app(pool.clone());
+    assert_eq!(send(&app, get("/api/stats/turns", "")).await.body, json!({ "cards": [] }));
+    let deck = |s: u32| (s..s + 4).map(k).collect::<Vec<_>>();
+    let (a, b) = (deck(1), deck(5));
+    let c = vec![k(1), k(9), k(10), k(11)];
+    let n = &mut 0;
+    let at = |turns, seat0: &[Uuid], seat1: &[Uuid], winner| M { turns, ..m(seat0, seat1, winner) };
+    add(&pool, n, at(5, &a, &b, Some(0)), 2).await;
+    add(&pool, n, at(5, &b, &a, Some(0)), 1).await;
+    add(&pool, n, at(9, &a, &b, None), 1).await;
+    add(&pool, n, at(9, &c, &b, Some(0)), 1).await;
+    let reversed: Vec<Uuid> = a.iter().rev().copied().collect();
+    add(&pool, n, at(5, &a, &reversed, Some(0)), 1).await;
+    add(&pool, n, M { version: "1.27.0", ..at(12, &a, &b, Some(0)) }, 2).await;
+
+    let res = send(&app, get("/api/stats/turns", "")).await;
+    assert_eq!(res.status, StatusCode::OK);
+    assert_eq!(res.headers["cache-control"], "public, max-age=300");
+    let (a_turns, b_turns) = ([(5, 3, 2), (9, 1, 0)], [(5, 3, 1), (9, 2, 0)]);
+    let expected = json!({
+        "cards": [
+            card_turns(1, &[(5, 3, 2), (9, 2, 1)]),
+            card_turns(5, &b_turns),
+            card_turns(6, &b_turns),
+            card_turns(7, &b_turns),
+            card_turns(8, &b_turns),
+            card_turns(2, &a_turns),
+            card_turns(3, &a_turns),
+            card_turns(4, &a_turns),
+            card_turns(9, &[(9, 1, 1)]),
+            card_turns(10, &[(9, 1, 1)]),
+            card_turns(11, &[(9, 1, 1)]),
+        ]
+    });
+    assert_eq!(res.body, expected);
+    assert_eq!(send(&app, get("/api/stats/turns?version=1.28.1", "")).await.body, expected);
+
+    let old = send(&app, get("/api/stats/turns?version=1.27.0", "")).await.body;
+    let order: Vec<Value> = old["cards"].as_array().unwrap().iter().map(|c| c["card"].clone()).collect();
+    assert_eq!(order, [1, 2, 3, 4, 5, 6, 7, 8].map(|i| json!(k(i))));
+    assert_eq!(old["cards"][0], card_turns(1, &[(12, 2, 2)]));
+    assert_eq!(old["cards"][4], card_turns(5, &[(12, 2, 0)]));
+    let all = send(&app, get("/api/stats/turns?version=all", "")).await.body;
+    assert_eq!(all["cards"][0], card_turns(1, &[(5, 3, 2), (9, 2, 1), (12, 2, 2)]));
+    assert_eq!(send(&app, get("/api/stats/turns?version=latest", "")).await.status, StatusCode::BAD_REQUEST);
+}

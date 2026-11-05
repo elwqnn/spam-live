@@ -192,6 +192,17 @@ pub struct Matchup {
     pub win_rate: Option<f64>,
 }
 
+async fn top_cards(db: &PgPool, version: Option<&str>) -> Result<Vec<Uuid>, sqlx::Error> {
+    sqlx::query_scalar(
+        "SELECT c.card FROM deck_results r CROSS JOIN LATERAL unnest(r.deck_key) AS c (card)
+         WHERE $1::text IS NULL OR r.app_version = $1
+         GROUP BY c.card ORDER BY count(*) DESC, c.card LIMIT 12",
+    )
+    .bind(version)
+    .fetch_all(db)
+    .await
+}
+
 #[utoipa::path(get, path = "/api/stats/matchups", tag = "stats", params(VersionQuery),
     responses((status = 200, body = MatchupStats,
         description = "cards: the 12 most played cards (deck results with the card, then card id). cells: 1 item for \
@@ -200,14 +211,7 @@ pub struct Matchup {
         (status = 400, body = ErrorBody)))]
 pub async fn matchups(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
-    let cards: Vec<Uuid> = sqlx::query_scalar(
-        "SELECT c.card FROM deck_results r CROSS JOIN LATERAL unnest(r.deck_key) AS c (card)
-         WHERE $1::text IS NULL OR r.app_version = $1
-         GROUP BY c.card ORDER BY count(*) DESC, c.card LIMIT 12",
-    )
-    .bind(&version)
-    .fetch_all(&s.db)
-    .await?;
+    let cards = top_cards(&s.db, version.as_deref()).await?;
     let cells: Vec<Matchup> = sqlx::query_as(
         "SELECT a.card, b.card AS opponent, count(*) AS games, count(*) FILTER (WHERE r.win) AS wins,
              win_rate(count(*), count(*) FILTER (WHERE r.win)) AS win_rate
@@ -296,6 +300,66 @@ pub async fn pace(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> R
 }
 
 #[derive(Serialize, ToSchema)]
+pub struct TurnStats {
+    pub cards: Vec<CardTurns>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct CardTurns {
+    pub card: Uuid,
+    pub turns: Vec<TurnResult>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct TurnResult {
+    pub turns: i32,
+    pub games: i64,
+    pub wins: i64,
+}
+
+#[derive(FromRow)]
+struct CardTurn {
+    card: Uuid,
+    turns: i32,
+    games: i64,
+    wins: i64,
+}
+
+#[utoipa::path(get, path = "/api/stats/turns", tag = "stats", params(VersionQuery),
+    responses((status = 200, body = TurnStats,
+        description = "cards: the 12 most played cards, in the matchups order. turns: 1 item for each match turn count \
+            with 1 game or more for the card, sorted by turns. games: the deck results with the card in matches with \
+            this turn count. wins: the part of games that the deck won."),
+        (status = 400, body = ErrorBody)))]
+pub async fn turns(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
+    let version = version(&s, q.version.as_deref())?;
+    let cards = top_cards(&s.db, version.as_deref()).await?;
+    let rows: Vec<CardTurn> = sqlx::query_as(
+        "SELECT c.card, m.turn_count AS turns, count(*) AS games, count(*) FILTER (WHERE r.win) AS wins
+         FROM deck_results r JOIN matches m ON m.game_uid = r.game_uid
+         CROSS JOIN LATERAL unnest(r.deck_key) AS c (card)
+         WHERE ($1::text IS NULL OR r.app_version = $1) AND c.card = ANY($2)
+         GROUP BY c.card, m.turn_count ORDER BY m.turn_count",
+    )
+    .bind(&version)
+    .bind(&cards)
+    .fetch_all(&s.db)
+    .await?;
+    let cards = cards
+        .into_iter()
+        .map(|card| CardTurns {
+            card,
+            turns: rows
+                .iter()
+                .filter(|r| r.card == card)
+                .map(|r| TurnResult { turns: r.turns, games: r.games, wins: r.wins })
+                .collect(),
+        })
+        .collect();
+    Ok(public(TurnStats { cards }))
+}
+
+#[derive(Serialize, ToSchema)]
 pub struct HistoryStats {
     pub weeks: Vec<ElementWeek>,
     pub versions: Vec<VersionStart>,
@@ -373,5 +437,6 @@ pub fn routes() -> Router<AppState> {
         .route("/api/stats/cards", get(card_stats))
         .route("/api/stats/matchups", get(matchups))
         .route("/api/stats/pace", get(pace))
+        .route("/api/stats/turns", get(turns))
         .route("/api/stats/history", get(history))
 }

@@ -724,6 +724,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/stats/turns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["turns"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -835,6 +851,11 @@ export interface components {
             abilities: components["schemas"]["AbilityRef"][];
             talents: string[];
             tox: string[];
+        };
+        CardTurns: {
+            /** Format: uuid */
+            card: string;
+            turns: components["schemas"]["TurnResult"][];
         };
         CatalogVersion: {
             languages: string[];
@@ -1262,6 +1283,17 @@ export interface components {
             matches: number;
             /** Format: int32 */
             turns: number;
+        };
+        TurnResult: {
+            /** Format: int64 */
+            games: number;
+            /** Format: int32 */
+            turns: number;
+            /** Format: int64 */
+            wins: number;
+        };
+        TurnStats: {
+            cards: components["schemas"]["CardTurns"][];
         };
         UnknownCard: {
             /** Format: uuid */
@@ -3151,6 +3183,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaceStats"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    turns: {
+        parameters: {
+            query?: {
+                /** @example all */
+                version?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description cards: the 12 most played cards, in the matchups order. turns: 1 item for each match turn count with 1 game or more for the card, sorted by turns. games: the deck results with the card in matches with this turn count. wins: the part of games that the deck won. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TurnStats"];
                 };
             };
             400: {

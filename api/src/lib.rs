@@ -139,6 +139,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         stats::card_stats,
         stats::matchups,
         stats::pace,
+        stats::turns,
         stats::history,
         admin::reports,
         admin::resolve,

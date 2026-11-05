@@ -486,5 +486,18 @@
 	"history_note": "All versions. The version filter does not apply to this section.",
 	"history_share": "Play share",
 	"history_week": "Week of {date}",
-	"history_few": "Not enough weeks yet."
+	"history_few": "Not enough weeks yet.",
+	"turns_title": "Win rate by turns",
+	"turns_text": "The win rate of the 12 most played cards by the turn count of the match. Turns are grouped by 3. A point needs at least {min} games.",
+	"turns_point": [
+		{
+			"declarations": ["input range", "input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{range} turns · {count} game",
+				"countPlural=*": "{range} turns · {count} games"
+			}
+		}
+	],
+	"turns_few": "Not enough games yet."
 }
