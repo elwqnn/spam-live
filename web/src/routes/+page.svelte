@@ -153,8 +153,8 @@
 		{@render heading(m.home_top_decks())}
 		<a
 			class="mb-1.5 ml-auto eyebrow text-muted-foreground transition-colors hover:text-foreground"
-			href={href('/stats')}
-			>{m.see_all_stats()}
+			href={href('/decks?sort=winrate')}
+			>{m.all_decks()}
 			<HugeiconsIcon
 				icon={ArrowRight02Icon}
 				aria-hidden="true"
