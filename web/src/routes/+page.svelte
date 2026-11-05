@@ -51,7 +51,12 @@
 </section>
 
 <section>
-	<div class="flex flex-wrap items-end gap-4 section-head">
+	<div
+		class={[
+			'flex flex-wrap items-end gap-4 section-head',
+			promoted.some((p) => p.reasons.length) && 'pb-8'
+		]}
+	>
 		{@render heading(m.home_top_decks())}
 		<a
 			class="mb-1.5 ml-auto eyebrow text-muted-foreground transition-colors hover:text-foreground"
