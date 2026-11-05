@@ -39,12 +39,16 @@
 		<span class="flex min-w-0 text-sm text-muted-foreground">
 			<Author name={deck.authorName} avatar={deck.authorAvatar} />
 		</span>
-		{#each reasons as reason (reason)}
-			<Badge variant="outline">{reason === 'votes' ? m.top_voted() : m.strong_win_rate()}</Badge>
-		{/each}
+		{#if reasons.includes('votes')}<Badge variant="outline">{m.top_voted()}</Badge>{/if}
 	</div>
 	<DeckCards cards={deck.cards} {catalog} {large} />
 	<dl class="mt-auto flex flex-wrap gap-x-6 gap-y-2 text-[13px] tabular-nums">
+		<div class="grid gap-0.5">
+			<dt class="eyebrow text-[10px] text-muted-foreground">{m.win_rate()}</dt>
+			<dd class={{ 'lg:text-2xl': large, 'shader-text': reasons.includes('winrate') }}>
+				{percent(deck.winRate)}
+			</dd>
+		</div>
 		<div class="grid gap-0.5">
 			<dt class="eyebrow text-[10px] text-muted-foreground">{m.votes()}</dt>
 			<dd class={{ 'lg:text-2xl': large }}>{deck.votes}</dd>
@@ -52,10 +56,6 @@
 		<div class="grid gap-0.5">
 			<dt class="eyebrow text-[10px] text-muted-foreground">{m.games()}</dt>
 			<dd class={{ 'lg:text-2xl': large }}>{deck.games}</dd>
-		</div>
-		<div class="grid gap-0.5">
-			<dt class="eyebrow text-[10px] text-muted-foreground">{m.win_rate()}</dt>
-			<dd class={{ 'lg:text-2xl': large }}>{percent(deck.winRate)}</dd>
 		</div>
 	</dl>
 </li>

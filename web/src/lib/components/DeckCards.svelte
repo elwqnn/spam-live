@@ -41,7 +41,7 @@
 		{/each}
 	</CardGrid>
 {:else}
-	<ul class="grid grid-cols-4 gap-2 pt-1.5 pl-1.5">
+	<ul class="grid grid-cols-4 gap-2 pt-[2.2%] pl-[2.2%]">
 		{#each cards as id (id)}
 			<li><CardThumb {id} card={catalog.get(id)} {large} /></li>
 		{/each}

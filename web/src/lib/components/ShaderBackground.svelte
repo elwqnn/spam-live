@@ -74,7 +74,6 @@ void main(){
 	}
 	.shade {
 		background:
-			linear-gradient(180deg, transparent calc(100% - 4rem), var(--background)),
 			linear-gradient(
 				180deg,
 				rgba(23, 23, 21, 0.58),

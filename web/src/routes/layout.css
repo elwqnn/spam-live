@@ -50,6 +50,11 @@
 	--straw: #edc966;
 	--slate: #4585b3;
 	--moss: #6b9e5e;
+	--shader-plum: var(--plum);
+	--shader-terra: color-mix(in oklab, var(--terra) 65%, var(--foreground));
+	--shader-straw: color-mix(in oklab, var(--straw) 45%, var(--foreground));
+	--shader-slate: color-mix(in oklab, var(--slate) 75%, var(--foreground));
+	--shader-moss: color-mix(in oklab, var(--moss) 65%, var(--foreground));
 	--side: clamp(1.5rem, (100vw - 75rem) / 6, 4rem);
 	--reach: 10rem;
 	--gutter: 1.25rem;
@@ -89,6 +94,11 @@
 	--el-mix: 100%;
 	--el-tint: #f2f1ea;
 	--contour: color-mix(in oklab, var(--foreground) 10%, transparent);
+	--shader-plum: color-mix(in oklab, var(--plum) 50%, var(--foreground));
+	--shader-terra: color-mix(in oklab, var(--terra) 80%, var(--foreground));
+	--shader-straw: var(--straw);
+	--shader-slate: color-mix(in oklab, var(--slate) 75%, var(--foreground));
+	--shader-moss: color-mix(in oklab, var(--moss) 90%, var(--foreground));
 	color-scheme: dark;
 }
 
@@ -170,6 +180,30 @@
 
 @utility text-el {
 	color: color-mix(in oklab, var(--el) var(--el-mix), var(--el-tint));
+}
+
+@utility shader-text {
+	background:
+		radial-gradient(closest-side, var(--shader-straw), transparent) 0 0 / 70% 160%,
+		radial-gradient(closest-side, var(--shader-slate), transparent) 100% 0 / 80% 180%,
+		radial-gradient(closest-side, var(--shader-moss), transparent) 0 100% / 60% 140%,
+		linear-gradient(110deg, var(--shader-plum), var(--shader-terra), var(--shader-plum)) 0 0 / 300%
+			100%;
+	background-clip: text;
+	color: transparent;
+	@variant motion-safe {
+		animation: shader-text 14s ease-in-out infinite alternate;
+	}
+}
+
+@keyframes shader-text {
+	to {
+		background-position:
+			100% 100%,
+			0 100%,
+			100% 0,
+			100% 0;
+	}
 }
 
 @utility grain {

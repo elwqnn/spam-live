@@ -44,26 +44,37 @@
 	{/if}
 	<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
 		<span class="text-sm text-muted-foreground tabular-nums">#{String(rank).padStart(2, '0')}</span>
-		<CardBadgeStack>
+		{#if reasons.includes('votes')}<Badge variant="outline">{m.top_voted()}</Badge>{/if}
+		<CardBadgeStack class="ml-auto justify-end">
 			{#each mix as [element, count] (element)}
 				<CardBadge type="element" value={element} display="compact"
 					><span class="tabular-nums">×{count}</span></CardBadge
 				>
 			{/each}
 		</CardBadgeStack>
-		{#each reasons as reason (reason)}
-			<Badge variant="outline">{reason === 'votes' ? m.top_voted() : m.strong_win_rate()}</Badge>
-		{/each}
 	</div>
 	<DeckCards {cards} {catalog} {large} />
-	<dl class="mt-auto flex flex-wrap gap-x-6 gap-y-2 text-[13px] tabular-nums">
-		<div class="grid gap-0.5">
-			<dt class="eyebrow text-[10px] text-muted-foreground">{m.games()}</dt>
-			<dd class={{ 'lg:text-2xl': large }}>{deck.games}</dd>
-		</div>
-		<div class="grid gap-0.5">
-			<dt class="eyebrow text-[10px] text-muted-foreground">{m.win_rate()}</dt>
-			<dd class={{ 'lg:text-2xl': large }}>{percent(deck.winRate)}</dd>
-		</div>
-	</dl>
+	{#if large}
+		<p class="mt-auto text-sm text-muted-foreground">
+			<span class="shader-text text-4xl font-medium tracking-tight tabular-nums lg:text-5xl"
+				>{percent(deck.winRate)}</span
+			>
+			{m.top_deck_of()}
+			<span class="font-semibold text-foreground">{m.top_deck_win_rate()}</span>
+			{m.top_deck_over()}
+			<span class="text-xl text-foreground tabular-nums lg:text-3xl">{deck.games}</span>
+			<span class="font-semibold text-foreground">{m.top_deck_games({ count: deck.games })}</span>
+		</p>
+	{:else}
+		<dl class="mt-auto flex flex-wrap gap-x-6 gap-y-2 text-[13px] tabular-nums">
+			<div class="grid gap-0.5">
+				<dt class="eyebrow text-[10px] text-muted-foreground">{m.win_rate()}</dt>
+				<dd class={{ 'shader-text': reasons.includes('winrate') }}>{percent(deck.winRate)}</dd>
+			</div>
+			<div class="grid gap-0.5">
+				<dt class="eyebrow text-[10px] text-muted-foreground">{m.games()}</dt>
+				<dd>{deck.games}</dd>
+			</div>
+		</dl>
+	{/if}
 </li>

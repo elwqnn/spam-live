@@ -28,7 +28,7 @@
 {#if card}
 	<a
 		href={href(`/cards/${id}`)}
-		class="group relative block aspect-[1432/2048] rounded-xs outline-offset-4 el-{card.element} focus-visible:outline-2"
+		class="group @container relative block aspect-[1432/2048] rounded-xs outline-offset-4 el-{card.element} focus-visible:outline-2"
 		{@attach cardPreview(card)}
 	>
 		<span
@@ -54,7 +54,7 @@
 				alt=""
 				aria-hidden="true"
 				decoding="async"
-				class="absolute -top-1.5 -left-1.5 size-4.5"
+				class="absolute -top-[9cqw] -left-[9cqw] size-[26cqw]"
 			/>
 		{/if}
 		<span class="sr-only">{name}</span>

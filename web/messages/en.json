@@ -82,7 +82,19 @@
 	"draft": "Draft",
 	"votes": "Votes",
 	"top_voted": "Top voted",
-	"strong_win_rate": "Strong win rate",
+	"top_deck_of": "",
+	"top_deck_win_rate": "win rate",
+	"top_deck_over": "over",
+	"top_deck_games": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "game",
+				"countPlural=*": "games"
+			}
+		}
+	],
 	"no_decks": "No deck matches the filters.",
 	"pages": "Pages",
 	"first_page": "First page",
