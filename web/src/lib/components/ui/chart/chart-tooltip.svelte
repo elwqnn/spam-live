@@ -19,6 +19,7 @@
 		labelKey,
 		label,
 		labelFormatter = defaultFormatter,
+		valueFormatter = (value: number) => value.toLocaleString(getLocale()),
 		labelClassName,
 		formatter,
 		nameKey,
@@ -35,6 +36,7 @@
 		labelFormatter?:
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			((value: any, payload: TooltipPayload[]) => string | number | Snippet) | null;
+		valueFormatter?: (value: number) => string;
 		formatter?: Snippet<
 			[
 				{
@@ -166,7 +168,7 @@
 							</div>
 							{#if item.value !== undefined}
 								<span class="font-medium text-foreground tabular-nums">
-									{item.value.toLocaleString(getLocale())}
+									{valueFormatter(item.value)}
 								</span>
 							{/if}
 						</div>

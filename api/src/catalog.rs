@@ -192,6 +192,10 @@ impl Catalog {
         self.versions.iter().find(|v| v.key < *key).map(|v| v.name.as_str())
     }
 
+    pub fn element(&self, id: &Uuid) -> Option<&str> {
+        self.versions.iter().find_map(|v| v.cards.iter().find(|c| c.id == *id)).map(|c| c.element.as_str())
+    }
+
     pub fn knows_card(&self, app_version: &str, id: &Uuid) -> bool {
         let has = |v: &Version| v.cards.iter().any(|c| c.id == *id);
         has(&self.versions[0]) || self.versions.iter().find(|v| v.name == app_version).is_some_and(has)

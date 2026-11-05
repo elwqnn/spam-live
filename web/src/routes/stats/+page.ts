@@ -7,21 +7,19 @@ export const load: PageLoad = async ({ fetch, url, untrack }) => {
 		fetch,
 		untrack(() => url.origin)
 	);
-	const version = url.searchParams.get('version') ?? undefined;
-	const sort = url.searchParams.get('sort') === 'games' ? 'games' : 'winrate';
-	const trend =
-		version !== 'all' && url.searchParams.get('trend') === 'version' ? 'version' : 'week';
-	const [cards, versions, decks, cardStats] = await Promise.all([
+	const query = { params: { query: { version: url.searchParams.get('version') ?? undefined } } };
+	const [cards, versions, matchups, pace, history] = await Promise.all([
 		client.GET('/api/cards', { params: { query: { lang: getLocale() } } }),
 		client.GET('/api/catalog/versions'),
-		client.GET('/api/stats/decks', { params: { query: { version, sort } } }),
-		client.GET('/api/stats/cards', { params: { query: { version, trend } } })
+		client.GET('/api/stats/matchups', query),
+		client.GET('/api/stats/pace', query),
+		client.GET('/api/stats/history')
 	]);
 	return {
 		cards: ok(cards),
 		versions: ok(versions).map((v) => v.version),
-		decks: ok(decks),
-		cardStats: ok(cardStats),
-		sort
+		matchups: ok(matchups),
+		pace: ok(pace),
+		history: ok(history)
 	};
 };

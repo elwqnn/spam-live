@@ -676,6 +676,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/stats/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/matchups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["matchups"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/pace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["pace"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -750,6 +798,22 @@ export interface components {
         CardFace: {
             abilities: components["schemas"]["FaceAbility"][];
             tox: components["schemas"]["FaceTox"][];
+        };
+        CardPace: {
+            /** Format: uuid */
+            card: string;
+            /** Format: int64 */
+            longGames: number;
+            /** Format: double */
+            longWinRate?: number | null;
+            /** Format: int64 */
+            longWins: number;
+            /** Format: int64 */
+            shortGames: number;
+            /** Format: double */
+            shortWinRate?: number | null;
+            /** Format: int64 */
+            shortWins: number;
         };
         CardStats: {
             /** Format: uuid */
@@ -909,6 +973,17 @@ export interface components {
             /** Format: int32 */
             winnerSeat?: number | null;
         };
+        ElementWeek: {
+            element: string;
+            /** Format: int64 */
+            games: number;
+            /** Format: date */
+            week: string;
+            /** Format: double */
+            winRate: number;
+            /** Format: int64 */
+            wins: number;
+        };
         Entry: {
             data: Record<string, unknown>;
             description?: string | null;
@@ -950,6 +1025,10 @@ export interface components {
         };
         GuidePreview: {
             guide: string;
+        };
+        HistoryStats: {
+            versions: components["schemas"]["VersionStart"][];
+            weeks: components["schemas"]["ElementWeek"][];
         };
         HourStats: {
             /** Format: int32 */
@@ -1018,6 +1097,22 @@ export interface components {
             /** Format: int64 */
             total: number;
         };
+        Matchup: {
+            /** Format: uuid */
+            card: string;
+            /** Format: int64 */
+            games: number;
+            /** Format: uuid */
+            opponent: string;
+            /** Format: double */
+            winRate?: number | null;
+            /** Format: int64 */
+            wins: number;
+        };
+        MatchupStats: {
+            cards: string[];
+            cells: components["schemas"]["Matchup"][];
+        };
         Me: {
             avatarUrl?: string | null;
             displayName: string;
@@ -1072,6 +1167,12 @@ export interface components {
             appOnline: number;
             /** Format: int64 */
             webOnline: number;
+        };
+        PaceStats: {
+            cards: components["schemas"]["CardPace"][];
+            /** Format: int32 */
+            median?: number | null;
+            turns: components["schemas"]["TurnBucket"][];
         };
         Ping: {
             /** Format: uuid */
@@ -1156,6 +1257,12 @@ export interface components {
         };
         /** @enum {string} */
         Trend: "week" | "version";
+        TurnBucket: {
+            /** Format: int64 */
+            matches: number;
+            /** Format: int32 */
+            turns: number;
+        };
         UnknownCard: {
             /** Format: uuid */
             cardId: string;
@@ -1187,6 +1294,11 @@ export interface components {
             /** Format: int64 */
             devices: number;
             version?: string | null;
+        };
+        VersionStart: {
+            /** Format: date-time */
+            start: string;
+            version: string;
         };
     };
     responses: never;
@@ -2957,6 +3069,88 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DeckKeyStats"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    history: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description All versions. weeks: 1 item for each UTC week (the Monday of the match end) and element with 1 game or more. games: card slots, 1 for each card of the element in a deck result. wins: the slots in a won deck result. The element comes from the newest catalog version that has the card. Cards that no catalog version has are not counted. versions: the first match end of each version. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoryStats"];
+                };
+            };
+        };
+    };
+    matchups: {
+        parameters: {
+            query?: {
+                /** @example all */
+                version?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description cards: the 12 most played cards (deck results with the card, then card id). cells: 1 item for each ordered pair of 2 different cards of cards with 1 game or more. games: the deck results where the deck has card and the opposing deck has opponent. wins: the part of games where the deck with card won. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatchupStats"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    pace: {
+        parameters: {
+            query?: {
+                /** @example all */
+                version?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description turns: the match count for each turn count. median: the median turn count (percentile_disc 0.5), null when there is no match. cards: short is turn count <= median, long is turn count > median. The win rates are null at 0 games. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaceStats"];
                 };
             };
             400: {

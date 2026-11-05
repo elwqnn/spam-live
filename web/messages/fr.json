@@ -64,9 +64,7 @@
 	"all_cards": "Toutes les cartes",
 	"card_zoom": "Voir {name} en grand",
 	"stats_title": "Statistiques",
-	"stats_intro": "Matchs classés entre joueurs. Les matchs miroirs et les matchs contestés ne comptent pas.",
-	"tab_decks": "Decks",
-	"tab_cards": "Cartes",
+	"stats_intro": "Les affrontements entre les cartes les plus jouées, la durée des matchs et la méta de chaque semaine. Seuls les matchs classés entre joueurs comptent. Les matchs miroirs et les matchs contestés ne comptent pas.",
 	"card": "Carte",
 	"no_stats": "Aucun match pour cette version.",
 	"error_not_found": "Page introuvable",
@@ -305,14 +303,6 @@
 	"deck_summary": "Résumé du deck",
 	"total_hp": "PV totaux",
 	"total_income": "Spamton total",
-	"meta_coverage": "Couverture de la méta",
-	"meta_coverage_text": "La part des cartes avec au moins 1 partie dans cette version.",
-	"cards_played": "{played} / {total} cartes jouées",
-	"by_rarity": "Par rareté",
-	"by_element": "Par élément",
-	"never_played": "Jamais jouées",
-	"more_cards": "{n} autres cartes",
-	"no_coverage": "Aucune carte n'a de partie dans cette version.",
 	"nav_glossary": "Glossaire",
 	"glossary_title": "Glossaire",
 	"glossary_text": "Les mots-clés, effets, capacités, talents et Tox du jeu, avec les cartes qui les utilisent.",
@@ -425,5 +415,76 @@
 	"analytics_added_short": "Ajoutées",
 	"privacy_store_presence": "Chaque onglet ouvert du site envoie un identifiant aléatoire toutes les 30 secondes. L'identifiant existe seulement dans cet onglet (sessionStorage) et 90 secondes dans la mémoire du serveur. Il n'a aucun lien avec votre compte. Nous gardons seulement des totaux par heure.",
 	"privacy_store_app_presence": "L'application de bureau informe le serveur quand elle s'ouvre, toutes les 10 minutes pendant qu'elle tourne, et quand elle se ferme, avec son numéro de version.",
-	"privacy_store_upload_source": "Nous enregistrons si un envoi de matchs vient du site ou de l'application de bureau."
+	"privacy_store_upload_source": "Nous enregistrons si un envoi de matchs vient du site ou de l'application de bureau.",
+	"matchups_title": "Affrontements",
+	"matchups_text": "Le taux de victoire d'un deck avec la carte de la ligne contre un deck avec la carte de la colonne, pour les 12 cartes les plus jouées. Une case avec moins de {min} parties n'affiche pas de valeur.",
+	"matchups_caption": "Taux de victoire de chaque carte contre chaque autre carte",
+	"matchups_rows": "Lignes : deck avec",
+	"matchups_columns": "Colonnes : contre",
+	"matchup_cell": [
+		{
+			"declarations": ["input rate", "input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{rate} sur {count} partie",
+				"countPlural=*": "{rate} sur {count} parties"
+			}
+		}
+	],
+	"matchup_few": "Moins de {min} parties",
+	"pace_title": "Rythme des parties",
+	"pace_text": "La durée des matchs en tours, et les cartes qui gagnent les matchs courts ou longs.",
+	"pace_turns": "Tours",
+	"pace_matches": "Matchs",
+	"pace_turns_n": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} tour",
+				"countPlural=*": "{count} tours"
+			}
+		}
+	],
+	"pace_median": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Médiane : {count} tour",
+				"countPlural=*": "Médiane : {count} tours"
+			}
+		}
+	],
+	"pace_short": "Fortes en parties courtes",
+	"pace_long": "Fortes en parties longues",
+	"pace_short_split": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} tour ou moins",
+				"countPlural=*": "{count} tours ou moins"
+			}
+		}
+	],
+	"pace_long_split": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Plus de {count} tour",
+				"countPlural=*": "Plus de {count} tours"
+			}
+		}
+	],
+	"pace_short_rate": "Courtes",
+	"pace_long_rate": "Longues",
+	"pace_few": "Aucune carte pour l'instant. Une carte doit avoir au moins {min} parties courtes et {min} parties longues.",
+	"history_title": "La méta dans le temps",
+	"history_text": "La part de jeu et le taux de victoire de chaque élément, par semaine. La part de jeu est la part des emplacements de carte occupés par l'élément.",
+	"history_note": "Toutes les versions. Le filtre de version ne s'applique pas à cette section.",
+	"history_share": "Part de jeu",
+	"history_week": "Semaine du {date}",
+	"history_few": "Pas encore assez de semaines."
 }

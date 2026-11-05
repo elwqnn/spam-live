@@ -64,9 +64,7 @@
 	"all_cards": "All cards",
 	"card_zoom": "View {name} large",
 	"stats_title": "Stats",
-	"stats_intro": "Ranked matches between players. Mirror matches and disputed matches are not counted.",
-	"tab_decks": "Decks",
-	"tab_cards": "Cards",
+	"stats_intro": "Matchups between the most played cards, the length of the matches and the meta of each week. Only ranked matches between players count. Mirror matches and disputed matches do not count.",
 	"card": "Card",
 	"no_stats": "No match for this version.",
 	"error_not_found": "Page not found",
@@ -305,14 +303,6 @@
 	"deck_summary": "Deck summary",
 	"total_hp": "Total HP",
 	"total_income": "Total Spamton",
-	"meta_coverage": "Meta coverage",
-	"meta_coverage_text": "The share of the cards with at least 1 game in this version.",
-	"cards_played": "{played} / {total} cards played",
-	"by_rarity": "By rarity",
-	"by_element": "By element",
-	"never_played": "Never played",
-	"more_cards": "{n} more cards",
-	"no_coverage": "No card has a game in this version.",
 	"nav_glossary": "Glossary",
 	"glossary_title": "Glossary",
 	"glossary_text": "The keywords, effects, abilities, talents and Tox of the game, with the cards that use them.",
@@ -425,5 +415,76 @@
 	"analytics_added_short": "Added",
 	"privacy_store_presence": "Each open tab of the site sends a random ID every 30 seconds. The ID lives only in this tab (sessionStorage) and 90 seconds in the server memory. It has no link to your account. We keep only totals per hour.",
 	"privacy_store_app_presence": "The desktop app tells the server when it opens, every 10 minutes while it runs, and when it closes, with its version number.",
-	"privacy_store_upload_source": "We record if a match upload came from the website or from the desktop app."
+	"privacy_store_upload_source": "We record if a match upload came from the website or from the desktop app.",
+	"matchups_title": "Matchups",
+	"matchups_text": "The win rate of a deck with the row card against a deck with the column card, for the 12 most played cards. A cell with fewer than {min} games shows no value.",
+	"matchups_caption": "Win rate of each card against each other card",
+	"matchups_rows": "Rows: deck with",
+	"matchups_columns": "Columns: against",
+	"matchup_cell": [
+		{
+			"declarations": ["input rate", "input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{rate} over {count} game",
+				"countPlural=*": "{rate} over {count} games"
+			}
+		}
+	],
+	"matchup_few": "Fewer than {min} games",
+	"pace_title": "Game pace",
+	"pace_text": "The length of the matches in turns, and the cards that win short or long matches.",
+	"pace_turns": "Turns",
+	"pace_matches": "Matches",
+	"pace_turns_n": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} turn",
+				"countPlural=*": "{count} turns"
+			}
+		}
+	],
+	"pace_median": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Median: {count} turn",
+				"countPlural=*": "Median: {count} turns"
+			}
+		}
+	],
+	"pace_short": "Strong in short games",
+	"pace_long": "Strong in long games",
+	"pace_short_split": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} turn or fewer",
+				"countPlural=*": "{count} turns or fewer"
+			}
+		}
+	],
+	"pace_long_split": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "More than {count} turn",
+				"countPlural=*": "More than {count} turns"
+			}
+		}
+	],
+	"pace_short_rate": "Short",
+	"pace_long_rate": "Long",
+	"pace_few": "No card yet. A card needs at least {min} short games and {min} long games.",
+	"history_title": "Meta over time",
+	"history_text": "The play share and the win rate of each element, per week. The play share is the part of the card slots with the element.",
+	"history_note": "All versions. The version filter does not apply to this section.",
+	"history_share": "Play share",
+	"history_week": "Week of {date}",
+	"history_few": "Not enough weeks yet."
 }

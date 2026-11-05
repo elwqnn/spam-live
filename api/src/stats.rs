@@ -5,8 +5,10 @@ use axum::{
     response::Response,
     routing::get,
 };
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, PgPool};
+use std::collections::BTreeMap;
 use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
@@ -167,6 +169,209 @@ pub async fn card_stats(State(s): State<AppState>, Query(q): Query<CardStatsQuer
     Ok(public(rows))
 }
 
+#[derive(Deserialize, IntoParams)]
+#[into_params(parameter_in = Query)]
+pub struct VersionQuery {
+    #[param(example = "all")]
+    pub version: Option<String>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct MatchupStats {
+    pub cards: Vec<Uuid>,
+    pub cells: Vec<Matchup>,
+}
+
+#[derive(Serialize, ToSchema, FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct Matchup {
+    pub card: Uuid,
+    pub opponent: Uuid,
+    pub games: i64,
+    pub wins: i64,
+    pub win_rate: Option<f64>,
+}
+
+#[utoipa::path(get, path = "/api/stats/matchups", tag = "stats", params(VersionQuery),
+    responses((status = 200, body = MatchupStats,
+        description = "cards: the 12 most played cards (deck results with the card, then card id). cells: 1 item for \
+            each ordered pair of 2 different cards of cards with 1 game or more. games: the deck results where the deck \
+            has card and the opposing deck has opponent. wins: the part of games where the deck with card won."),
+        (status = 400, body = ErrorBody)))]
+pub async fn matchups(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
+    let version = version(&s, q.version.as_deref())?;
+    let cards: Vec<Uuid> = sqlx::query_scalar(
+        "SELECT c.card FROM deck_results r CROSS JOIN LATERAL unnest(r.deck_key) AS c (card)
+         WHERE $1::text IS NULL OR r.app_version = $1
+         GROUP BY c.card ORDER BY count(*) DESC, c.card LIMIT 12",
+    )
+    .bind(&version)
+    .fetch_all(&s.db)
+    .await?;
+    let cells: Vec<Matchup> = sqlx::query_as(
+        "SELECT a.card, b.card AS opponent, count(*) AS games, count(*) FILTER (WHERE r.win) AS wins,
+             win_rate(count(*), count(*) FILTER (WHERE r.win)) AS win_rate
+         FROM deck_results r
+         JOIN deck_results o ON o.game_uid = r.game_uid AND o.deck_key <> r.deck_key
+         CROSS JOIN LATERAL unnest(r.deck_key) AS a (card)
+         CROSS JOIN LATERAL unnest(o.deck_key) AS b (card)
+         WHERE ($1::text IS NULL OR r.app_version = $1) AND a.card = ANY($2) AND b.card = ANY($2) AND a.card <> b.card
+         GROUP BY a.card, b.card ORDER BY a.card, b.card",
+    )
+    .bind(&version)
+    .bind(&cards)
+    .fetch_all(&s.db)
+    .await?;
+    Ok(public(MatchupStats { cards, cells }))
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct PaceStats {
+    pub turns: Vec<TurnBucket>,
+    pub median: Option<i32>,
+    pub cards: Vec<CardPace>,
+}
+
+#[derive(Serialize, ToSchema, FromRow)]
+pub struct TurnBucket {
+    pub turns: i32,
+    pub matches: i64,
+}
+
+#[derive(Serialize, ToSchema, FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct CardPace {
+    pub card: Uuid,
+    pub short_games: i64,
+    pub short_wins: i64,
+    pub short_win_rate: Option<f64>,
+    pub long_games: i64,
+    pub long_wins: i64,
+    pub long_win_rate: Option<f64>,
+}
+
+const PACE_MATCHES: &str = "SELECT DISTINCT r.game_uid, m.turn_count FROM deck_results r
+    JOIN matches m ON m.game_uid = r.game_uid WHERE $1::text IS NULL OR r.app_version = $1";
+
+#[utoipa::path(get, path = "/api/stats/pace", tag = "stats", params(VersionQuery),
+    responses((status = 200, body = PaceStats,
+        description = "turns: the match count for each turn count. median: the median turn count \
+            (percentile_disc 0.5), null when there is no match. cards: short is turn count <= median, long is turn \
+            count > median. The win rates are null at 0 games."),
+        (status = 400, body = ErrorBody)))]
+pub async fn pace(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
+    let version = version(&s, q.version.as_deref())?;
+    let turns: Vec<TurnBucket> = sqlx::query_as(AssertSqlSafe(format!(
+        "SELECT turn_count AS turns, count(*) AS matches FROM ({PACE_MATCHES}) g GROUP BY turn_count ORDER BY turn_count"
+    )))
+    .bind(&version)
+    .fetch_all(&s.db)
+    .await?;
+    let median: Option<i32> = sqlx::query_scalar(AssertSqlSafe(format!(
+        "SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY turn_count) FROM ({PACE_MATCHES}) g"
+    )))
+    .bind(&version)
+    .fetch_one(&s.db)
+    .await?;
+    let cards: Vec<CardPace> = sqlx::query_as(
+        "SELECT card, short_games, short_wins, win_rate(short_games, short_wins) AS short_win_rate,
+             long_games, long_wins, win_rate(long_games, long_wins) AS long_win_rate
+         FROM (
+             SELECT c.card, count(*) FILTER (WHERE m.turn_count <= $2) AS short_games,
+                 count(*) FILTER (WHERE m.turn_count <= $2 AND r.win) AS short_wins,
+                 count(*) FILTER (WHERE m.turn_count > $2) AS long_games,
+                 count(*) FILTER (WHERE m.turn_count > $2 AND r.win) AS long_wins
+             FROM deck_results r JOIN matches m ON m.game_uid = r.game_uid
+             CROSS JOIN LATERAL unnest(r.deck_key) AS c (card)
+             WHERE $1::text IS NULL OR r.app_version = $1
+             GROUP BY c.card
+         ) t
+         ORDER BY short_games + long_games DESC, card",
+    )
+    .bind(&version)
+    .bind(median)
+    .fetch_all(&s.db)
+    .await?;
+    Ok(public(PaceStats { turns, median, cards }))
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct HistoryStats {
+    pub weeks: Vec<ElementWeek>,
+    pub versions: Vec<VersionStart>,
+}
+
+#[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ElementWeek {
+    pub week: NaiveDate,
+    pub element: String,
+    pub games: i64,
+    pub wins: i64,
+    pub win_rate: f64,
+}
+
+#[derive(Serialize, ToSchema, FromRow)]
+pub struct VersionStart {
+    pub version: String,
+    pub start: DateTime<Utc>,
+}
+
+#[derive(FromRow)]
+struct WeekCard {
+    week: NaiveDate,
+    card: Uuid,
+    games: i64,
+    wins: i64,
+}
+
+#[utoipa::path(get, path = "/api/stats/history", tag = "stats",
+    responses((status = 200, body = HistoryStats,
+        description = "All versions. weeks: 1 item for each UTC week (the Monday of the match end) and element with 1 \
+            game or more. games: card slots, 1 for each card of the element in a deck result. wins: the slots in a won \
+            deck result. The element comes from the newest catalog version that has the card. Cards that no catalog \
+            version has are not counted. versions: the first match end of each version.")))]
+pub async fn history(State(s): State<AppState>) -> Result<Response, ApiError> {
+    let rows: Vec<WeekCard> = sqlx::query_as(
+        "SELECT date_trunc('week', r.end_utc AT TIME ZONE 'UTC')::date AS week, c.card,
+             count(*) AS games, count(*) FILTER (WHERE r.win) AS wins
+         FROM deck_results r CROSS JOIN LATERAL unnest(r.deck_key) AS c (card)
+         GROUP BY 1, 2",
+    )
+    .fetch_all(&s.db)
+    .await?;
+    let mut sums: BTreeMap<(NaiveDate, &str), (i64, i64)> = BTreeMap::new();
+    for row in &rows {
+        if let Some(element) = s.catalog.element(&row.card) {
+            let sum = sums.entry((row.week, element)).or_default();
+            sum.0 += row.games;
+            sum.1 += row.wins;
+        }
+    }
+    let weeks = sums
+        .into_iter()
+        .map(|((week, element), (games, wins))| ElementWeek {
+            week,
+            element: element.to_string(),
+            games,
+            wins,
+            win_rate: wins as f64 / games as f64,
+        })
+        .collect();
+    let versions: Vec<VersionStart> = sqlx::query_as(
+        "SELECT app_version AS version, min(end_utc) AS start FROM deck_results
+         GROUP BY app_version ORDER BY start, app_version",
+    )
+    .fetch_all(&s.db)
+    .await?;
+    Ok(public(HistoryStats { weeks, versions }))
+}
+
 pub fn routes() -> Router<AppState> {
-    Router::new().route("/api/stats/decks", get(deck_stats)).route("/api/stats/cards", get(card_stats))
+    Router::new()
+        .route("/api/stats/decks", get(deck_stats))
+        .route("/api/stats/cards", get(card_stats))
+        .route("/api/stats/matchups", get(matchups))
+        .route("/api/stats/pace", get(pace))
+        .route("/api/stats/history", get(history))
 }
