@@ -220,8 +220,25 @@ fn cancel_pair(app: AppHandle) {
     emit(&app);
 }
 
+fn close(token: Option<String>) {
+    if let Some(token) = token {
+        let _ = thread::spawn(move || Api::new(site()).presence(&token, "close", VERSION)).join();
+    }
+}
+
+fn revoke(app: &AppHandle, token: &str) {
+    let mut d = data(app);
+    if d.token.as_deref() == Some(token) {
+        let _ = keyring().and_then(|entry| entry.delete_credential());
+        d.token = None;
+        d.notice = Some(Notice::Revoked);
+    }
+}
+
 #[tauri::command(async)]
 fn unlink(app: AppHandle) -> Result<(), String> {
+    let token = data(&app).token.clone();
+    close(token);
     match keyring().and_then(|entry| entry.delete_credential()) {
         Ok(()) | Err(keyring::Error::NoEntry) => {}
         Err(e) => return Err(e.to_string()),
@@ -354,11 +371,31 @@ fn worker(app: AppHandle) {
     let api = Api::new(site());
     let mut uploader: Option<Uploader> = None;
     let mut version_check = Instant::now();
+    let mut checked: Option<String> = None;
+    let mut online: Option<String> = None;
     loop {
         let now = Instant::now();
-        if now >= version_check {
+        let token = data(&app).token.clone();
+        if now >= version_check || token != checked {
             version_check = now + RETRY;
-            if let Ok(min) = api.min_version() {
+            checked.clone_from(&token);
+            let min = match &token {
+                Some(token) => {
+                    let event = if online.as_ref() == Some(token) { "check" } else { "open" };
+                    let result = api.presence(token, event, VERSION);
+                    match &result {
+                        Ok(_) => online = Some(token.clone()),
+                        Err(fail) if fail.status == Some(401) => {
+                            revoke(&app, token);
+                            emit(&app);
+                        }
+                        Err(_) => {}
+                    }
+                    result
+                }
+                None => api.min_version(),
+            };
+            if let Ok(min) = min {
                 data(&app).update = uploader::older(VERSION, &min);
                 emit(&app);
             }
@@ -373,15 +410,10 @@ fn worker(app: AppHandle) {
         if let (Some(token), Some(folder)) = (token, folder) {
             let reports = uploader.get_or_insert_with(|| Uploader::new(folder)).step(&api, &token, now);
             if let Some(last) = reports.last().cloned() {
-                {
-                    let mut d = data(&app);
-                    if reports.iter().any(Report::unauthorized) && d.token.as_ref() == Some(&token) {
-                        let _ = keyring().and_then(|entry| entry.delete_credential());
-                        d.token = None;
-                        d.notice = Some(Notice::Revoked);
-                    }
-                    d.last = Some(last);
+                if reports.iter().any(Report::unauthorized) {
+                    revoke(&app, &token);
                 }
+                data(&app).last = Some(last);
                 emit(&app);
             }
         }
@@ -417,7 +449,11 @@ fn main() {
                 .menu(&Menu::with_items(app, &[&open, &quit])?)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "open" => show(app),
-                    "quit" => app.exit(0),
+                    "quit" => {
+                        let token = data(app).token.clone();
+                        close(token);
+                        app.exit(0);
+                    }
                     _ => {}
                 });
             if let Some(icon) = app.default_window_icon() {

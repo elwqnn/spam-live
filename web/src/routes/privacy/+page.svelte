@@ -9,7 +9,10 @@
 		m.privacy_store_matches,
 		m.privacy_store_replays,
 		m.privacy_store_content,
-		m.privacy_store_devices
+		m.privacy_store_devices,
+		m.privacy_store_presence,
+		m.privacy_store_app_presence,
+		m.privacy_store_upload_source
 	];
 	const notStored = [
 		m.privacy_not_store_opponent,

@@ -95,10 +95,12 @@ struct UserRow {
 
 pub struct AnyUser(pub CurrentUser);
 
+pub fn bearer(headers: &HeaderMap) -> Option<&str> {
+    headers.get(header::AUTHORIZATION).and_then(|v| v.to_str().ok()).and_then(|v| v.strip_prefix("Bearer "))
+}
+
 async fn authenticate(parts: &mut Parts, s: &AppState) -> Result<(CurrentUser, bool), ApiError> {
-    let bearer =
-        parts.headers.get(header::AUTHORIZATION).and_then(|v| v.to_str().ok()).and_then(|v| v.strip_prefix("Bearer "));
-    let (row, via_cookie) = if let Some(token) = bearer {
+    let (row, via_cookie) = if let Some(token) = bearer(&parts.headers) {
         let row = sqlx::query_as::<_, UserRow>(
             "UPDATE devices d SET last_used_at = now() FROM users u
              WHERE d.token_hash = $1 AND u.id = d.user_id

@@ -300,7 +300,13 @@ async fn link_account(db: &PgPool, user_id: i64, account_id: Uuid) -> Result<Res
     }
 }
 
-pub(crate) async fn store(db: &PgPool, catalog: &Catalog, user_id: i64, m: &Match) -> Result<Status, sqlx::Error> {
+pub(crate) async fn store(
+    db: &PgPool,
+    catalog: &Catalog,
+    user_id: i64,
+    m: &Match,
+    source: &str,
+) -> Result<Status, sqlx::Error> {
     let mut stars = [None, None];
     stars[m.seat as usize] = m.stars;
     let mut tx = db.begin().await?;
@@ -373,10 +379,11 @@ pub(crate) async fn store(db: &PgPool, catalog: &Catalog, user_id: i64, m: &Matc
         .execute(&mut *tx)
         .await?;
     }
-    sqlx::query("INSERT INTO uploads (game_uid, user_id, seat) VALUES ($1, $2, $3)")
+    sqlx::query("INSERT INTO uploads (game_uid, user_id, seat, source) VALUES ($1, $2, $3, $4)")
         .bind(&m.game_uid)
         .bind(user_id)
         .bind(m.seat)
+        .bind(source)
         .execute(&mut *tx)
         .await?;
     tx.commit().await?;
@@ -455,6 +462,7 @@ pub async fn upload(
     .map_err(|_| ApiError::new(StatusCode::INTERNAL_SERVER_ERROR, "internal error"))?;
 
     let now = Utc::now();
+    let source = if user.via_cookie { "web" } else { "desktop" };
     let mut linked = user.spam_account_id;
     let mut in_index = HashSet::new();
     let mut accepted = HashSet::new();
@@ -468,7 +476,7 @@ pub async fn upload(
         };
         let (status, reason) = match result {
             Ok(m) => {
-                let status = store(&s.db, &s.catalog, user.id, &m).await?;
+                let status = store(&s.db, &s.catalog, user.id, &m, source).await?;
                 accepted.insert(m.game_uid);
                 (status, None)
             }

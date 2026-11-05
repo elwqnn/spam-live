@@ -21,6 +21,7 @@ pub const MARKER: &str = "Sending decks to server: ";
 pub const SERVER: &str = "api.crocodyle.fr";
 pub const STABLE: Duration = Duration::from_secs(5);
 pub const RETRY: Duration = Duration::from_secs(600);
+pub const CLOSE_TIMEOUT: Duration = Duration::from_secs(2);
 pub const MAX_CHUNK: usize = 900_000;
 
 pub fn default_folder(windows: bool, var: impl Fn(&str) -> Option<OsString>) -> Option<PathBuf> {
@@ -217,6 +218,22 @@ impl Api {
             min_version: String,
         }
         let req = self.http.get(format!("{}/api/desktop/min-version", self.site));
+        Ok(self.call::<MinVersion>(req)?.min_version)
+    }
+
+    pub fn presence(&self, token: &str, event: &str, version: &str) -> Result<String, Fail> {
+        #[derive(Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        struct MinVersion {
+            min_version: String,
+        }
+        let mut req = self
+            .post("/api/desktop/presence")
+            .bearer_auth(token)
+            .json(&serde_json::json!({ "event": event, "version": version }));
+        if event == "close" {
+            req = req.timeout(CLOSE_TIMEOUT);
+        }
         Ok(self.call::<MinVersion>(req)?.min_version)
     }
 
@@ -600,6 +617,7 @@ mod tests {
             .unwrap();
         assert_eq!(confirm.status().as_u16(), 204);
         let token = api.device_token(&code.device_code).unwrap().expect("token");
+        assert!(api.presence(&token, "open", "0.1.0").is_ok());
 
         let folder = temp("samples");
         copy(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../../samples/save"), &folder);
@@ -623,5 +641,7 @@ mod tests {
         assert!(matches.keys().all(|k| k == "new" || k == "known"), "{matches:?}");
         assert!(matches.values().sum::<usize>() > 0);
         assert!(counts(Kind::Decks).values().sum::<usize>() > 0);
+        assert!(api.presence(&token, "close", "0.1.0").is_ok());
+        assert_eq!(api.presence("bad", "check", "0.1.0").unwrap_err().status, Some(401));
     }
 }

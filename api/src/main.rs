@@ -55,7 +55,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let db = PgPoolOptions::new().max_connections(10).connect(&database_url).await?;
     sqlx::migrate!().run(&db).await?;
 
-    let cleanup_db = db.clone();
+    let config = Config {
+        public_url,
+        steam_api_key: env("STEAM_API_KEY"),
+        steam_openid_url,
+        github_release_url,
+        desktop_min_version,
+        max_pending_device_codes: 1000,
+    };
+    let state = AppState::new(db, config, catalog);
+
+    let cleanup_db = state.db.clone();
     tokio::spawn(async move {
         let mut interval = tokio::time::interval(Duration::from_secs(24 * 3600));
         loop {
@@ -66,15 +76,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     });
 
-    let config = Config {
-        public_url,
-        steam_api_key: env("STEAM_API_KEY"),
-        steam_openid_url,
-        github_release_url,
-        desktop_min_version,
-        max_pending_device_codes: 1000,
-    };
-    let app = api::router(AppState::new(db, config, catalog));
+    let analytics_state = state.clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(Duration::from_secs(60));
+        let mut hourly = api::analytics::Hourly::new(chrono::Utc::now());
+        loop {
+            interval.tick().await;
+            if let Err(e) = api::analytics::tick(&analytics_state, &mut hourly, chrono::Utc::now()).await {
+                tracing::error!(error = %e, "analytics tick failed");
+            }
+        }
+    });
+
+    let app = api::router(state);
     let listener = tokio::net::TcpListener::bind(&bind).await?;
     tracing::info!("listening on {bind}");
     axum::serve(listener, app)

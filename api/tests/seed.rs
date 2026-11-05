@@ -47,4 +47,8 @@ async fn seed_is_repeatable_and_covers_every_card(pool: PgPool) {
     .await
     .unwrap();
     assert!(keys >= 15, "{keys}");
+
+    let (hours, max): (i64, i64) =
+        sqlx::query_as("SELECT count(*), max(web_peak)::int8 FROM analytics_hourly").fetch_one(&pool).await.unwrap();
+    assert!((717..=718).contains(&hours) && max > 0, "{hours} {max}");
 }

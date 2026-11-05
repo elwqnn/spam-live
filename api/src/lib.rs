@@ -1,4 +1,5 @@
 pub mod admin;
+pub mod analytics;
 pub mod auth;
 pub mod catalog;
 pub mod decks;
@@ -38,6 +39,7 @@ pub struct AppState {
     pub upload_limiter: Arc<matches::RateLimiter>,
     pub comment_limiter: Arc<matches::RateLimiter>,
     pub release: Arc<release::Cache>,
+    pub presence: Arc<analytics::Presence>,
 }
 
 impl AppState {
@@ -53,6 +55,7 @@ impl AppState {
                 Duration::from_secs(decks::COMMENT_WINDOW_SECS),
             )),
             release: Arc::default(),
+            presence: Arc::default(),
         }
     }
 }
@@ -137,8 +140,11 @@ pub fn public<T: Serialize>(body: T) -> Response {
         admin::unlink,
         admin::disputed,
         admin::unknown_cards,
+        analytics::presence,
+        analytics::desktop_presence,
+        analytics::admin_analytics,
     ),
-    components(schemas(decks::DeckSort, stats::StatsSort, stats::Trend))
+    components(schemas(decks::DeckSort, stats::StatsSort, stats::Trend, analytics::AnalyticsRange))
 )]
 pub struct ApiDoc;
 
@@ -156,6 +162,7 @@ pub fn router(state: AppState) -> Router {
         .merge(decks::routes())
         .merge(stats::routes())
         .merge(admin::routes())
+        .merge(analytics::routes())
         .with_state(state)
 }
 

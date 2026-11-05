@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/api/admin/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_analytics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/matches/disputed": {
         parameters: {
             query?: never;
@@ -388,6 +404,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/desktop/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["desktop_presence"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/desktop/release": {
         parameters: {
             query?: never;
@@ -564,6 +596,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["presence"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/reports": {
         parameters: {
             query?: never;
@@ -620,6 +668,24 @@ export interface components {
             /** Format: int64 */
             cooldown: number;
             id: string;
+        };
+        Analytics: {
+            community: components["schemas"]["Community"];
+            desktop: components["schemas"]["Desktop"];
+            hours: components["schemas"]["HourStats"][];
+            matches: components["schemas"]["MatchTotals"];
+            now: components["schemas"]["OnlineNow"];
+            players: components["schemas"]["Players"];
+            uploads: components["schemas"]["Uploads"];
+        };
+        /** @enum {string} */
+        AnalyticsRange: "24h" | "7d" | "30d";
+        /** @enum {string} */
+        AppEvent: "open" | "check" | "close";
+        AppPresence: {
+            event: components["schemas"]["AppEvent"];
+            /** @example 0.1.0 */
+            version: string;
         };
         Artist: {
             links: components["schemas"]["ArtistLink"][];
@@ -712,6 +778,16 @@ export interface components {
         CommentInput: {
             body: string;
         };
+        Community: {
+            /** Format: int64 */
+            comments: number;
+            /** Format: int64 */
+            draftDecks: number;
+            /** Format: int64 */
+            publicDecks: number;
+            /** Format: int64 */
+            votes: number;
+        };
         Deck: {
             appVersion: string;
             authorAvatar?: string | null;
@@ -767,6 +843,13 @@ export interface components {
         };
         /** @enum {string} */
         DeckStatus: "draft" | "public";
+        Desktop: {
+            /** Format: int64 */
+            devices: number;
+            /** Format: int64 */
+            seen24h: number;
+            versions: components["schemas"]["VersionCount"][];
+        };
         Device: {
             /** Format: date-time */
             createdAt: string;
@@ -850,6 +933,32 @@ export interface components {
         GuidePreview: {
             guide: string;
         };
+        HourStats: {
+            /** Format: int32 */
+            appDistinct?: number | null;
+            /** Format: int32 */
+            appPeak?: number | null;
+            /** Format: int64 */
+            devices?: number | null;
+            /** Format: date-time */
+            hour: string;
+            /** Format: int64 */
+            linkedAccounts?: number | null;
+            /** Format: int64 */
+            matches?: number | null;
+            /** Format: int64 */
+            matchesAdded: number;
+            /** Format: int64 */
+            publicDecks?: number | null;
+            /** Format: int64 */
+            rankedMatches?: number | null;
+            /** Format: int64 */
+            users?: number | null;
+            /** Format: int32 */
+            webDistinct?: number | null;
+            /** Format: int32 */
+            webPeak?: number | null;
+        };
         ImportResult: {
             decks: components["schemas"]["ImportedDeck"][];
         };
@@ -877,6 +986,20 @@ export interface components {
         LinkKind: "instagram" | "x" | "bluesky" | "twitch" | "artstation" | "linktree" | "website";
         /** @enum {string} */
         MatchResult: "win" | "loss" | "draw";
+        MatchTotals: {
+            /** Format: int64 */
+            ai: number;
+            /** Format: int64 */
+            disputed: number;
+            /** Format: int64 */
+            last24h: number;
+            /** Format: int64 */
+            last7d: number;
+            /** Format: int64 */
+            ranked: number;
+            /** Format: int64 */
+            total: number;
+        };
         Me: {
             avatarUrl?: string | null;
             displayName: string;
@@ -919,6 +1042,32 @@ export interface components {
             /** Format: int64 */
             targetId: number;
             targetType: components["schemas"]["TargetType"];
+        };
+        Online: {
+            /** Format: int64 */
+            matches: number;
+            /** Format: int64 */
+            online: number;
+        };
+        OnlineNow: {
+            /** Format: int64 */
+            appOnline: number;
+            /** Format: int64 */
+            webOnline: number;
+        };
+        Ping: {
+            /** Format: uuid */
+            id: string;
+        };
+        Players: {
+            /** Format: int64 */
+            accounts: number;
+            /** Format: int64 */
+            banned: number;
+            /** Format: int64 */
+            linkedAccounts: number;
+            /** Format: int64 */
+            signups7d: number;
         };
         Release: {
             linux?: components["schemas"]["Asset"] | null;
@@ -1008,6 +1157,19 @@ export interface components {
             entries: components["schemas"]["EntryResult"][];
             replays: components["schemas"]["ReplayResult"][];
         };
+        Uploads: {
+            /** Format: int64 */
+            desktop: number;
+            /** Format: int64 */
+            unknown: number;
+            /** Format: int64 */
+            web: number;
+        };
+        VersionCount: {
+            /** Format: int64 */
+            devices: number;
+            version?: string | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -1017,6 +1179,44 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_analytics: {
+        parameters: {
+            query?: {
+                range?: components["schemas"]["AnalyticsRange"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description hours: 1 item per UTC hour of the range, oldest first, the current hour last. A missing hour row gives null fields. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Analytics"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
     disputed: {
         parameters: {
             query?: never;
@@ -2116,6 +2316,55 @@ export interface operations {
             };
         };
     };
+    desktop_presence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppPresence"];
+            };
+        };
+        responses: {
+            /** @description open and check: online for 15 minutes. close: offline. Not cached. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MinVersion"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description A cookie session. Only a device token is allowed. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
     release: {
         parameters: {
             query?: never;
@@ -2529,6 +2778,38 @@ export interface operations {
                 };
             };
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    presence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Ping"];
+            };
+        };
+        responses: {
+            /** @description Web tabs and desktop apps online now, and the match total. Not cached. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Online"];
+                };
+            };
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

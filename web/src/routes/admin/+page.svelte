@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import { closeAfter, formAction, href, modeName, queryHref } from '#lib';
+	import Analytics from '#lib/components/Analytics.svelte';
 	import DeckCards from '#lib/components/DeckCards.svelte';
 	import Dialog from '#lib/components/Dialog.svelte';
 	import Time from '#lib/components/Time.svelte';
@@ -20,7 +21,8 @@
 		['reports', m.admin_reports],
 		['users', m.admin_users],
 		['matches', m.admin_matches],
-		['cards', m.admin_cards]
+		['cards', m.admin_cards],
+		['analytics', m.admin_analytics]
 	] as const;
 	const link = (active: boolean) =>
 		buttonVariants({ variant: active ? 'secondary' : 'ghost', size: 'sm' });
@@ -193,6 +195,8 @@
 	{:else}
 		<p class="row text-sm text-muted-foreground">{m.admin_no_disputed()}</p>
 	{/if}
+{:else if data.tab === 'analytics' && data.analytics}
+	<Analytics data={data.analytics} range={data.range} />
 {:else if data.unknown.length}
 	<div>
 		<Table.Root>

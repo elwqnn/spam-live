@@ -1,11 +1,12 @@
 use std::error::Error;
 
-use chrono::{DateTime, TimeDelta, Utc};
+use chrono::{DateTime, TimeDelta, Timelike, Utc};
 use serde_json::{Value, json};
 use sqlx::{PgPool, postgres::PgConnectOptions};
 use uuid::{Builder, Uuid};
 
 use crate::{
+    analytics::utc_hour,
     catalog::{Catalog, parse_version},
     matches::{check_account, parse_entry, store},
 };
@@ -19,6 +20,16 @@ const EXTRA: f64 = 700.0;
 const RANDOM: usize = 120;
 const EXTRA_ARCHETYPES: usize = 6;
 const PUBLIC_DECKS: usize = 20;
+const HOURS: i32 = 30 * 24;
+const GAP: std::ops::Range<i32> = 240..243;
+const DEVICES: [(Option<&str>, i64); 6] = [
+    (Some("0.1.0"), 1),
+    (Some("0.1.0"), 3),
+    (Some("0.1.0"), 30),
+    (Some("0.0.9"), 50),
+    (None, 100),
+    (Some("0.0.9"), 400),
+];
 
 const NAMES: [&str; 60] = [
     "Ashen Wolf",
@@ -376,8 +387,25 @@ pub async fn run(db: &PgPool, catalog: &Catalog) -> Result<(), Box<dyn Error>> {
             let p = g.players[seat];
             let m = parse_entry(entry(g, &uid, seat, &accounts), now)?;
             check_account(db, users[p], &mut linked[p], accounts[p]).await.map_err(|e| e.1)??;
-            store(db, catalog, users[p], &m).await?;
+            store(db, catalog, users[p], &m, if (n + seat) % 3 == 0 { "web" } else { "desktop" }).await?;
         }
+    }
+
+    sqlx::query("UPDATE matches SET created_at = end_utc + interval '2 minutes' WHERE game_uid LIKE $1")
+        .bind(format!("{UID_PREFIX}%"))
+        .execute(db)
+        .await?;
+    for (i, (version, hours)) in DEVICES.iter().enumerate() {
+        sqlx::query(
+            "INSERT INTO devices (user_id, token_hash, created_at, last_used_at, app_version)
+             VALUES ($1, sha256(convert_to('seed-device-' || $1, 'UTF8')), $2, $3, $4)",
+        )
+        .bind(users[i])
+        .bind(now - day * 20)
+        .bind(now - hour * *hours as i32)
+        .bind(version)
+        .execute(db)
+        .await?;
     }
 
     let mut picks: Vec<usize> = (0..archetypes).collect();
@@ -441,6 +469,55 @@ pub async fn run(db: &PgPool, catalog: &Catalog) -> Result<(), Box<dyn Error>> {
             .await?;
         }
     }
+    analytics(db, &mut rng, now).await
+}
+
+async fn analytics(db: &PgPool, rng: &mut Rng, now: DateTime<Utc>) -> Result<(), Box<dyn Error>> {
+    let end = utc_hour(now);
+    let start = end - TimeDelta::hours(i64::from(HOURS));
+    let (mut hours, mut web_peaks, mut app_peaks, mut web_ids, mut app_ids) =
+        (Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new());
+    for i in (0..HOURS).filter(|i| !GAP.contains(i)) {
+        let hour = start + TimeDelta::hours(i64::from(i));
+        let day = 0.5 + 0.5 * (std::f64::consts::TAU * (f64::from(hour.hour()) - 20.0) / 24.0).cos();
+        let growth = 0.6 + 0.4 * f64::from(i) / f64::from(HOURS);
+        let web = (2.0 + 14.0 * day * growth + 3.0 * rng.unit()).round() as i32;
+        let app = (f64::from(web) * (0.3 + 0.2 * rng.unit())).round() as i32;
+        hours.push(hour);
+        web_peaks.push(web);
+        app_peaks.push(app);
+        web_ids.push(web * (2 + rng.below(3) as i32) + rng.below(4) as i32);
+        app_ids.push(app + rng.below(3) as i32);
+    }
+    sqlx::query("DELETE FROM analytics_hourly WHERE hour >= $1 AND hour < $2")
+        .bind(start)
+        .bind(end)
+        .execute(db)
+        .await?;
+    sqlx::query(
+        "WITH m AS MATERIALIZED (
+             SELECT created_at, game_uid IN (SELECT game_uid FROM deck_results) AS ranked FROM matches
+         )
+         INSERT INTO analytics_hourly (hour, web_peak, app_peak, web_distinct, app_distinct, matches, ranked_matches,
+             users, linked_accounts, public_decks, devices)
+         SELECT t.hour, t.web_peak, t.app_peak, t.web_distinct, t.app_distinct,
+             (SELECT count(*) FROM m WHERE m.created_at < t.hour + interval '1 hour'),
+             (SELECT count(*) FROM m WHERE m.ranked AND m.created_at < t.hour + interval '1 hour'),
+             (SELECT count(*) FROM users u WHERE u.created_at < t.hour + interval '1 hour'),
+             (SELECT count(*) FROM users u WHERE u.spam_account_id IS NOT NULL
+                 AND u.created_at < t.hour + interval '1 hour'),
+             (SELECT count(*) FROM decks d WHERE d.status = 'public' AND d.published_at < t.hour + interval '1 hour'),
+             (SELECT count(*) FROM devices d WHERE d.created_at < t.hour + interval '1 hour')
+         FROM unnest($1::timestamptz[], $2::int[], $3::int[], $4::int[], $5::int[])
+             AS t (hour, web_peak, app_peak, web_distinct, app_distinct)",
+    )
+    .bind(&hours)
+    .bind(&web_peaks)
+    .bind(&app_peaks)
+    .bind(&web_ids)
+    .bind(&app_ids)
+    .execute(db)
+    .await?;
     Ok(())
 }
 

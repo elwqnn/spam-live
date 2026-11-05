@@ -4,7 +4,7 @@
 	import { Download04Icon } from '@hugeicons/core-free-icons';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { api, href, loginHref } from '#lib';
+	import { api, href, loginHref, type Schemas } from '#lib';
 	import AccountMenu from '#lib/components/AccountMenu.svelte';
 	import CardPreview from '#lib/components/CardPreview.svelte';
 	import CommandPalette from '#lib/components/CommandPalette.svelte';
@@ -40,11 +40,48 @@
 	let single = $state(true);
 	let palette = $state<ReturnType<typeof CommandPalette>>();
 	let head = $state(0);
+	let presence = $state<Schemas['Online']>();
+	let presenceId = '';
+	let presenceTimer: ReturnType<typeof setInterval> | undefined;
+	const count = (n: number) => new Intl.NumberFormat(getLocale()).format(n);
 
 	onMount(() => {
 		mac = isMac();
 		single = !document.documentElement.classList.contains('keys-off');
+		presenceId = storedId();
+		onvisibilitychange();
+		return () => clearInterval(presenceTimer);
 	});
+
+	function storedId() {
+		const fresh = crypto.randomUUID();
+		try {
+			const id = sessionStorage.getItem('presence');
+			if (id) return id;
+			sessionStorage.setItem('presence', fresh);
+		} catch {
+			return fresh;
+		}
+		return fresh;
+	}
+
+	async function ping() {
+		try {
+			const { data } = await api(fetch, location.origin).POST('/api/presence', {
+				body: { id: presenceId }
+			});
+			if (data) presence = data;
+		} catch {
+			return;
+		}
+	}
+
+	function onvisibilitychange() {
+		clearInterval(presenceTimer);
+		if (document.visibilityState !== 'visible') return;
+		ping();
+		presenceTimer = setInterval(ping, 30_000);
+	}
 
 	function setSingle(on: boolean) {
 		single = on;
@@ -72,6 +109,7 @@
 </script>
 
 <svelte:window {onkeydown} />
+<svelte:document {onvisibilitychange} />
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
@@ -119,6 +157,13 @@
 		</main>
 
 		<footer class="flex flex-wrap items-center gap-x-5 gap-y-3 px-(--gutter) py-6">
+			{#if presence}
+				<p class="basis-full text-[13px] text-muted-foreground tabular-nums">
+					{count(presence.online)}
+					{m.online_now()} · {count(presence.matches)}
+					{m.matches_total({ count: presence.matches })}
+				</p>
+			{/if}
 			<p class="basis-full text-[13px] text-muted-foreground sm:basis-auto">
 				{m.footer_disclaimer()}
 			</p>
