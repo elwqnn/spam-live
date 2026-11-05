@@ -23,6 +23,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import RarityMark from './RarityMark.svelte';
+	import Tooltip from './Tooltip.svelte';
 
 	let {
 		type,
@@ -30,7 +31,7 @@
 		display = 'full',
 		label,
 		box = false,
-		children
+		children: extra
 	}: {
 		type: 'element' | 'rarity' | 'hp' | 'income' | 'cooldown';
 		value: string | number;
@@ -58,52 +59,56 @@
 	const bare = $derived(compact && !box && (type === 'rarity' || sprite));
 </script>
 
-<span
-	class={[
-		'inline-flex h-5.5 shrink-0 items-center gap-1.5 rounded-xs align-bottom eyebrow whitespace-nowrap',
-		bare ? '' : compact ? 'px-1.5' : 'px-2',
-		type === 'element'
-			? [
-					`el-${key} text-el dark:[--el-mix:75%]`,
-					!bare && 'bg-[color-mix(in_oklab,var(--el)_20%,var(--card))]'
-				]
-			: type === 'rarity'
-				? ['text-muted-foreground', !bare && 'border border-foreground/20']
-				: 'bg-muted text-muted-foreground'
-	]}
-	title={compact ? full : undefined}
->
-	{#if compact}<span class="sr-only">{full}</span>{/if}
-	{#if type === 'rarity'}
-		<RarityMark rarity={key} tooltip={false} />
-	{:else if sprite}
-		<img
-			src="/art/ui/element_{key}.webp"
-			alt=""
-			aria-hidden="true"
-			decoding="async"
-			class={['size-5 shrink-0', !compact && '-ml-1']}
-		/>
-	{:else if type === 'income'}
-		<img
-			src="/art/ui/gold_icon.webp"
-			alt=""
-			aria-hidden="true"
-			decoding="async"
-			class="-ml-0.5 size-4 shrink-0"
-		/>
-	{:else if type === 'cooldown'}
+<Tooltip content={compact ? full : undefined}>
+	{#snippet children(tip)}
 		<span
-			class="size-4 shrink-0 bg-current mask-[url(/art/ui/card_cooldown.webp)] mask-contain mask-center mask-no-repeat"
-			aria-hidden="true"
-		></span>
-	{/if}
-	{#if !compact}
-		{name}{#if number}<span class="text-foreground tabular-nums">{key}</span>{/if}
-	{:else if type === 'element'}
-		{#if !sprite}<span aria-hidden="true">{name}</span>{/if}
-	{:else if type !== 'rarity'}
-		<span class="text-foreground tabular-nums" aria-hidden="true">{key}</span>
-	{/if}
-	{@render children?.()}
-</span>
+			class={[
+				'inline-flex h-5.5 shrink-0 items-center gap-1.5 rounded-xs align-bottom eyebrow whitespace-nowrap',
+				bare ? '' : compact ? 'px-1.5' : 'px-2',
+				type === 'element'
+					? [
+							`el-${key} text-el dark:[--el-mix:75%]`,
+							!bare && 'bg-[color-mix(in_oklab,var(--el)_20%,var(--card))]'
+						]
+					: type === 'rarity'
+						? ['text-muted-foreground', !bare && 'border border-foreground/20']
+						: 'bg-muted text-muted-foreground'
+			]}
+			{...tip}
+		>
+			{#if compact}<span class="sr-only">{full}</span>{/if}
+			{#if type === 'rarity'}
+				<RarityMark rarity={key} tooltip={false} />
+			{:else if sprite}
+				<img
+					src="/art/ui/element_{key}.webp"
+					alt=""
+					aria-hidden="true"
+					decoding="async"
+					class={['size-5 shrink-0', !compact && '-ml-1']}
+				/>
+			{:else if type === 'income'}
+				<img
+					src="/art/ui/gold_icon.webp"
+					alt=""
+					aria-hidden="true"
+					decoding="async"
+					class="-ml-0.5 size-4 shrink-0"
+				/>
+			{:else if type === 'cooldown'}
+				<span
+					class="size-4 shrink-0 bg-current mask-[url(/art/ui/card_cooldown.webp)] mask-contain mask-center mask-no-repeat"
+					aria-hidden="true"
+				></span>
+			{/if}
+			{#if !compact}
+				{name}{#if number}<span class="text-foreground tabular-nums">{key}</span>{/if}
+			{:else if type === 'element'}
+				{#if !sprite}<span aria-hidden="true">{name}</span>{/if}
+			{:else if type !== 'rarity'}
+				<span class="text-foreground tabular-nums" aria-hidden="true">{key}</span>
+			{/if}
+			{@render extra?.()}
+		</span>
+	{/snippet}
+</Tooltip>

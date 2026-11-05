@@ -40,7 +40,7 @@
 >
 	<div class="px-2 py-1.5">
 		<p class="eyebrow text-muted-foreground">{m.signed_in_as()}</p>
-		<p class="truncate text-sm font-semibold" title={me.displayName}>{me.displayName}</p>
+		<p class="truncate text-sm font-semibold">{me.displayName}</p>
 	</div>
 	<div class="mt-1 border-t pt-1">
 		<a class={item} href={href('/me')} onclick={close}>{m.me_title()}</a>

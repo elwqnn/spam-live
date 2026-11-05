@@ -9,6 +9,7 @@
 	import CardPreview from '#lib/components/CardPreview.svelte';
 	import CommandPalette, { type Action } from '#lib/components/CommandPalette.svelte';
 	import Dialog from '#lib/components/Dialog.svelte';
+	import Tooltip from '#lib/components/Tooltip.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale, locales, localizeHref } from '#lib/paraglide/runtime.js';
@@ -162,11 +163,15 @@
 						>{locale}</a
 					>
 				{/each}
-				<Button variant="ghost" size="icon-sm" onclick={toggleTheme} title={m.theme_toggle()}>
-					<HugeiconsIcon icon={Moon02Icon} class="dark:hidden" />
-					<HugeiconsIcon icon={Sun03Icon} class="hidden dark:block" />
-					<span class="sr-only">{m.theme_toggle()}</span>
-				</Button>
+				<Tooltip content={m.theme_toggle()}>
+					{#snippet children(tip)}
+						<Button variant="ghost" size="icon-sm" onclick={toggleTheme} {...tip}>
+							<HugeiconsIcon icon={Moon02Icon} class="dark:hidden" />
+							<HugeiconsIcon icon={Sun03Icon} class="hidden dark:block" />
+							<span class="sr-only">{m.theme_toggle()}</span>
+						</Button>
+					{/snippet}
+				</Tooltip>
 			</div>
 		</footer>
 	</div>

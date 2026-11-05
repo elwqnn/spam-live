@@ -1,7 +1,20 @@
 <script lang="ts">
 	import { formatDate } from '#lib';
+	import { getLocale } from '#lib/paraglide/runtime.js';
+	import Tooltip from './Tooltip.svelte';
 
 	let { iso, class: className }: { iso: string; class?: string } = $props();
+
+	const full = $derived(
+		new Intl.DateTimeFormat(getLocale(), {
+			dateStyle: 'long',
+			timeStyle: 'long',
+			timeZone: 'UTC'
+		}).format(new Date(iso))
+	);
 </script>
 
-<time datetime={iso} title={iso} class={className}>{formatDate(iso)}</time>
+<Tooltip content={full}
+	>{#snippet children(tip)}<time datetime={iso} class={className} {...tip}>{formatDate(iso)}</time
+		>{/snippet}</Tooltip
+>

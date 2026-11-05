@@ -3,6 +3,7 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import { ELEMENTS } from './CardBadge.svelte';
 	import { cardPreview } from './CardPreview.svelte';
+	import Tooltip from './Tooltip.svelte';
 
 	let { id, card }: { id: string; card?: Schemas['CardBase'] } = $props();
 
@@ -44,11 +45,15 @@
 		<span class="sr-only">{name}</span>
 	</a>
 {:else}
-	<span
-		class="flex aspect-[1432/2048] items-center justify-center rounded-xs border border-dashed font-mono text-[10px] text-muted-foreground"
-		title={name}
-	>
-		<span aria-hidden="true">{id.slice(0, 8)}</span>
-		<span class="sr-only">{name}</span>
-	</span>
+	<Tooltip content={name}>
+		{#snippet children(tip)}
+			<span
+				class="flex aspect-[1432/2048] items-center justify-center rounded-xs border border-dashed font-mono text-[10px] text-muted-foreground"
+				{...tip}
+			>
+				<span aria-hidden="true">{id.slice(0, 8)}</span>
+				<span class="sr-only">{name}</span>
+			</span>
+		{/snippet}
+	</Tooltip>
 {/if}
