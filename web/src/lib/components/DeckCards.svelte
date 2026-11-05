@@ -10,11 +10,13 @@
 		cards,
 		catalog,
 		tiles = false,
+		large = false,
 		below
 	}: {
 		cards: string[];
 		catalog: ReadonlyMap<string, Schemas['CardBase']>;
 		tiles?: boolean;
+		large?: boolean;
 		below?: Snippet<[number]>;
 	} = $props();
 </script>
@@ -41,7 +43,7 @@
 {:else}
 	<ul class="grid grid-cols-4 gap-2 pt-1.5 pl-1.5">
 		{#each cards as id (id)}
-			<li><CardThumb {id} card={catalog.get(id)} /></li>
+			<li><CardThumb {id} card={catalog.get(id)} {large} /></li>
 		{/each}
 	</ul>
 {/if}

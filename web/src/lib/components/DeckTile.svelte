@@ -2,18 +2,34 @@
 	import { href, percent, type Schemas } from '#lib';
 	import { Badge } from '#lib/components/ui/badge/index.js';
 	import { m } from '#lib/paraglide/messages.js';
+	import type { Reason } from '#lib/promote.js';
 	import Author from './Author.svelte';
 	import DeckCards from './DeckCards.svelte';
+	import LiveLines from './LiveLines.svelte';
 
 	let {
 		deck,
-		catalog
-	}: { deck: Schemas['DeckItem']; catalog: ReadonlyMap<string, Schemas['CardBase']> } = $props();
+		catalog,
+		reasons = [],
+		large = false
+	}: {
+		deck: Schemas['DeckItem'];
+		catalog: ReadonlyMap<string, Schemas['CardBase']>;
+		reasons?: Reason[];
+		large?: boolean;
+	} = $props();
 </script>
 
 <li
-	class="flex flex-col gap-3 px-(--gutter) py-4 transition-colors [contain-intrinsic-size:auto_205px] [content-visibility:auto] hover:bg-row sm:py-5"
+	class={[
+		'flex flex-col gap-3 px-(--gutter) py-4 transition-colors [contain-intrinsic-size:auto_205px] [content-visibility:auto] sm:py-5',
+		reasons.length ? 'relative isolate bg-card' : 'hover:bg-row',
+		large && 'lg:col-span-2 lg:row-span-2 lg:[contain-intrinsic-size:auto_480px]'
+	]}
 >
+	{#if reasons.length}
+		<LiveLines line={0.5} speed={1 / 3} class="opacity-7 [:hover>&]:opacity-9" />
+	{/if}
 	<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
 		<a
 			class="text-[15px] font-medium wrap-anywhere hover:underline"
@@ -23,20 +39,23 @@
 		<span class="flex min-w-0 text-sm text-muted-foreground">
 			<Author name={deck.authorName} avatar={deck.authorAvatar} />
 		</span>
+		{#each reasons as reason (reason)}
+			<Badge variant="outline">{reason === 'votes' ? m.top_voted() : m.strong_win_rate()}</Badge>
+		{/each}
 	</div>
-	<DeckCards cards={deck.cards} {catalog} />
+	<DeckCards cards={deck.cards} {catalog} {large} />
 	<dl class="mt-auto flex flex-wrap gap-x-6 gap-y-2 text-[13px] tabular-nums">
 		<div class="grid gap-0.5">
 			<dt class="eyebrow text-[10px] text-muted-foreground">{m.votes()}</dt>
-			<dd>{deck.votes}</dd>
+			<dd class={{ 'lg:text-2xl': large }}>{deck.votes}</dd>
 		</div>
 		<div class="grid gap-0.5">
 			<dt class="eyebrow text-[10px] text-muted-foreground">{m.games()}</dt>
-			<dd>{deck.games}</dd>
+			<dd class={{ 'lg:text-2xl': large }}>{deck.games}</dd>
 		</div>
 		<div class="grid gap-0.5">
 			<dt class="eyebrow text-[10px] text-muted-foreground">{m.win_rate()}</dt>
-			<dd>{percent(deck.winRate)}</dd>
+			<dd class={{ 'lg:text-2xl': large }}>{percent(deck.winRate)}</dd>
 		</div>
 	</dl>
 </li>

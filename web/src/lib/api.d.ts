@@ -747,6 +747,8 @@ export interface components {
             games: number;
             /** Format: double */
             winRate?: number | null;
+            /** Format: double */
+            winScore?: number | null;
             /** Format: int64 */
             wins: number;
         };
@@ -866,6 +868,8 @@ export interface components {
             games: number;
             /** Format: double */
             winRate?: number | null;
+            /** Format: double */
+            winScore?: number | null;
             /** Format: int64 */
             wins: number;
         };
@@ -1566,7 +1570,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Public decks. author=me lists the decks of the caller with drafts. Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. games, wins and winRate are the stats of the deck key for the latest catalog version. winRate is null at 0 games. q matches part of the deck name, without case. */
+            /** @description Public decks. author=me lists the decks of the caller with drafts. Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. games, wins and winRate are the stats of the deck key for the latest catalog version. winRate is null at 0 games. winScore is the lower bound of the 95 % Wilson score interval of winRate, null at 0 games. sort=winrate orders by winScore. q matches part of the deck name, without case. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2618,7 +2622,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Ranked human matches, not disputed, no mirror. winRate is null at 0 games. */
+            /** @description Ranked human matches, not disputed, no mirror. winRate is null at 0 games. winScore is the lower bound of the 95 % Wilson score interval of winRate, null at 0 games. sort=winrate orders by winScore. */
             200: {
                 headers: {
                     [name: string]: unknown;

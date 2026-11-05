@@ -394,7 +394,8 @@ pub struct DeckQuery {
         description = "Public decks. author=me lists the decks of the caller with drafts. \
             Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. \
             games, wins and winRate are the stats of the deck key for the latest catalog version. \
-            winRate is null at 0 games. q matches part of the deck name, without case."),
+            winRate is null at 0 games. winScore is the lower bound of the 95 % Wilson score interval of winRate, \
+            null at 0 games. sort=winrate orders by winScore. q matches part of the deck name, without case."),
         (status = 400, body = ErrorBody), (status = 401, body = ErrorBody)))]
 pub async fn list_decks(
     State(s): State<AppState>,
@@ -423,15 +424,17 @@ pub async fn list_decks(
     let order = match q.sort.unwrap_or_default() {
         DeckSort::Votes => "votes DESC, d.id DESC",
         DeckSort::Recent => "COALESCE(d.published_at, d.created_at) DESC, d.id DESC",
-        DeckSort::Winrate => "ws.win_rate DESC NULLS LAST, votes DESC, d.id DESC",
+        DeckSort::Winrate => "ws.win_score DESC NULLS LAST, votes DESC, d.id DESC",
     };
     let decks = sqlx::query_as(AssertSqlSafe(format!(
         "WITH ws AS (
              SELECT deck_key, count(*) AS games, count(*) FILTER (WHERE win) AS wins,
-                 win_rate(count(*), count(*) FILTER (WHERE win)) AS win_rate
+                 win_rate(count(*), count(*) FILTER (WHERE win)) AS win_rate,
+                 win_score(count(*), count(*) FILTER (WHERE win)) AS win_score
              FROM deck_results WHERE app_version = $6 GROUP BY deck_key
          )
-         SELECT {DECK_COLUMNS}, COALESCE(ws.games, 0) AS games, COALESCE(ws.wins, 0) AS wins, ws.win_rate
+         SELECT {DECK_COLUMNS}, COALESCE(ws.games, 0) AS games, COALESCE(ws.wins, 0) AS wins, ws.win_rate,
+             ws.win_score
          {DECK_FROM} LEFT JOIN ws ON ws.deck_key = d.deck_key
          WHERE ($1::bigint IS NULL OR d.author_id = $1) AND (d.status = 'public' OR $2)
              AND ($3::uuid IS NULL OR $3 = ANY (d.cards))

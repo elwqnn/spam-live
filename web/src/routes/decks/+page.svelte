@@ -11,11 +11,13 @@
 	import TitleRow from '#lib/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
+	import { promote } from '#lib/promote.js';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
 	const catalog = $derived(new Map(data.cards.map((c) => [c.id, c])));
+	const promoted = $derived(data.prev ? [] : promote(data.decks));
 	const reset = { offset: null, before: null };
 	const kept = $derived(
 		[...page.url.searchParams].filter(([key]) => !['q', 'offset', 'before'].includes(key))
@@ -102,8 +104,8 @@
 {#if data.decks.length}
 	<div>
 		<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
-			{#each data.decks as deck (deck.id)}
-				<DeckTile {deck} {catalog} />
+			{#each data.decks as deck, i (deck.id)}
+				<DeckTile {deck} {catalog} reasons={promoted[i]?.reasons} large={promoted[i]?.large} />
 			{/each}
 		</ul>
 	</div>

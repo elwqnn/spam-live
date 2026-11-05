@@ -5,11 +5,25 @@
 	import { cardPreview } from './CardPreview.svelte';
 	import Tooltip from './Tooltip.svelte';
 
-	let { id, card }: { id: string; card?: Schemas['CardBase'] } = $props();
+	let {
+		id,
+		card,
+		large = false
+	}: { id: string; card?: Schemas['CardBase']; large?: boolean } = $props();
 
 	const name = $derived(card ? (card.name ?? id) : m.unknown_card() + ' ' + id.slice(0, 8));
 	const shape = '[mask:url(/art/ui/card_mask.webp)_0_0/100%_100%]';
 </script>
+
+{#snippet art()}
+	<img
+		src="/art/thumb/{id}.webp"
+		alt=""
+		loading="lazy"
+		decoding="async"
+		class="size-full object-cover"
+	/>
+{/snippet}
 
 {#if card}
 	<a
@@ -25,13 +39,14 @@
 			class={['absolute inset-0 bg-[color-mix(in_oklab,var(--el)_40%,#000)]', shape]}
 			aria-hidden="true"
 		>
-			<img
-				src="/art/thumb/{id}.webp"
-				alt=""
-				loading="lazy"
-				decoding="async"
-				class="size-full object-cover"
-			/>
+			{#if large}
+				<picture class="contents">
+					<source media="(min-width: 64rem)" srcset="/art/card/{id}.webp" />
+					{@render art()}
+				</picture>
+			{:else}
+				{@render art()}
+			{/if}
 		</span>
 		{#if Object.hasOwn(ELEMENTS, card.element)}
 			<img

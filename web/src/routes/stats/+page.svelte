@@ -14,11 +14,13 @@
 	import TrendMenu from '#lib/components/TrendMenu.svelte';
 	import { versionFilter } from '#lib/components/VersionSelect.svelte';
 	import { m } from '#lib/paraglide/messages.js';
+	import { promote } from '#lib/promote.js';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
 	const catalog = $derived(new Map(data.cards.map((c) => [c.id, c])));
+	const promoted = $derived(promote(data.decks));
 	const tab = $derived(page.url.searchParams.get('tab') === 'cards' ? 'cards' : 'decks');
 	const link = (active: boolean) =>
 		buttonVariants({ variant: active ? 'secondary' : 'ghost', size: 'sm' });
@@ -73,7 +75,13 @@
 		<div>
 			<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
 				{#each data.decks as deck, i (deck.cards.join())}
-					<DeckKeyTile {deck} rank={i + 1} {catalog} />
+					<DeckKeyTile
+						{deck}
+						rank={i + 1}
+						{catalog}
+						reasons={promoted[i].reasons}
+						large={promoted[i].large}
+					/>
 				{/each}
 			</ul>
 		</div>

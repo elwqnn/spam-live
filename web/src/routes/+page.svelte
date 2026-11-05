@@ -7,11 +7,13 @@
 	import ShaderBackground from '#lib/components/ShaderBackground.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { m } from '#lib/paraglide/messages.js';
+	import { promote } from '#lib/promote.js';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
 	const catalog = $derived(new Map(data.cards.map((c) => [c.id, c])));
+	const promoted = $derived(promote(data.top));
 	const line = 'border-[#fbf8f0]/35 bg-[#171715]/35 hover:border-[#fbf8f0]/70';
 </script>
 
@@ -60,7 +62,13 @@
 		<div>
 			<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
 				{#each data.top as deck, i (deck.cards.join())}
-					<DeckKeyTile {deck} rank={i + 1} {catalog} />
+					<DeckKeyTile
+						{deck}
+						rank={i + 1}
+						{catalog}
+						reasons={promoted[i].reasons}
+						large={promoted[i].large}
+					/>
 				{/each}
 			</ul>
 		</div>

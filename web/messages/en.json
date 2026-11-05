@@ -81,6 +81,8 @@
 	"sort_recent": "Recent",
 	"draft": "Draft",
 	"votes": "Votes",
+	"top_voted": "Top voted",
+	"strong_win_rate": "Strong win rate",
 	"no_decks": "No deck matches the filters.",
 	"pages": "Pages",
 	"first_page": "First page",

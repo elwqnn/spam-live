@@ -19,12 +19,14 @@ pub struct KeyStats {
     pub games: i64,
     pub wins: i64,
     pub win_rate: Option<f64>,
+    pub win_score: Option<f64>,
 }
 
 pub async fn key_stats(db: &PgPool, cards: &[Uuid], version: Option<&str>) -> Result<KeyStats, sqlx::Error> {
     sqlx::query_as(
         "SELECT count(*) AS games, count(*) FILTER (WHERE win) AS wins,
-             win_rate(count(*), count(*) FILTER (WHERE win)) AS win_rate
+             win_rate(count(*), count(*) FILTER (WHERE win)) AS win_rate,
+             win_score(count(*), count(*) FILTER (WHERE win)) AS win_score
          FROM deck_results WHERE deck_key = array_sort($1::uuid[]) AND ($2::text IS NULL OR app_version = $2)",
     )
     .bind(cards)
@@ -82,6 +84,7 @@ pub struct DeckKeyStats {
     pub games: i64,
     pub wins: i64,
     pub win_rate: Option<f64>,
+    pub win_score: Option<f64>,
 }
 
 #[derive(Serialize, ToSchema, FromRow)]
@@ -98,17 +101,20 @@ pub struct CardStats {
 
 #[utoipa::path(get, path = "/api/stats/decks", tag = "stats", params(DeckStatsQuery),
     responses((status = 200, body = Vec<DeckKeyStats>,
-        description = "Ranked human matches, not disputed, no mirror. winRate is null at 0 games."),
+        description = "Ranked human matches, not disputed, no mirror. winRate is null at 0 games. \
+            winScore is the lower bound of the 95 % Wilson score interval of winRate, null at 0 games. \
+            sort=winrate orders by winScore."),
         (status = 400, body = ErrorBody)))]
 pub async fn deck_stats(State(s): State<AppState>, Query(q): Query<DeckStatsQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
     let order = match q.sort.unwrap_or_default() {
-        StatsSort::Winrate => "win_rate DESC NULLS LAST, games DESC, cards",
+        StatsSort::Winrate => "win_score DESC NULLS LAST, win_rate DESC NULLS LAST, games DESC, cards",
         StatsSort::Games => "games DESC, wins DESC, cards",
     };
     let rows: Vec<DeckKeyStats> = sqlx::query_as(AssertSqlSafe(format!(
         "SELECT deck_key AS cards, count(*) AS games, count(*) FILTER (WHERE win) AS wins,
-             win_rate(count(*), count(*) FILTER (WHERE win)) AS win_rate
+             win_rate(count(*), count(*) FILTER (WHERE win)) AS win_rate,
+             win_score(count(*), count(*) FILTER (WHERE win)) AS win_score
          FROM deck_results WHERE ($1::text IS NULL OR app_version = $1)
          GROUP BY deck_key ORDER BY {order} LIMIT $2"
     )))
