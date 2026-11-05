@@ -19,7 +19,7 @@
 	const rows = $derived(
 		[
 			...card.face.abilities.map((a) => ({ ...a, tox: undefined })),
-			...card.face.tox.map((t) => ({ name: t.name, tox: tier(t.rarity) ?? '' }))
+			...card.face.tox.map((t) => ({ ...t, tox: tier(t.rarity) ?? '' }))
 		].slice(0, 3)
 	);
 </script>
@@ -59,6 +59,7 @@
 							src="/art/ui/card_ability_passive_line_{row.tox}_left.webp"
 							alt=""
 						/>{/if}
+					{#if row.image}<img class="tox-icon" src="/art/tox/{row.id}.webp" alt="" />{/if}
 					<span class="text tox-name" style:--n={row.name.length}>{row.name}</span>
 					{#if row.tox}<img
 							src="/art/ui/card_ability_passive_line_{row.tox}_right.webp"
@@ -218,6 +219,11 @@
 		min-width: 0;
 		height: 11.41cqw;
 		object-fit: contain;
+	}
+	.tox .tox-icon {
+		flex: none;
+		width: 9cqw;
+		height: 9cqw;
 	}
 	.tox-name {
 		flex: none;

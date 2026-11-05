@@ -31,8 +31,11 @@ fn mini(version: &str, card_name: Value) -> Value {
             { "id": "t3", "name": null, "description": null }
         ],
         "tox": [
-            { "id": "tox1", "title": "Burn_R", "rarity": "rarity-rare", "name": { "en": "Burn", "fr": "Brûlure" }, "description": null },
-            { "id": "tox2", "title": "Ghost_C", "name": null, "description": null }
+            {
+                "id": "tox1", "title": "Burn_R", "rarity": "rarity-rare", "modificatorImage": "tox_burn",
+                "name": { "en": "Burn", "fr": "Brûlure" }, "description": null
+            },
+            { "id": "tox2", "title": "Ghost_C", "modificatorImage": null, "name": null, "description": null }
         ]
     })
 }
@@ -139,7 +142,10 @@ async fn versions_and_language_fallback() {
             { "name": "Coup", "cooldown": 2, "element": "water" },
             { "name": "Kick", "cooldown": 1, "element": null }
         ],
-        "tox": [{ "name": "Brûlure", "rarity": "rarity-rare" }, { "name": "Ghost_C", "rarity": null }]
+        "tox": [
+            { "id": "tox1", "name": "Brûlure", "rarity": "rarity-rare", "image": true },
+            { "id": "tox2", "name": "Ghost_C", "rarity": null, "image": false }
+        ]
     });
     assert_eq!(list.body[0]["face"], face);
     assert_eq!(send(&app, get("/api/cards?version=1.9.0", "")).await.body[0]["name"], "Old");

@@ -37955,6 +37955,7 @@
       },
       "effect": 50,
       "id": "0004a1e3-755d-4fe7-8890-316214c67fcd",
+      "modificatorImage": "tox_heart_vital",
       "name": {
         "de": "Vitalherz",
         "en": "Vitalheart",
@@ -37974,6 +37975,7 @@
       "description": null,
       "effect": 1020,
       "id": "003ff95c-23ff-40b5-b3fd-9970abcd71b1",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -37993,6 +37995,7 @@
       },
       "effect": 40,
       "id": "04dedce0-2c15-4302-807b-6935254e92f3",
+      "modificatorImage": "tox_heart_fire",
       "name": {
         "de": "Feuerherz",
         "en": "Fireheart",
@@ -38020,6 +38023,7 @@
       },
       "effect": 40,
       "id": "061ce3ad-b3f3-4d87-9be3-e2f89a261e57",
+      "modificatorImage": "tox_heart_shadow",
       "name": {
         "de": "Schattenherz",
         "en": "Shadowheart",
@@ -38039,6 +38043,7 @@
       "description": null,
       "effect": 1070,
       "id": "07b6866f-822a-46ff-8ab7-7256dfd66e92",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -38058,6 +38063,7 @@
       },
       "effect": 185,
       "id": "086ac211-cb0d-4851-b87c-b698af1c44dd",
+      "modificatorImage": "tox_phoenix",
       "name": {
         "de": "Phönix",
         "en": "Phoenix",
@@ -38085,6 +38091,7 @@
       },
       "effect": 40,
       "id": "0990d0a4-9c4b-44e7-99b3-4b287c64000b",
+      "modificatorImage": "tox_heart_nature",
       "name": {
         "de": "Naturherz",
         "en": "Natureheart",
@@ -38112,6 +38119,7 @@
       },
       "effect": 40,
       "id": "099fed12-ffb5-4657-9395-e6a469d58ea7",
+      "modificatorImage": "tox_heart_fire",
       "name": {
         "de": "Feuerherz",
         "en": "Fireheart",
@@ -38139,6 +38147,7 @@
       },
       "effect": 51,
       "id": "0acf7dc3-40c3-47e7-9e4d-38b5987619b8",
+      "modificatorImage": "tox_coeurResistance",
       "name": {
         "de": "Resistenzherz",
         "en": "Heart Resistance",
@@ -38158,6 +38167,7 @@
       "description": null,
       "effect": 1140,
       "id": "0c41e47a-c997-4b00-bc9e-91b49c81d50f",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -38177,6 +38187,7 @@
       },
       "effect": 40,
       "id": "0eeeaa50-1673-4a13-9c28-38537f2f0a4c",
+      "modificatorImage": "tox_heart_nature",
       "name": {
         "de": "Naturherz",
         "en": "Natureheart",
@@ -38204,6 +38215,7 @@
       },
       "effect": 320,
       "id": "104dc003-f0ba-4770-b580-b7dca759ee36",
+      "modificatorImage": "tox_spamland",
       "name": {
         "de": "Spamland",
         "en": "Spamland",
@@ -38231,6 +38243,7 @@
       },
       "effect": 40,
       "id": "11460cbc-7c6b-4920-807b-17a11cdfa279",
+      "modificatorImage": "tox_heart_water",
       "name": {
         "de": "Wasserherz",
         "en": "Waterheart",
@@ -38258,6 +38271,7 @@
       },
       "effect": 190,
       "id": "130e8404-84fb-46ca-9b4d-b660a3d47081",
+      "modificatorImage": "tox_poison",
       "name": {
         "de": "Gift",
         "en": "Poison",
@@ -38285,6 +38299,7 @@
       },
       "effect": 310,
       "id": "1351ffe1-c819-4ef4-ba55-092d0874c355",
+      "modificatorImage": "tox_soin_primitif",
       "name": {
         "de": "Primitive Heilung",
         "en": "Ancient Healing",
@@ -38312,6 +38327,7 @@
       },
       "effect": 90,
       "id": "16689b25-970f-49e3-ba3e-504c53921fa0",
+      "modificatorImage": "tox_eternity",
       "name": {
         "de": "Ewigkeit",
         "en": "Eternity",
@@ -38339,6 +38355,7 @@
       },
       "effect": 30,
       "id": "1744febc-b20f-4536-ac78-6dd665470b30",
+      "modificatorImage": "tox_graveyard",
       "name": {
         "de": "Friedhof",
         "en": "Graveyard",
@@ -38366,6 +38383,7 @@
       },
       "effect": 10,
       "id": "18833a15-7437-44ab-96c9-e04fb4e452f1",
+      "modificatorImage": "tox_berserk",
       "name": {
         "de": "Berserker",
         "en": "Berserk",
@@ -38393,6 +38411,7 @@
       },
       "effect": 80,
       "id": "1954f412-dded-4612-8cc7-e8217da05350",
+      "modificatorImage": "tox_erosion",
       "name": {
         "de": "Erosion",
         "en": "Erosion",
@@ -38420,6 +38439,7 @@
       },
       "effect": 190,
       "id": "19bc3a78-3a0d-42db-adbf-801a248f2621",
+      "modificatorImage": "tox_poison",
       "name": {
         "de": "Gift",
         "en": "Poison",
@@ -38447,6 +38467,7 @@
       },
       "effect": 40,
       "id": "1d72d252-b658-46ed-a6f7-be4394e43a88",
+      "modificatorImage": "tox_heart_shadow",
       "name": {
         "de": "Schattenherz",
         "en": "Shadowheart",
@@ -38474,6 +38495,7 @@
       },
       "effect": 5,
       "id": "1f7515fe-f382-4d1f-b3e1-6017ed663833",
+      "modificatorImage": "AOE",
       "name": {
         "de": "AoE",
         "en": "AoE",
@@ -38501,6 +38523,7 @@
       },
       "effect": 5,
       "id": "203f290f-1db1-4e8c-b6c1-74a5c9b716fa",
+      "modificatorImage": "AOE",
       "name": {
         "de": "AoE",
         "en": "AoE",
@@ -38528,6 +38551,7 @@
       },
       "effect": 40,
       "id": "2886f055-9ec8-4d70-8a0b-dd833a381daf",
+      "modificatorImage": "tox_heart_shadow",
       "name": {
         "de": "Schattenherz",
         "en": "Shadowheart",
@@ -38547,6 +38571,7 @@
       "description": null,
       "effect": 1080,
       "id": "2bb5d3aa-143e-43b3-8097-5e01dfb0ebba",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -38566,6 +38591,7 @@
       },
       "effect": 270,
       "id": "2bd3114a-2e6a-4a2e-8575-2a452fe03603",
+      "modificatorImage": "tox_shield",
       "name": {
         "de": "Schild",
         "en": "Shield",
@@ -38593,6 +38619,7 @@
       },
       "effect": 40,
       "id": "2deb8997-a27b-4829-9cc1-77292eab49ad",
+      "modificatorImage": "tox_heart_earth",
       "name": {
         "de": "Erdherz",
         "en": "Earthheart",
@@ -38620,6 +38647,7 @@
       },
       "effect": 310,
       "id": "2e324c62-0606-4ef4-be8b-a1db590baa1d",
+      "modificatorImage": "tox_soin_primitif",
       "name": {
         "de": "Primitive Heilung",
         "en": "Ancient Healing",
@@ -38639,6 +38667,7 @@
       "description": null,
       "effect": 1160,
       "id": "2e5e227a-1d50-4725-ba4d-62fde7eee5fc",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -38658,6 +38687,7 @@
       },
       "effect": 300,
       "id": "2ecec4bf-6f47-4206-b256-6f87e20b90b4",
+      "modificatorImage": "tox_smoke",
       "name": {
         "de": "Nebel",
         "en": "Smoke",
@@ -38685,6 +38715,7 @@
       },
       "effect": 110,
       "id": "2fea9d51-cdcc-4098-924e-856981382931",
+      "modificatorImage": "tox_immunity",
       "name": {
         "de": "Immunität",
         "en": "Immunity",
@@ -38712,6 +38743,7 @@
       },
       "effect": 80,
       "id": "30a81cef-d592-4e7e-a9bd-d0d524d6c3c0",
+      "modificatorImage": "tox_erosion",
       "name": {
         "de": "Erosion",
         "en": "Erosion",
@@ -38739,6 +38771,7 @@
       },
       "effect": 260,
       "id": "31dcc2f8-0377-435f-b964-139d32367030",
+      "modificatorImage": "tox_sac_de_frappe",
       "name": {
         "de": "Boxsack",
         "en": "Punching Bag",
@@ -38766,6 +38799,7 @@
       },
       "effect": 40,
       "id": "32fd3012-4c46-4a44-8636-2fa880dcebc9",
+      "modificatorImage": "tox_heart_light",
       "name": {
         "de": "Lichtherz",
         "en": "Lightheart",
@@ -38793,6 +38827,7 @@
       },
       "effect": 25,
       "id": "3430ad9b-d1dd-4ae7-8d27-c9b0f6716802",
+      "modificatorImage": "tox_luck",
       "name": {
         "de": "Glückspilz",
         "en": "Lucky",
@@ -38820,6 +38855,7 @@
       },
       "effect": 185,
       "id": "3438da10-15a8-4b17-8952-77f2148d9b97",
+      "modificatorImage": "tox_phoenix",
       "name": {
         "de": "Phönix",
         "en": "Phoenix",
@@ -38839,6 +38875,7 @@
       "description": null,
       "effect": 1040,
       "id": "347ce0c3-f494-48e3-a7e3-e517c9ca7792",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -38858,6 +38895,7 @@
       },
       "effect": 190,
       "id": "35f16726-a93c-4539-90d2-350233b2e887",
+      "modificatorImage": "tox_poison",
       "name": {
         "de": "Gift",
         "en": "Poison",
@@ -38885,6 +38923,7 @@
       },
       "effect": 445,
       "id": "395cb63b-bd33-44fc-bd8c-c87f03e20192",
+      "modificatorImage": "tox_camouflage",
       "name": {
         "de": "Tarnung",
         "en": "Camouflage",
@@ -38904,6 +38943,7 @@
       "description": null,
       "effect": 1030,
       "id": "39e8e91b-f212-40eb-82e1-72273c22adcc",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -38923,6 +38963,7 @@
       },
       "effect": 40,
       "id": "3b4e8dd3-20e8-472d-ba92-6ea2aaf5780f",
+      "modificatorImage": "tox_heart_earth",
       "name": {
         "de": "Erdherz",
         "en": "Earthheart",
@@ -38950,6 +38991,7 @@
       },
       "effect": 5,
       "id": "3e3daae0-f9ac-45f1-8d1e-71e26daf80bb",
+      "modificatorImage": "AOE",
       "name": {
         "de": "AoE",
         "en": "AoE",
@@ -38969,6 +39011,7 @@
       "description": null,
       "effect": 1100,
       "id": "3ea65075-1f05-4194-9fee-8d23af692cf0",
+      "modificatorImage": null,
       "name": null,
       "rarity": "rarity-common",
       "teamData": null,
@@ -38988,6 +39031,7 @@
       },
       "effect": 10,
       "id": "3f183463-7170-464d-a818-54c0ad23a6aa",
+      "modificatorImage": "tox_berserk",
       "name": {
         "de": "Berserker",
         "en": "Berserk",
@@ -39015,6 +39059,7 @@
       },
       "effect": 220,
       "id": "3f80f12b-b784-4929-8883-737a86195075",
+      "modificatorImage": "tox_return",
       "name": {
         "de": "Reflexion",
         "en": "Reflection",
@@ -39042,6 +39087,7 @@
       },
       "effect": 380,
       "id": "41c9081b-ab8c-4aaa-aaf3-d5ae7f38d8dd",
+      "modificatorImage": "tox_avenger",
       "name": {
         "de": "Rächer",
         "en": "Avenger",
@@ -39069,6 +39115,7 @@
       },
       "effect": 40,
       "id": "447498ff-f283-4105-a7fe-7e896aee3bde",
+      "modificatorImage": "tox_heart_light",
       "name": {
         "de": "Lichtherz",
         "en": "Lightheart",
@@ -39096,6 +39143,7 @@
       },
       "effect": 220,
       "id": "45fe47d3-470e-445a-8fe0-b8e41f7a98e0",
+      "modificatorImage": "tox_return",
       "name": {
         "de": "Reflexion",
         "en": "Reflection",
@@ -39123,6 +39171,7 @@
       },
       "effect": 220,
       "id": "47a4af77-ed29-4ec8-8899-047f453aee94",
+      "modificatorImage": "tox_return",
       "name": {
         "de": "Reflexion",
         "en": "Reflection",
@@ -39150,6 +39199,7 @@
       },
       "effect": 70,
       "id": "488a7191-0aa8-4fce-bb1d-781887c278c7",
+      "modificatorImage": "tox_disappearance",
       "name": {
         "de": "Verschwinden",
         "en": "Vanish",
@@ -39177,6 +39227,7 @@
       },
       "effect": 51,
       "id": "4c5fce9c-6f39-4a7d-ab2b-230c03a32197",
+      "modificatorImage": "tox_coeurResistance",
       "name": {
         "de": "Resistenzherz",
         "en": "Heart Resistance",
@@ -39204,6 +39255,7 @@
       },
       "effect": 320,
       "id": "4ef2de03-b2d4-4859-9950-14e69f6d2da8",
+      "modificatorImage": "tox_spamland",
       "name": {
         "de": "Spamland",
         "en": "Spamland",
@@ -39223,6 +39275,7 @@
       "description": null,
       "effect": 1050,
       "id": "50a766b7-d334-4dd6-ac07-9006f887076a",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -39242,6 +39295,7 @@
       },
       "effect": 51,
       "id": "50d236ee-c3c4-4888-a6e1-4ef1d7cf77e0",
+      "modificatorImage": "tox_coeurResistance",
       "name": {
         "de": "Resistenzherz",
         "en": "Heart Resistance",
@@ -39261,6 +39315,7 @@
       "description": null,
       "effect": 1060,
       "id": "50fc9709-67f4-4454-8170-c5eb6414e409",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -39280,6 +39335,7 @@
       },
       "effect": 260,
       "id": "51b59ccc-1f24-47ee-b28a-de31f97d73d7",
+      "modificatorImage": "tox_sac_de_frappe",
       "name": {
         "de": "Boxsack",
         "en": "Punching Bag",
@@ -39307,6 +39363,7 @@
       },
       "effect": 260,
       "id": "51cf25f8-9ee3-4962-a20c-e21c7778b101",
+      "modificatorImage": "tox_sac_de_frappe",
       "name": {
         "de": "Boxsack",
         "en": "Punching Bag",
@@ -39334,6 +39391,7 @@
       },
       "effect": 40,
       "id": "52a1e790-0a32-4f9a-bfe1-a4eadd265f44",
+      "modificatorImage": "tox_heart_nature",
       "name": {
         "de": "Naturherz",
         "en": "Natureheart",
@@ -39361,6 +39419,7 @@
       },
       "effect": 40,
       "id": "531deb23-4d24-46eb-a55c-a8734e5d8f79",
+      "modificatorImage": "tox_heart_shadow",
       "name": {
         "de": "Schattenherz",
         "en": "Shadowheart",
@@ -39388,6 +39447,7 @@
       },
       "effect": 130,
       "id": "56af17ac-0e1a-4032-bc36-f7f992122988",
+      "modificatorImage": "tox_vampirism",
       "name": {
         "de": "Vampirismus",
         "en": "Vampirism",
@@ -39415,6 +39475,7 @@
       },
       "effect": 55,
       "id": "59c403d2-4977-4a7f-83d3-856471ec26c7",
+      "modificatorImage": null,
       "name": {
         "de": "Rückstoß",
         "en": "Backlash",
@@ -39442,6 +39503,7 @@
       },
       "effect": 130,
       "id": "5f5ce405-b2cd-4867-8fd5-23773739751d",
+      "modificatorImage": "tox_vampirism",
       "name": {
         "de": "Vampirismus",
         "en": "Vampirism",
@@ -39469,6 +39531,7 @@
       },
       "effect": 320,
       "id": "5f65175a-97c1-49c5-b465-29e9456b4283",
+      "modificatorImage": "tox_spamland",
       "name": {
         "de": "Spamland",
         "en": "Spamland",
@@ -39496,6 +39559,7 @@
       },
       "effect": 40,
       "id": "60665290-ddb9-45e1-a11f-c382ac394e89",
+      "modificatorImage": "tox_heart_earth",
       "name": {
         "de": "Erdherz",
         "en": "Earthheart",
@@ -39523,6 +39587,7 @@
       },
       "effect": 115,
       "id": "613aa9eb-44ca-4b00-ae24-19839d00a8a1",
+      "modificatorImage": "tox_inversion",
       "name": {
         "de": "Umkehrung",
         "en": "Inversion",
@@ -39550,6 +39615,7 @@
       },
       "effect": 55,
       "id": "66134935-b566-4c03-a285-550414ea22fe",
+      "modificatorImage": null,
       "name": {
         "de": "Rückstoß",
         "en": "Backlash",
@@ -39577,6 +39643,7 @@
       },
       "effect": 400,
       "id": "67e77899-a669-4dcc-a87a-8a8ef4a5fef5",
+      "modificatorImage": "tox_avenger",
       "name": {
         "de": "Dieb",
         "en": "Thief",
@@ -39604,6 +39671,7 @@
       },
       "effect": 285,
       "id": "6c49e81f-d8e4-4575-9703-c09183426488",
+      "modificatorImage": "tox_frozen",
       "name": {
         "de": "Einfrieren",
         "en": "Freeze",
@@ -39631,6 +39699,7 @@
       },
       "effect": 140,
       "id": "6d47a044-0c1b-4865-b63b-0bf84b1895c3",
+      "modificatorImage": "tox_mimetism",
       "name": {
         "de": "Mimikry",
         "en": "Mimicry",
@@ -39658,6 +39727,7 @@
       },
       "effect": 50,
       "id": "6fe7a940-418f-4a8b-97e0-64db9fc28a14",
+      "modificatorImage": "tox_heart_vital",
       "name": {
         "de": "Vitalherz",
         "en": "Vitalheart",
@@ -39685,6 +39755,7 @@
       },
       "effect": 10,
       "id": "7025f72e-f6b8-49e9-8845-44788881cf7a",
+      "modificatorImage": "tox_berserk",
       "name": {
         "de": "Berserker",
         "en": "Berserk",
@@ -39712,6 +39783,7 @@
       },
       "effect": 21,
       "id": "7175a8a6-b26f-40a5-b8aa-0c31a9fe1e1d",
+      "modificatorImage": "tox_bomba",
       "name": {
         "de": "Bomba",
         "en": "Bomba",
@@ -39739,6 +39811,7 @@
       },
       "effect": 25,
       "id": "7b51f1aa-daac-4491-845f-3a2d455b1d3e",
+      "modificatorImage": "tox_luck",
       "name": {
         "de": "Glückspilz",
         "en": "Lucky",
@@ -39766,6 +39839,7 @@
       },
       "effect": 390,
       "id": "7cc4c169-9cec-4d1b-99e9-54e200b52773",
+      "modificatorImage": "metamorphe",
       "name": {
         "de": "Metamorph",
         "en": "Metamorph",
@@ -39793,6 +39867,7 @@
       },
       "effect": 40,
       "id": "82ffe85f-8c50-4a5e-bb2e-d0e344408568",
+      "modificatorImage": "tox_heart_light",
       "name": {
         "de": "Lichtherz",
         "en": "Lightheart",
@@ -39820,6 +39895,7 @@
       },
       "effect": 40,
       "id": "8437a92a-86f1-4962-b32a-975a9a2cb29b",
+      "modificatorImage": "tox_heart_light",
       "name": {
         "de": "Lichtherz",
         "en": "Lightheart",
@@ -39847,6 +39923,7 @@
       },
       "effect": 260,
       "id": "8957818c-d64c-4737-a0ec-8da8d05a5243",
+      "modificatorImage": "tox_sac_de_frappe",
       "name": {
         "de": "Boxsack",
         "en": "Punching Bag",
@@ -39866,6 +39943,7 @@
       "description": null,
       "effect": 40,
       "id": "8b334aa8-f146-42ae-a4ac-6ea171139b28",
+      "modificatorImage": "tox_heart_water",
       "name": null,
       "rarity": "rarity-common",
       "teamData": null,
@@ -39885,6 +39963,7 @@
       },
       "effect": 130,
       "id": "8df45dba-41f7-46ae-be78-7919d5ab1914",
+      "modificatorImage": "tox_vampirism",
       "name": {
         "de": "Vampirismus",
         "en": "Vampirism",
@@ -39912,6 +39991,7 @@
       },
       "effect": 185,
       "id": "9019befc-55a1-423d-8323-746673b14fdb",
+      "modificatorImage": "tox_phoenix",
       "name": {
         "de": "Phönix",
         "en": "Phoenix",
@@ -39939,6 +40019,7 @@
       },
       "effect": 5,
       "id": "94830ee3-b8bd-4f8e-b56d-f8d54aa0b5c0",
+      "modificatorImage": "AOE",
       "name": {
         "de": "AoE",
         "en": "AoE",
@@ -39966,6 +40047,7 @@
       },
       "effect": 220,
       "id": "95585854-7fae-4897-950d-3f37f9db2965",
+      "modificatorImage": "tox_return",
       "name": {
         "de": "Reflexion",
         "en": "Reflection",
@@ -39993,6 +40075,7 @@
       },
       "effect": 270,
       "id": "966564d9-1275-4925-9b23-ab30d313a131",
+      "modificatorImage": "tox_shield",
       "name": {
         "de": "Schild",
         "en": "Shield",
@@ -40020,6 +40103,7 @@
       },
       "effect": 320,
       "id": "967c2807-3af6-4392-9cd7-b49527a33186",
+      "modificatorImage": "tox_spamland",
       "name": {
         "de": "Spamland",
         "en": "Spamland",
@@ -40047,6 +40131,7 @@
       },
       "effect": 51,
       "id": "98588dbc-efc3-4f4f-a6e4-52ec41a6593c",
+      "modificatorImage": "tox_coeurResistance",
       "name": {
         "de": "Resistenzherz",
         "en": "Heart Resistance",
@@ -40074,6 +40159,7 @@
       },
       "effect": 30,
       "id": "9a26899c-1f51-4def-89de-a4976eb60e0b",
+      "modificatorImage": "tox_graveyard",
       "name": {
         "de": "Friedhof",
         "en": "Graveyard",
@@ -40093,6 +40179,7 @@
       "description": null,
       "effect": 1130,
       "id": "9c1d7e4a-3f82-4b56-a0d9-6e2f1b3c4d5e",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -40112,6 +40199,7 @@
       },
       "effect": 310,
       "id": "9c7f0aab-0bad-4ac6-b6a9-096173d2c74c",
+      "modificatorImage": "tox_soin_primitif",
       "name": {
         "de": "Primitive Heilung",
         "en": "Ancient Healing",
@@ -40139,6 +40227,7 @@
       },
       "effect": 40,
       "id": "9de176f7-2192-494a-87ac-af7db838a91b",
+      "modificatorImage": "tox_heart_earth",
       "name": {
         "de": "Erdherz",
         "en": "Earthheart",
@@ -40166,6 +40255,7 @@
       },
       "effect": 40,
       "id": "a192a94d-6491-4dc2-aaf3-32858a70f467",
+      "modificatorImage": "tox_heart_nature",
       "name": {
         "de": "Naturherz",
         "en": "Natureheart",
@@ -40193,6 +40283,7 @@
       },
       "effect": 270,
       "id": "a296ffaf-ca06-40e9-8d32-0463e74de735",
+      "modificatorImage": "tox_shield",
       "name": {
         "de": "Schild",
         "en": "Shield",
@@ -40220,6 +40311,7 @@
       },
       "effect": 350,
       "id": "a4914dc0-9826-4740-a5e5-b4bcf3819ef6",
+      "modificatorImage": "tox_temporality",
       "name": {
         "de": "Temporalität",
         "en": "Temporality",
@@ -40247,6 +40339,7 @@
       },
       "effect": 130,
       "id": "a7631bab-e2ae-40d7-898d-b74e1558b7a0",
+      "modificatorImage": "tox_vampirism",
       "name": {
         "de": "Vampirismus",
         "en": "Vampirism",
@@ -40266,6 +40359,7 @@
       "description": null,
       "effect": 1090,
       "id": "ae9540b4-1643-4a3a-8493-a84d7fb57272",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -40285,6 +40379,7 @@
       },
       "effect": 40,
       "id": "afc49ca1-7ab1-4071-a220-4c91f6623609",
+      "modificatorImage": "tox_heart_water",
       "name": {
         "de": "Wasserherz",
         "en": "Waterheart",
@@ -40312,6 +40407,7 @@
       },
       "effect": 10,
       "id": "b41581fe-2707-4173-b081-df4e494c0f51",
+      "modificatorImage": "tox_berserk",
       "name": {
         "de": "Berserker",
         "en": "Berserk",
@@ -40339,6 +40435,7 @@
       },
       "effect": 360,
       "id": "b4d635c2-3b57-4290-a903-bd113fa018b2",
+      "modificatorImage": "tox_tenacity",
       "name": {
         "de": "Zähigkeit",
         "en": "Tenacity",
@@ -40366,6 +40463,7 @@
       },
       "effect": 310,
       "id": "b58dcb1e-08ff-4323-8a14-31e2a00eb588",
+      "modificatorImage": "tox_soin_primitif",
       "name": {
         "de": "Primitive Heilung",
         "en": "Ancient Healing",
@@ -40393,6 +40491,7 @@
       },
       "effect": 50,
       "id": "b6b8ba80-ae3a-4b06-92ea-382f7fd2b862",
+      "modificatorImage": "tox_heart_vital",
       "name": {
         "de": "Vitalherz",
         "en": "Vitalheart",
@@ -40420,6 +40519,7 @@
       },
       "effect": 410,
       "id": "b8a930ba-f24d-413a-afd9-c8bc6da15a81",
+      "modificatorImage": "tox_taunt",
       "name": {
         "de": "Entdeckung",
         "en": "Discovery",
@@ -40447,6 +40547,7 @@
       },
       "effect": 40,
       "id": "bb80d55d-d577-4ac5-8b38-b8fc3ca176ba",
+      "modificatorImage": "tox_heart_fire",
       "name": {
         "de": "Feuerherz",
         "en": "Fireheart",
@@ -40474,6 +40575,7 @@
       },
       "effect": 190,
       "id": "bdbe6b81-dcd2-4670-bd27-7f82a34af1b7",
+      "modificatorImage": "tox_poison",
       "name": {
         "de": "Gift",
         "en": "Poison",
@@ -40501,6 +40603,7 @@
       },
       "effect": 20,
       "id": "c722ba19-f013-4827-aabf-479d17cf089b",
+      "modificatorImage": "tox_brut",
       "name": {
         "de": "Brutal",
         "en": "Brutal",
@@ -40528,6 +40631,7 @@
       },
       "effect": 40,
       "id": "c9b679aa-a360-4027-b9fe-ac54ce938db3",
+      "modificatorImage": "tox_heart_water",
       "name": {
         "de": "Wasserherz",
         "en": "Waterheart",
@@ -40555,6 +40659,7 @@
       },
       "effect": 30,
       "id": "d045fdf5-f8e4-4de3-ab8a-f6e52acd0d92",
+      "modificatorImage": "tox_graveyard",
       "name": {
         "de": "Friedhof",
         "en": "Graveyard",
@@ -40582,6 +40687,7 @@
       },
       "effect": 270,
       "id": "d37f35ae-a040-48a1-b0f2-dbcf9aa1f2cb",
+      "modificatorImage": "tox_shield",
       "name": {
         "de": "Schild",
         "en": "Shield",
@@ -40609,6 +40715,7 @@
       },
       "effect": 150,
       "id": "d4142b4b-b05d-4624-930d-339619025c6a",
+      "modificatorImage": "tox_multiplier",
       "name": {
         "de": "Multiplikator",
         "en": "Multiplier",
@@ -40636,6 +40743,7 @@
       },
       "effect": 30,
       "id": "d5dab315-410b-4a8b-a7a9-81879df7225b",
+      "modificatorImage": "tox_graveyard",
       "name": {
         "de": "Friedhof",
         "en": "Graveyard",
@@ -40655,6 +40763,7 @@
       "description": null,
       "effect": 1110,
       "id": "d937ab5c-aac4-48df-8a90-023ce811cb30",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -40674,6 +40783,7 @@
       },
       "effect": 160,
       "id": "d95b7e55-a20d-4139-a287-e31eeeddfaf8",
+      "modificatorImage": "tox_mystery",
       "name": {
         "de": "Mysterium",
         "en": "Mystery",
@@ -40701,6 +40811,7 @@
       },
       "effect": 185,
       "id": "d98dfdb4-0ee3-4e39-b606-c5b3a9cf9b50",
+      "modificatorImage": "tox_phoenix",
       "name": {
         "de": "Phönix",
         "en": "Phoenix",
@@ -40728,6 +40839,7 @@
       },
       "effect": 25,
       "id": "d9939114-0a6d-49e6-8c52-8ce50816bce3",
+      "modificatorImage": "tox_luck",
       "name": {
         "de": "Glückspilz",
         "en": "Lucky",
@@ -40755,6 +40867,7 @@
       },
       "effect": 230,
       "id": "daf27a3e-eecb-4a28-9c4a-8940aa9f8e8e",
+      "modificatorImage": "tox_reset",
       "name": {
         "de": "Reset",
         "en": "Reset",
@@ -40782,6 +40895,7 @@
       },
       "effect": 50,
       "id": "db073952-196c-4c3b-a699-e761a9196ad0",
+      "modificatorImage": "tox_heart_vital",
       "name": {
         "de": "Vitalherz",
         "en": "Vitalheart",
@@ -40809,6 +40923,7 @@
       },
       "effect": 240,
       "id": "e2f45b38-4df6-4916-9893-b87a56a6f280",
+      "modificatorImage": "tox_revenge",
       "name": {
         "de": "Rache",
         "en": "Revenge",
@@ -40836,6 +40951,7 @@
       },
       "effect": 280,
       "id": "e2f87279-10f1-4c9c-8f19-b5025727b0cb",
+      "modificatorImage": "tox_stun",
       "name": {
         "de": "Betäubung",
         "en": "Stun",
@@ -40863,6 +40979,7 @@
       },
       "effect": 40,
       "id": "e388aae7-8532-42aa-81c0-dd8e2f756654",
+      "modificatorImage": "tox_heart_water",
       "name": {
         "de": "Wasserherz",
         "en": "Waterheart",
@@ -40890,6 +41007,7 @@
       },
       "effect": 391,
       "id": "e4a1b1e3-2ee0-4af5-8143-8eebb31c828d",
+      "modificatorImage": "metamorphe",
       "name": {
         "de": "Zufälliger Metamorph",
         "en": "Random Metamorph",
@@ -40917,6 +41035,7 @@
       },
       "effect": 170,
       "id": "ecf8384c-120a-4ceb-8828-11839798e9a7",
+      "modificatorImage": "tox_optimisation",
       "name": {
         "de": "Optimierung",
         "en": "Optimization",
@@ -40936,6 +41055,7 @@
       "description": null,
       "effect": 1010,
       "id": "f565c104-b15b-4610-a2bf-c75d7800fc72",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,
@@ -40955,6 +41075,7 @@
       },
       "effect": 25,
       "id": "f8cf5cfa-b5e8-427f-817b-9b6d6f2cec16",
+      "modificatorImage": "tox_luck",
       "name": {
         "de": "Glückspilz",
         "en": "Lucky",
@@ -40982,6 +41103,7 @@
       },
       "effect": 445,
       "id": "f9fe3de5-4646-4829-a29b-d9e1286521c9",
+      "modificatorImage": "tox_camouflage",
       "name": {
         "de": "Tarnung",
         "en": "Camouflage",
@@ -41009,6 +41131,7 @@
       },
       "effect": 200,
       "id": "fd1a6b2b-1cc8-4949-b75d-4cef66683519",
+      "modificatorImage": "tox_taunt",
       "name": {
         "de": "Provokation",
         "en": "Taunt",
@@ -41036,6 +41159,7 @@
       },
       "effect": 40,
       "id": "fd33bc4a-3a62-4e34-81f1-689f808679b2",
+      "modificatorImage": "tox_heart_fire",
       "name": {
         "de": "Feuerherz",
         "en": "Fireheart",
@@ -41055,6 +41179,7 @@
       "description": null,
       "effect": 1150,
       "id": "fe317393-a98f-4f05-90fa-b08f919b7578",
+      "modificatorImage": null,
       "name": null,
       "rarity": null,
       "teamData": null,

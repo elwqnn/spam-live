@@ -9,6 +9,7 @@
 	import DeckTile from './DeckTile.svelte';
 	import Description from './Description.svelte';
 	import TitleRow from './TitleRow.svelte';
+	import ToxIcon from './ToxIcon.svelte';
 	import TrendMenu from './TrendMenu.svelte';
 	import VersionSelect from './VersionSelect.svelte';
 
@@ -99,7 +100,10 @@
 					<ul class="divide-y border bg-card text-sm">
 						{#each card.tox as tox (tox.id)}
 							<li class="grid gap-3 p-4">
-								{@render name(entryName(tox))}
+								<div class="flex items-center gap-3">
+									<ToxIcon id={tox.id} image={!!tox.data.modificatorImage} class="size-8" />
+									{@render name(entryName(tox))}
+								</div>
 								{#if tox.description}
 									<Description text={tox.description} entry={tox} {keywords} />
 								{/if}

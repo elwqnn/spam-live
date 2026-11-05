@@ -46,7 +46,7 @@ OUT = {
 DROP = {
     "m_GameObject", "m_Enabled", "m_Script", "m_Name", "_id", "_hasCustomId", "_name",
     "_illustration", "_illustrationResourcePath", "_cardColor", "_avatarImageOffset", "_avatarImageSize", "_styles",
-    "status_fx", "<ModificatorImage>k__BackingField",
+    "status_fx",
 }
 TEXT_KEYS = {
     "cards": lambda r: ("Card.Name." + r["sanitizedName"], "Card.Lore." + r["sanitizedName"] + ".Description"),
@@ -58,6 +58,8 @@ GLOSSARY = {"keywords": ("Keyword.Title.", "Keyword.Desc."), "effects": ("Card.E
 
 
 def camel(name):
+    if name.startswith("<") and name.endswith(">k__BackingField"):
+        name = name[1:-16]
     head, *rest = name.strip("_").split("_")
     head = head.lower() if head.isupper() else head[0].lower() + head[1:]
     return head + "".join(p[:1].upper() + p[1:] for p in rest)
@@ -201,6 +203,8 @@ def main(data_dir, out_dir):
             removed[OUT[full]] += 1
             continue
         record = conv({k: v for k, v in tree.items() if k != ID_FIELD[full]}, data[key][1].assets_file)
+        if full != TOX:
+            record.pop("modificatorImage", None)
         record["id"] = tree[ID_FIELD[full]]
         assert "name" not in record and "description" not in record
         if OUT[full] == "artists":

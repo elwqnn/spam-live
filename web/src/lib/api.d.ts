@@ -827,6 +827,8 @@ export interface components {
             name: string;
         };
         FaceTox: {
+            id: string;
+            image: boolean;
             name: string;
             rarity?: string | null;
         };

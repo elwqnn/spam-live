@@ -9,6 +9,7 @@
 	import { Input } from '#lib/components/ui/input/index.js';
 	import type { Filter } from '#lib/filter.js';
 	import TitleRow from '#lib/components/TitleRow.svelte';
+	import ToxIcon from '#lib/components/ToxIcon.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import type { PageProps } from './$types';
@@ -17,7 +18,7 @@
 		id: string;
 		name?: string | null;
 		description?: string | null;
-		data?: object;
+		data?: Record<string, unknown>;
 		cards?: string[];
 	};
 
@@ -116,7 +117,14 @@
 					target === anchor && 'bg-row'
 				]}
 			>
-				<h2 class="text-[15px] leading-6 font-semibold wrap-anywhere">{entryName(entry)}</h2>
+				<div class="flex items-center gap-3">
+					{#if type === 'tox'}
+						<ToxIcon id={entry.id} image={!!entry.data?.modificatorImage} class="size-8" />
+					{/if}
+					<h2 class="min-w-0 text-[15px] leading-6 font-semibold wrap-anywhere">
+						{entryName(entry)}
+					</h2>
+				</div>
 				<div class="grid min-w-0 gap-3">
 					{#if entry.description}
 						<Description

@@ -279,8 +279,10 @@ pub struct FaceAbility {
 
 #[derive(Serialize, ToSchema)]
 pub struct FaceTox {
+    pub id: String,
     pub name: String,
     pub rarity: Option<String>,
+    pub image: bool,
 }
 
 #[derive(Serialize, ToSchema)]
@@ -416,8 +418,10 @@ fn base(v: &Version, c: &RawCard, lang: &str) -> CardBase {
                 .map(|id| {
                     let e = &v.tox[id];
                     FaceTox {
+                        id: e.id.clone(),
                         name: tr(&e.name, lang).or_else(|| field(e, "title")).unwrap_or_else(|| e.id.clone()),
                         rarity: field(e, "rarity"),
+                        image: field(e, "modificatorImage").is_some_and(|s| !s.is_empty()),
                     }
                 })
                 .collect(),

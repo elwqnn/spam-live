@@ -28,6 +28,7 @@ CARD = (1432, 2048)
 ILLUSTRATION = (716, 1024)
 THUMB = (179, 256)
 AVATAR = (256, 256)
+TOX = (128, 128)
 
 
 def full_image(sprite):
@@ -43,7 +44,7 @@ def full_image(sprite):
 
 def main(data_dir, out_dir):
     env = UnityPy.load(data_dir)
-    container, sprites, cards = {}, {}, []
+    container, sprites, cards, tox = {}, {}, [], []
     for obj in env.objects:
         kind = obj.type.name
         if kind == "PlayerSettings":
@@ -58,8 +59,11 @@ def main(data_dir, out_dir):
         elif kind == "MonoBehaviour":
             pointer = obj.parse_monobehaviour_head().m_Script
             script = pointer.deref_parse_as_object() if pointer else None
-            if script and f"{script.m_Namespace}.{script.m_ClassName}" == "Spam.Data.CardData":
+            full = f"{script.m_Namespace}.{script.m_ClassName}" if script else None
+            if full == "Spam.Data.CardData":
                 cards.append(obj)
+            elif full == "TcgEngine.ModificatorStatusData":
+                tox.append(obj)
 
     def resource(path):
         found = [
@@ -70,7 +74,7 @@ def main(data_dir, out_dir):
             sys.exit(f"{path}: {len(found)} sprites")
         return found[0].read()
 
-    for folder in ("card", "thumb", "avatar", "ui"):
+    for folder in ("card", "thumb", "avatar", "ui", "tox"):
         shutil.rmtree(os.path.join(out_dir, folder), ignore_errors=True)
     files = []
 
@@ -101,8 +105,22 @@ def main(data_dir, out_dir):
         w, h = tree["_avatarImageSize"]["x"], tree["_avatarImageSize"]["y"]
         save(art.crop((x, y, x + w, y + h)).resize(AVATAR, Image.LANCZOS), f"avatar/{tree['_id']}.webp")
 
+    exported, missing = 0, []
+    for obj in tox:
+        tree = obj.read_typetree()
+        pointer = tree["<ModificatorImage>k__BackingField"]
+        if not pointer["m_PathID"]:
+            missing.append((tree["_UUID"], tree["title"]))
+            continue
+        img = full_image(PPtr(m_FileID=pointer["m_FileID"], m_PathID=pointer["m_PathID"]).deref(obj.assets_file).read())
+        if img.width != img.height:
+            sys.exit(f"tox {tree['_UUID']}: sprite is {img.width}x{img.height}, expected a square")
+        save(img.convert("RGBA").resize(TOX, Image.LANCZOS), f"tox/{tree['_UUID']}.webp")
+        exported += 1
+
     total = sum(os.path.getsize(f) for f in files)
-    print(f"ui={len(UI)} card={released} thumb={released} avatar={released} files={len(files)} size={total / 1e6:.1f} MB")
+    print(f"ui={len(UI)} card={released} thumb={released} avatar={released} tox={exported} files={len(files)} size={total / 1e6:.1f} MB")
+    print("tox without sprite", *(f"{uuid}:{title}" for uuid, title in sorted(missing)))
 
 
 if __name__ == "__main__":

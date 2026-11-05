@@ -67,6 +67,7 @@
 	import CardBadge from './CardBadge.svelte';
 	import CardBadgeStack from './CardBadgeStack.svelte';
 	import RarityMark from './RarityMark.svelte';
+	import ToxIcon from './ToxIcon.svelte';
 
 	let popup = $state<HTMLElement>();
 	const card = $derived(preview.card);
@@ -168,7 +169,8 @@
 				<ul class="grid gap-1">
 					{#each card.face.tox as tox, i (i)}
 						<li class="flex items-center justify-between gap-2">
-							<span class="min-w-0 truncate">{tox.name}</span>
+							<ToxIcon id={tox.id} image={tox.image} lazy={false} class="size-5" />
+							<span class="mr-auto min-w-0 truncate">{tox.name}</span>
 							{#if tox.rarity}<RarityMark rarity={tox.rarity} tooltip={false} />{/if}
 						</li>
 					{/each}
