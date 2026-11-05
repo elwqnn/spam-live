@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { ArrowLeft02Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
-	import { entryName, href, percent, type CardDetail, type Schemas } from '#lib';
+	import { entryName, href, percent, winRateColor, type CardDetail, type Schemas } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
 	import ArtistCredit from './ArtistCredit.svelte';
 	import CardBadge, { ELEMENTS } from './CardBadge.svelte';
@@ -38,7 +38,7 @@
 	<div class="grid content-start gap-1 p-4">
 		<dt class="eyebrow text-muted-foreground">{label}</dt>
 		<dd class="grid gap-1">
-			<span class="text-2xl tabular-nums">{value}</span>
+			<span class={['text-2xl tabular-nums', color && winRateColor(stats?.winRate)]}>{value}</span>
 			<Change value={change} {color} class="text-sm" />
 		</dd>
 	</div>
@@ -158,8 +158,8 @@
 				</div>
 				<div class="border bg-card">
 					<dl class="cells grid grid-cols-3">
-						{@render stat(m.games(), stats?.games ?? 0)}
 						{@render stat(m.play_rate(), percent(stats?.playRate), stats?.playRateChange)}
+						{@render stat(m.games(), stats?.games ?? 0)}
 						{@render stat(m.win_rate(), percent(stats?.winRate), stats?.winRateChange, true)}
 					</dl>
 				</div>

@@ -61,7 +61,7 @@
 
 <script lang="ts">
 	import { page } from '$app/state';
-	import { percent } from '#lib';
+	import { percent, winRateColor } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
 	import { place } from '#lib/place.js';
 	import CardBadge from './CardBadge.svelte';
@@ -115,10 +115,10 @@
 	});
 </script>
 
-{#snippet stat(label: string, value: string | number)}
+{#snippet stat(label: string, value: string | number, tone?: string)}
 	<div class="grid gap-0.5">
 		<dt class="eyebrow text-muted-foreground">{label}</dt>
-		<dd class="tabular-nums">{value}</dd>
+		<dd class={['tabular-nums', tone]}>{value}</dd>
 	</div>
 {/snippet}
 
@@ -179,9 +179,9 @@
 		{/if}
 		{#if stats}
 			<dl class="grid grid-cols-3 gap-2 p-3">
-				{@render stat(m.games(), stats.games)}
 				{@render stat(m.play_rate(), percent(stats.games ? stats.playRate : null))}
-				{@render stat(m.win_rate(), percent(stats.winRate))}
+				{@render stat(m.games(), stats.games)}
+				{@render stat(m.win_rate(), percent(stats.winRate), winRateColor(stats.winRate))}
 			</dl>
 		{/if}
 	{/if}

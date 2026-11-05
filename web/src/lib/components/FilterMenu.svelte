@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { queryHref } from '#lib';
 	import { buttonVariants } from '#lib/components/ui/button/index.js';
-	import { selection, toggle, type Filter } from '#lib/filter.js';
+	import { selection, target, type Filter } from '#lib/filter.js';
 	import { m } from '#lib/paraglide/messages.js';
 
 	let {
@@ -22,8 +22,6 @@
 	const name = (value: string) => filter.options.find((o) => o.value === value)?.label ?? value;
 	const link = (value: string | null, extra?: Record<string, null>) =>
 		queryHref(page.url, { ...reset, ...extra, [filter.id]: value });
-	const target = (value: string) =>
-		filter.multiple ? toggle(current, value) : value === filter.default ? null : value;
 	const close = () => menu?.hidePopover();
 	const item =
 		'flex items-center gap-2 px-2 py-1.5 text-sm transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none';
@@ -72,7 +70,7 @@
 			<li>
 				<a
 					class={item}
-					href={link(target(option.value), option.reset)}
+					href={link(target(filter, current, option.value), option.reset)}
 					aria-current={on ? 'true' : undefined}
 					data-sveltekit-reset="false"
 					onclick={filter.multiple ? undefined : close}

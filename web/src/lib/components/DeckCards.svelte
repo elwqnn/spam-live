@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { percent, type Schemas } from '#lib';
+	import { percent, winRateColor, type Schemas } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
 	import CardGrid from './CardGrid.svelte';
 	import CardThumb from './CardThumb.svelte';
@@ -62,7 +62,7 @@
 							>
 						{/if}
 						<span class="flex flex-wrap items-baseline gap-x-2">
-							<span class="text-sm/5 text-foreground"
+							<span class={['text-sm/5', winRateColor(s?.winRate) ?? 'text-foreground']}
 								><span class="sr-only">{m.win_rate()}</span> {percent(s?.winRate)}</span
 							>
 							<Change

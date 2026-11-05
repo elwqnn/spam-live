@@ -54,16 +54,16 @@
 	{#if chart}<div class="relative hidden sm:block">{@render chart()}</div>{/if}
 	{#if stats}
 		<dl class="flex shrink-0 items-center gap-x-5 text-[13px] tabular-nums">
-			<div class="grid gap-0.5 text-right">
-				<dt class="eyebrow text-[10px] text-muted-foreground">{m.games()}</dt>
-				<dd>{stats.games}</dd>
-			</div>
 			<div class="hidden gap-0.5 text-right md:grid">
 				<dt class="eyebrow text-[10px] text-muted-foreground">{m.play_rate()}</dt>
 				<dd class="grid justify-items-end">
 					{percent(stats.playRate)}
 					<Change value={stats.playRateChange} class="text-[11px]" />
 				</dd>
+			</div>
+			<div class="grid gap-0.5 text-right">
+				<dt class="eyebrow text-[10px] text-muted-foreground">{m.games()}</dt>
+				<dd>{stats.games}</dd>
 			</div>
 			<div class="grid gap-0.5">
 				<dt class="text-right eyebrow text-[10px] text-muted-foreground">{m.win_rate()}</dt>

@@ -11,3 +11,10 @@ export function formatChange(change: number | null | undefined, locale: Locale) 
 	}).format(points);
 	return { sign, value, text: m.points({ value }, { locale }) };
 }
+
+const shown = new Intl.NumberFormat('en', { style: 'percent', maximumFractionDigits: 1 });
+
+export function winRateColor(winRate: number | null | undefined) {
+	if (winRate == null || shown.format(winRate) === '50%') return undefined;
+	return winRate > 0.5 ? 'text-up' : 'text-down';
+}

@@ -4,7 +4,7 @@
 	import { fold, queryHref } from '#lib';
 	import { ELEMENTS, RARITIES } from '#lib/components/CardBadge.svelte';
 	import CardList from '#lib/components/CardList.svelte';
-	import FilterMenu from '#lib/components/FilterMenu.svelte';
+	import FilterChips from '#lib/components/FilterChips.svelte';
 	import FloatingElements from '#lib/components/FloatingElements.svelte';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { selection, type Filter } from '#lib/filter.js';
@@ -48,18 +48,23 @@
 			options: Object.entries(ELEMENTS).map(([value, label]) => ({
 				value,
 				label: label(),
-				count: count('element', value)
+				count: count('element', value),
+				icon: `/art/ui/element_${value}.webp`
 			}))
 		},
 		{
 			id: 'rarity',
 			label: m.filter_rarity(),
 			multiple: true,
-			options: Object.entries(RARITIES).map(([key, label]) => ({
-				value: key.replace('rarity-', ''),
-				label: label(),
-				count: count('rarity', key)
-			}))
+			options: Object.entries(RARITIES).map(([key, label]) => {
+				const value = key.replace('rarity-', '');
+				return {
+					value,
+					label: label(),
+					count: count('rarity', key),
+					icon: `/art/ui/card_rarity_${value}.webp`
+				};
+			})
 		}
 	]);
 
@@ -100,7 +105,7 @@
 
 <CardList {cards} {stats} {filters}>
 	{#snippet actions()}
-		<FilterMenu filter={sorts} />
-		<TrendMenu />
+		<FilterChips filter={sorts} />
+		<TrendMenu flat />
 	{/snippet}
 </CardList>

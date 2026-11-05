@@ -2,6 +2,7 @@ export type FilterOption = {
 	value: string;
 	label: string;
 	count?: number;
+	icon?: string;
 	reset?: Record<string, null>;
 };
 
@@ -17,3 +18,6 @@ export function toggle(values: string[], value: string) {
 	const next = values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
 	return next.length ? next.join(',') : null;
 }
+
+export const target = (filter: Filter, current: string[], value: string) =>
+	filter.multiple ? toggle(current, value) : value === filter.default ? null : value;

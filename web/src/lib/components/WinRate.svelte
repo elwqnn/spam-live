@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { percent } from '#lib';
+	import { percent, winRateColor } from '#lib';
 
 	let { value, element }: { value?: number | null; element?: string } = $props();
 </script>
@@ -16,5 +16,7 @@
 			></span>
 		{/if}
 	</span>
-	<span class="w-14 text-right text-[13px] tabular-nums">{percent(value)}</span>
+	<span class={['w-14 text-right text-[13px] tabular-nums', winRateColor(value)]}
+		>{percent(value)}</span
+	>
 </span>

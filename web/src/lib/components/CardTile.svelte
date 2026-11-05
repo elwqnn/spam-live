@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { href, percent, type Schemas } from '#lib';
+	import { href, percent, winRateColor, type Schemas } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
 	import CardArt from './CardArt.svelte';
 	import Change from './Change.svelte';
@@ -36,21 +36,21 @@
 		>
 			<span class="flex items-baseline justify-between gap-3">
 				<span class="min-w-0 truncate text-sm font-medium" aria-hidden="true">{name}</span>
-				<span class="shrink-0 text-[17px] leading-none font-medium"
+				<span class={['shrink-0 text-[17px] leading-none font-medium', winRateColor(stats.winRate)]}
 					><span class="sr-only">{m.win_rate()}</span> {percent(stats.winRate)}</span
 				>
-			</span>
-			<span class="flex flex-wrap items-baseline justify-between gap-x-3">
-				<span class="eyebrow text-muted-foreground"
-					>{stats.games} {m.games_unit({ count: stats.games })}</span
-				>
-				<Change value={stats.winRateChange} label={m.win_rate()} color class="text-xs" />
 			</span>
 			<span class="flex flex-wrap items-baseline justify-between gap-x-3">
 				<span class="eyebrow text-muted-foreground"
 					>{m.play_rate()} {percent(stats.games ? stats.playRate : null)}</span
 				>
 				<Change value={stats.playRateChange} label={m.play_rate()} class="text-xs" />
+			</span>
+			<span class="flex flex-wrap items-baseline justify-between gap-x-3">
+				<span class="eyebrow text-muted-foreground"
+					>{stats.games} {m.games_unit({ count: stats.games })}</span
+				>
+				<Change value={stats.winRateChange} label={m.win_rate()} color class="text-xs" />
 			</span>
 		</div>
 	{/if}

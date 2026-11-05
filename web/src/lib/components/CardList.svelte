@@ -1,16 +1,14 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
 	import { page } from '$app/state';
-	import { queryHref, type Schemas } from '#lib';
-	import { buttonVariants } from '#lib/components/ui/button/index.js';
+	import type { Schemas } from '#lib';
 	import type { Filter } from '#lib/filter.js';
 	import { m } from '#lib/paraglide/messages.js';
-	import { cn } from '#lib/utils.js';
 	import CardGrid from './CardGrid.svelte';
 	import CardRow from './CardRow.svelte';
 	import CardStack from './CardStack.svelte';
 	import CardTile from './CardTile.svelte';
-	import FilterBar from './FilterBar.svelte';
+	import FilterChips from './FilterChips.svelte';
 	import Switch from './Switch.svelte';
 
 	let {
@@ -32,10 +30,15 @@
 	} = $props();
 
 	const mode = $derived(view ?? (page.url.searchParams.get('view') === 'rows' ? 'rows' : 'grid'));
-	const views = [
-		['grid', m.view_grid],
-		['rows', m.view_rows]
-	] as const;
+	const views: Filter = $derived({
+		id: 'view',
+		label: m.view(),
+		default: 'grid',
+		options: [
+			{ value: 'grid', label: m.view_grid() },
+			{ value: 'rows', label: m.view_rows() }
+		]
+	});
 	const empty = { games: 0, playRate: 0, winRate: null };
 
 	let shown = $state(true);
@@ -55,42 +58,30 @@
 	}
 </script>
 
-<div class="px-(--gutter) py-3">
-	<FilterBar {filters}>
-		{#snippet actions()}
+<div class="px-(--gutter) py-4">
+	<div role="group" aria-label={m.filters()} class="grid gap-3">
+		{#each filters as filter (filter.id)}
+			<FilterChips {filter} class="sm:grid sm:grid-cols-[5rem_minmax(0,1fr)] sm:items-start" />
+		{/each}
+		<div class="flex flex-wrap items-center gap-x-6 gap-y-3">
 			{@render extra?.()}
-			{#if stats && mode === 'grid'}
-				<label class="flex items-center gap-2 text-sm">
-					{m.stats()}
-					<Switch
-						checked={shown}
-						class="in-[.stats-off]:border-foreground/25! in-[.stats-off]:bg-transparent! in-[.stats-off]:*:translate-x-0! in-[.stats-off]:*:bg-foreground!"
-						onclick={toggleStats}
-					/>
-				</label>
-			{/if}
-			{#if showToggle}
-				<div
-					role="group"
-					aria-label={m.view()}
-					class="flex h-8 overflow-hidden rounded-sm border border-foreground/25"
-				>
-					{#each views as [key, label] (key)}
-						<a
-							class={cn(
-								buttonVariants({ variant: mode === key ? 'secondary' : 'ghost', size: 'sm' }),
-								'h-auto rounded-none border-0 focus-visible:ring-inset',
-								mode !== key && 'text-muted-foreground'
-							)}
-							aria-current={mode === key ? 'true' : undefined}
-							href={queryHref(page.url, { view: key === 'grid' ? null : key })}
-							data-sveltekit-reset="false">{label()}</a
-						>
-					{/each}
-				</div>
-			{/if}
-		{/snippet}
-	</FilterBar>
+			<div class="ml-auto flex flex-wrap items-center gap-x-6 gap-y-3">
+				{#if stats && mode === 'grid'}
+					<label class="flex items-center gap-3">
+						<span class="eyebrow text-muted-foreground">{m.stats()}</span>
+						<Switch
+							checked={shown}
+							class="in-[.stats-off]:border-foreground/25! in-[.stats-off]:bg-transparent! in-[.stats-off]:*:translate-x-0! in-[.stats-off]:*:bg-foreground!"
+							onclick={toggleStats}
+						/>
+					</label>
+				{/if}
+				{#if showToggle}
+					<FilterChips filter={views} selected={mode} />
+				{/if}
+			</div>
+		</div>
+	</div>
 </div>
 
 {#if !cards.length}
