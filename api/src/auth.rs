@@ -379,6 +379,7 @@ pub async fn me(State(s): State<AppState>, user: CurrentUser) -> Result<Json<Me>
         (status = 401, body = ErrorBody), (status = 403, body = ErrorBody)))]
 pub async fn delete_me(State(s): State<AppState>, AnyUser(user): AnyUser) -> Result<Response, ApiError> {
     sqlx::query("DELETE FROM users WHERE id = $1").bind(user.id).execute(&s.db).await?;
+    s.live.notify(0);
     Ok((StatusCode::NO_CONTENT, [(header::SET_COOKIE, CLEAR_SESSION)]).into_response())
 }
 

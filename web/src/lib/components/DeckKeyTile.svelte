@@ -31,6 +31,31 @@
 			return element ? map.set(element, (map.get(element) ?? 0) + 1) : map;
 		}, new Map<string, number>())
 	);
+
+	let tilted: HTMLElement | null = null;
+
+	function rest() {
+		if (!tilted) return;
+		tilted.style.transform = '';
+		delete tilted.dataset.tilt;
+		tilted = null;
+	}
+
+	function move(e: PointerEvent) {
+		if (e.pointerType !== 'mouse' || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			rest();
+			return;
+		}
+		const link = (e.target as Element).closest<HTMLElement>('a');
+		if (link !== tilted) rest();
+		if (!link?.parentElement) return;
+		const rect = link.parentElement.getBoundingClientRect();
+		const x = Math.min(1, Math.max(0, (e.clientX - rect.left) / link.offsetWidth));
+		const y = Math.min(1, Math.max(0, (e.clientY - rect.top) / link.offsetHeight));
+		link.style.transform = `perspective(800px) rotateX(${(0.5 - y) * 16}deg) rotateY(${(x - 0.5) * 16}deg)`;
+		link.dataset.tilt = '';
+		tilted = link;
+	}
 </script>
 
 <li
@@ -53,7 +78,19 @@
 			{/each}
 		</CardBadgeStack>
 	</div>
-	<DeckCards {cards} {catalog} {large} {stats} />
+	<div
+		class={[
+			'contents',
+			large &&
+				'[&_a]:duration-700 [&_a]:ease-(--spring) [&_a]:motion-safe:transition-transform [&_a[data-tilt]]:duration-100 [&_a[data-tilt]]:ease-out'
+		]}
+		role="presentation"
+		onpointermove={large ? move : undefined}
+		onpointerleave={large ? rest : undefined}
+		onpointercancel={large ? rest : undefined}
+	>
+		<DeckCards {cards} {catalog} {large} {stats} />
+	</div>
 	{#if large}
 		<p class="mt-auto text-sm text-muted-foreground">
 			<span class="shader-text text-4xl font-medium tracking-tight tabular-nums lg:text-5xl"

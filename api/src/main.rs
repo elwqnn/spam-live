@@ -88,16 +88,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     });
 
+    let live = state.live.clone();
     let app = api::router(state);
     let listener = tokio::net::TcpListener::bind(&bind).await?;
     tracing::info!("listening on {bind}");
     axum::serve(listener, app)
-        .with_graceful_shutdown(async {
+        .with_graceful_shutdown(async move {
             let mut term = signal(SignalKind::terminate()).expect("SIGTERM handler");
             tokio::select! {
                 _ = tokio::signal::ctrl_c() => {}
                 _ = term.recv() => {}
             }
+            live.close();
         })
         .await?;
     Ok(())

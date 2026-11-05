@@ -3,6 +3,7 @@ pub mod analytics;
 pub mod auth;
 pub mod catalog;
 pub mod decks;
+pub mod live;
 pub mod matches;
 pub mod release;
 #[cfg(feature = "seed")]
@@ -40,6 +41,7 @@ pub struct AppState {
     pub comment_limiter: Arc<matches::RateLimiter>,
     pub release: Arc<release::Cache>,
     pub presence: Arc<analytics::Presence>,
+    pub live: Arc<live::Live>,
 }
 
 impl AppState {
@@ -56,6 +58,7 @@ impl AppState {
             )),
             release: Arc::default(),
             presence: Arc::default(),
+            live: Arc::default(),
         }
     }
 }
@@ -131,6 +134,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         decks::patch_comment,
         decks::delete_comment,
         decks::create_report,
+        live::deck_events,
         stats::deck_stats,
         stats::card_stats,
         admin::reports,
@@ -160,6 +164,7 @@ pub fn router(state: AppState) -> Router {
         .merge(matches::routes())
         .merge(release::routes())
         .merge(decks::routes())
+        .merge(live::routes())
         .merge(stats::routes())
         .merge(admin::routes())
         .merge(analytics::routes())

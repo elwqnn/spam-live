@@ -103,6 +103,7 @@ pub async fn resolve(
             .fetch_optional(&s.db)
             .await?
             .ok_or_else(|| not_found("open report not found"))?;
+    let deleted = target.0.filter(|_| matches!(body.action, ResolveAction::Delete));
     let query = match (body.action, target) {
         (ResolveAction::Dismiss, _) => {
             sqlx::query("UPDATE reports SET status = 'dismissed', resolved_at = now() WHERE id = $1").bind(id)
@@ -111,6 +112,9 @@ pub async fn resolve(
         (ResolveAction::Delete, (_, comment)) => sqlx::query("DELETE FROM comments WHERE id = $1").bind(comment),
     };
     query.execute(&s.db).await?;
+    if let Some(deck) = deleted {
+        s.live.notify(deck);
+    }
     Ok(StatusCode::NO_CONTENT)
 }
 

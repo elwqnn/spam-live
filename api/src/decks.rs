@@ -317,6 +317,9 @@ pub async fn patch_deck(
     .bind(guide)
     .execute(&s.db)
     .await?;
+    if deck.status == DeckStatus::Public {
+        s.live.notify(id);
+    }
     Ok(Json(load(&s, id, Some(user.id)).await?))
 }
 
@@ -327,8 +330,11 @@ pub async fn delete_deck(
     user: CurrentUser,
     Path(id): Path<i64>,
 ) -> Result<StatusCode, ApiError> {
-    owned(&s.db, id, &user).await?;
+    let deck = owned(&s.db, id, &user).await?;
     sqlx::query("DELETE FROM decks WHERE id = $1").bind(id).execute(&s.db).await?;
+    if deck.status == DeckStatus::Public {
+        s.live.notify(id);
+    }
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -342,13 +348,17 @@ pub async fn publish(
 ) -> Result<Json<DeckDetail>, ApiError> {
     let deck = owned(&s.db, id, &user).await?;
     unknown_cards(&s, &deck.cards)?;
-    sqlx::query(
+    let changed = sqlx::query(
         "UPDATE decks SET status = 'public', published_at = now(), updated_at = now()
          WHERE id = $1 AND status = 'draft'",
     )
     .bind(id)
     .execute(&s.db)
-    .await?;
+    .await?
+    .rows_affected();
+    if changed == 1 {
+        s.live.notify(id);
+    }
     Ok(Json(load(&s, id, Some(user.id)).await?))
 }
 
@@ -360,10 +370,15 @@ pub async fn unpublish(
     Path(id): Path<i64>,
 ) -> Result<Json<DeckDetail>, ApiError> {
     owned(&s.db, id, &user).await?;
-    sqlx::query("UPDATE decks SET status = 'draft', updated_at = now() WHERE id = $1 AND status = 'public'")
-        .bind(id)
-        .execute(&s.db)
-        .await?;
+    let changed =
+        sqlx::query("UPDATE decks SET status = 'draft', updated_at = now() WHERE id = $1 AND status = 'public'")
+            .bind(id)
+            .execute(&s.db)
+            .await?
+            .rows_affected();
+    if changed == 1 {
+        s.live.notify(id);
+    }
     Ok(Json(load(&s, id, Some(user.id)).await?))
 }
 

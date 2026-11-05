@@ -43,6 +43,7 @@ dependencies = [
  "axum",
  "chrono",
  "flate2",
+ "futures-util",
  "getrandom 0.4.3",
  "pulldown-cmark",
  "reqwest",
