@@ -10,6 +10,7 @@
 	import Author from './Author.svelte';
 	import DeckCards from './DeckCards.svelte';
 	import LiveLines from './LiveLines.svelte';
+	import Time from './Time.svelte';
 
 	let {
 		deck,
@@ -28,6 +29,7 @@
 	let voted = $derived(!!deck.myVote);
 	let votes = $derived(deck.votes);
 	let pending = false;
+	let pop = $state(false);
 
 	const vote: SubmitFunction = ({ cancel }) => {
 		if (pending) return cancel();
@@ -35,22 +37,29 @@
 		const [was, count] = [voted, votes];
 		voted = !was;
 		votes = count + (was ? -1 : 1);
+		pop = !was;
 		return ({ result }) => {
 			pending = false;
 			if (result.type !== 'success') {
 				voted = was;
 				votes = count;
+				pop = false;
 			}
 		};
 	};
 </script>
 
 {#snippet heart(label: string)}
-	<HugeiconsIcon
-		icon={FavouriteIcon}
-		aria-hidden="true"
-		class={voted ? 'size-4 fill-current text-terra' : 'size-4'}
-	/>
+	<span
+		class={['flex', pop && voted && 'motion-safe:animate-pop']}
+		onanimationend={() => (pop = false)}
+	>
+		<HugeiconsIcon
+			icon={FavouriteIcon}
+			aria-hidden="true"
+			class={voted ? 'size-4 fill-current text-terra' : 'size-4'}
+		/>
+	</span>
 	<span class="sr-only">{label}</span>
 	<span class="tabular-nums">{votes}</span>
 {/snippet}
@@ -116,6 +125,10 @@
 		<div class="grid gap-0.5">
 			<dt class="eyebrow text-[10px] text-muted-foreground">{m.games()}</dt>
 			<dd class={{ 'lg:text-2xl': large }}>{deck.games}</dd>
+		</div>
+		<div class="grid gap-0.5">
+			<dt class="eyebrow text-[10px] text-muted-foreground">{m.added()}</dt>
+			<dd class="text-muted-foreground"><Time iso={deck.publishedAt ?? deck.createdAt} /></dd>
 		</div>
 	</dl>
 </li>

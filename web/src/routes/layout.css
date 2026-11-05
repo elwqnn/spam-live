@@ -122,10 +122,17 @@
 	--radius-xs: 2px;
 	--radius-sm: 4px;
 	--animate-grow: grow 1s ease-out 0.25s backwards;
+	--animate-pop: pop 400ms var(--spring);
 
 	@keyframes grow {
 		from {
 			transform: scaleX(0);
+		}
+	}
+
+	@keyframes pop {
+		from {
+			scale: 0.6;
 		}
 	}
 }
