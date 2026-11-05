@@ -60,6 +60,7 @@
 	"all_versions": "All versions",
 	"base_value": "base value",
 	"all_cards": "All cards",
+	"card_zoom": "View {name} large",
 	"stats_title": "Stats",
 	"stats_intro": "Ranked matches between players. Mirror matches and disputed matches are not counted.",
 	"tab_decks": "Decks",

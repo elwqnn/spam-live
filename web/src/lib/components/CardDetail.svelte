@@ -2,9 +2,9 @@
 	import { entryName, href, percent, type CardDetail, type Schemas } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
 	import ArtistCredit from './ArtistCredit.svelte';
-	import CardArt from './CardArt.svelte';
 	import CardBadge, { ELEMENTS } from './CardBadge.svelte';
 	import CardBadgeStack from './CardBadgeStack.svelte';
+	import CardZoom from './CardZoom.svelte';
 	import Change from './Change.svelte';
 	import DeckTile from './DeckTile.svelte';
 	import Description from './Description.svelte';
@@ -53,9 +53,7 @@
 <article class="rows">
 	<TitleRow class="grid gap-6 row sm:grid-cols-[18rem_minmax(0,1fr)] sm:items-start md:gap-10">
 		<div class="grid w-full max-w-72 gap-3 sm:sticky sm:top-8">
-			<div aria-hidden="true">
-				<CardArt {card} interactive />
-			</div>
+			<CardZoom {card} />
 			{#if card.artist}
 				<ArtistCredit artist={card.artist} />
 			{/if}
