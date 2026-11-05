@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { HugeiconsIcon } from '@hugeicons/svelte';
+	import { ArrowUpRight01Icon } from '@hugeicons/core-free-icons';
 	import type { Schemas } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
 
@@ -25,6 +27,11 @@
 		target="_blank"
 		rel="external noopener noreferrer"
 		aria-label={m.artist_link({ name: artist.name, network: name })}
-		>{name} <span aria-hidden="true">↗</span></a
+		>{name}
+		<HugeiconsIcon
+			icon={ArrowUpRight01Icon}
+			aria-hidden="true"
+			class="inline size-[1em] align-[-0.125em]"
+		/></a
 	>
 {/each}

@@ -72,5 +72,5 @@ export const closeAfter: SubmitFunction =
 		await update();
 	};
 
-export { fold } from './description.js';
+export { fold, glossaryAnchor } from './description.js';
 export { formatChange } from './change.js';

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { HugeiconsIcon } from '@hugeicons/svelte';
+	import { ArrowLeft02Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
 	import { entryName, href, percent, type CardDetail, type Schemas } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
 	import ArtistCredit from './ArtistCredit.svelte';
@@ -62,7 +64,13 @@
 			<div class="grid gap-3">
 				<a
 					class="eyebrow text-muted-foreground transition-colors hover:text-foreground"
-					href={href('/cards')}><span aria-hidden="true">←</span> {m.all_cards()}</a
+					href={href('/cards')}
+					><HugeiconsIcon
+						icon={ArrowLeft02Icon}
+						aria-hidden="true"
+						class="inline size-[1em] align-[-0.125em]"
+					/>
+					{m.all_cards()}</a
 				>
 				<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">
 					{card.name ?? card.id}
@@ -92,6 +100,21 @@
 				</CardBadgeStack>
 			</section>
 
+			<section class="grid gap-3">
+				{@render heading(m.abilities())}
+				<ul class="divide-y border bg-card text-sm">
+					{#each card.abilities as { ability, cooldown } (ability.id)}
+						<li class="grid gap-3 p-4">
+							<div class="flex items-start justify-between gap-2">
+								{@render name(entryName(ability))}
+								<CardBadge type="cooldown" value={cooldown} display="compact" />
+							</div>
+							<Description text={ability.description} entry={ability} {keywords} />
+						</li>
+					{/each}
+				</ul>
+			</section>
+
 			{#if card.tox.length}
 				<section class="grid gap-3">
 					{@render heading(m.tox())}
@@ -110,21 +133,6 @@
 					</ul>
 				</section>
 			{/if}
-
-			<section class="grid gap-3">
-				{@render heading(m.abilities())}
-				<ul class="divide-y border bg-card text-sm">
-					{#each card.abilities as { ability, cooldown } (ability.id)}
-						<li class="grid gap-3 p-4">
-							<div class="flex items-start justify-between gap-2">
-								{@render name(entryName(ability))}
-								<CardBadge type="cooldown" value={cooldown} display="compact" />
-							</div>
-							<Description text={ability.description} entry={ability} {keywords} />
-						</li>
-					{/each}
-				</ul>
-			</section>
 
 			<section class="grid gap-3">
 				{@render heading(m.talents())}
@@ -166,7 +174,12 @@
 				<a
 					class="eyebrow text-muted-foreground transition-colors hover:text-foreground"
 					href={href(`/decks?card=${card.id}`)}
-					>{m.decks_with_card_all()} <span aria-hidden="true">→</span></a
+					>{m.decks_with_card_all()}
+					<HugeiconsIcon
+						icon={ArrowRight02Icon}
+						aria-hidden="true"
+						class="inline size-[1em] align-[-0.125em]"
+					/></a
 				>
 			</div>
 			<div>

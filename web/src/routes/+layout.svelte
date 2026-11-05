@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { Download04Icon, Moon02Icon, Sun03Icon } from '@hugeicons/core-free-icons';
+	import { Download04Icon } from '@hugeicons/core-free-icons';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { api, href, loginHref } from '#lib';
 	import AccountMenu from '#lib/components/AccountMenu.svelte';
 	import CardPreview from '#lib/components/CardPreview.svelte';
-	import CommandPalette, { type Action } from '#lib/components/CommandPalette.svelte';
+	import CommandPalette from '#lib/components/CommandPalette.svelte';
 	import Dialog from '#lib/components/Dialog.svelte';
 	import Switch from '#lib/components/Switch.svelte';
-	import Tooltip from '#lib/components/Tooltip.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale, locales, localizeHref } from '#lib/paraglide/runtime.js';
@@ -21,10 +20,8 @@
 
 	let { children, data }: LayoutProps = $props();
 
-	const GITHUB = 'https://github.com/elwqnn/spam-live';
 	const download = href('/download');
 	const login = $derived(loginHref(page.url));
-	const languages = new Intl.DisplayNames([getLocale()], { type: 'language' });
 
 	async function logout() {
 		await api(fetch, location.origin).POST('/api/auth/logout');
@@ -38,34 +35,11 @@
 		['/glossary', m.nav_glossary],
 		['/import', m.nav_import]
 	] as const;
-	function toggleTheme() {
-		localStorage.theme = document.documentElement.classList.toggle('dark') ? 'dark' : 'light';
-	}
 
 	let mac = $state(false);
 	let single = $state(true);
 	let palette = $state<ReturnType<typeof CommandPalette>>();
-
-	const actions: Action[] = $derived([
-		{ id: 'theme', label: m.theme_toggle(), run: toggleTheme },
-		...locales
-			.filter((locale) => locale !== getLocale())
-			.map((locale) => ({
-				id: `locale-${locale}`,
-				label: m.palette_language({ name: languages.of(locale) ?? locale }),
-				run: () => location.assign(localizeHref(page.url.pathname + page.url.search, { locale }))
-			})),
-		data.me
-			? { id: 'logout', label: m.logout(), run: logout }
-			: { id: 'login', label: m.login_steam(), run: () => location.assign(login) },
-		{
-			id: 'download',
-			label: m.import_app_download(),
-			hint: single ? 'd' : undefined,
-			run: () => goto(download)
-		},
-		{ id: 'github', label: m.nav_github(), run: () => location.assign(GITHUB) }
-	]);
+	let head = $state(0);
 
 	onMount(() => {
 		mac = isMac();
@@ -104,8 +78,12 @@
 	<title>{m.site_name()}</title>
 </svelte:head>
 
-<div class="sides flex min-h-dvh flex-col overflow-x-clip lg:px-8">
+<div
+	class="sides flex min-h-dvh flex-col overflow-x-clip lg:px-8"
+	style:--head={head ? `${head}px` : undefined}
+>
 	<header
+		bind:offsetHeight={head}
 		class="head mx-auto flex w-full max-w-300 flex-wrap items-center gap-x-8 gap-y-3 px-(--gutter) py-4 sm:py-5 lg:border-x"
 	>
 		<a href={href('/')} class="text-[17px] font-semibold tracking-wide"
@@ -120,7 +98,7 @@
 			{/each}
 		</nav>
 		<div class="ml-auto flex min-w-0 flex-wrap items-center gap-3">
-			<CommandPalette bind:this={palette} {actions} {mac} />
+			<CommandPalette bind:this={palette} {mac} />
 			{#if data.me}
 				<AccountMenu me={data.me} {logout} />
 			{:else}
@@ -164,22 +142,13 @@
 						>{locale}</a
 					>
 				{/each}
-				<Tooltip content={m.theme_toggle()}>
-					{#snippet children(tip)}
-						<Button variant="ghost" size="icon-sm" onclick={toggleTheme} {...tip}>
-							<HugeiconsIcon icon={Moon02Icon} class="dark:hidden" />
-							<HugeiconsIcon icon={Sun03Icon} class="hidden dark:block" />
-							<span class="sr-only">{m.theme_toggle()}</span>
-						</Button>
-					{/snippet}
-				</Tooltip>
 			</div>
 		</footer>
 	</div>
 </div>
 <Dialog id="shortcuts" title={m.shortcuts_title()}>
 	<dl class="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-6 gap-y-2.5 text-sm">
-		<dt class="flex items-center gap-1"><kbd>{mac ? '⌘' : 'Ctrl'}</kbd><kbd>K</kbd></dt>
+		<dt class="flex items-center gap-1"><kbd>{mac ? 'Cmd' : 'Ctrl'}</kbd><kbd>K</kbd></dt>
 		<dd>{m.shortcut_palette()}</dd>
 		<dt><kbd>/</kbd></dt>
 		<dd>{m.shortcut_search()}</dd>

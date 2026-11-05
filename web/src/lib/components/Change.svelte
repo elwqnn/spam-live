@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { HugeiconsIcon } from '@hugeicons/svelte';
+	import { ArrowDown01Icon, ArrowUp01Icon } from '@hugeicons/core-free-icons';
 	import { formatChange } from '#lib';
 	import { cn } from '#lib/utils.js';
 	import { m } from '#lib/paraglide/messages.js';
@@ -33,7 +35,17 @@
 			className
 		)}
 	>
-		<span aria-hidden="true">{change.text}</span>
+		<span aria-hidden="true"
+			>{#if change.sign > 0}<HugeiconsIcon
+					icon={ArrowUp01Icon}
+					aria-hidden="true"
+					class="mr-[.25em] inline size-[1em] align-[-0.125em]"
+				/>{:else if change.sign < 0}<HugeiconsIcon
+					icon={ArrowDown01Icon}
+					aria-hidden="true"
+					class="mr-[.25em] inline size-[1em] align-[-0.125em]"
+				/>{/if}{change.text}</span
+		>
 		<span class="sr-only"
 			>{label}
 			{change.sign > 0

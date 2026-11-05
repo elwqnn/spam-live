@@ -1,11 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { formatDescription, matchKeyword } from './description';
+import { formatDescription, glossaryAnchor, matchKeyword } from './description';
 
 type Raw = { id: string; description: Record<string, string | null> | null };
 type Keyword = { id: string; name: Record<string, string> };
-const catalog: Record<'abilities' | 'talents' | 'tox', Raw[]> & { keywords: Keyword[] } =
-	JSON.parse(readFileSync(new URL('../../../catalog/1.28.1.json', import.meta.url), 'utf8'));
+const catalog: Record<'abilities' | 'talents' | 'tox' | 'effects', Raw[]> & {
+	keywords: Keyword[];
+} = JSON.parse(readFileSync(new URL('../../../catalog/1.28.1.json', import.meta.url), 'utf8'));
 
 function fmt(kind: 'abilities' | 'talents' | 'tox', id: string, lang: 'en' | 'fr') {
 	const entry = catalog[kind].find((e) => e.id === id);
@@ -212,5 +213,29 @@ describe('matchKeyword', () => {
 
 	it('needs a space after a prefix', () => {
 		expect(match('Randomly', 'en')).toBe(null);
+	});
+});
+
+describe('glossaryAnchor', () => {
+	it('slugs the folded id', () => {
+		expect(glossaryAnchor('keyword', 'AOE')).toBe('keyword-aoe');
+		expect(glossaryAnchor('ability', 'Appel de la forêt')).toBe('ability-appel-de-la-foret');
+		expect(glossaryAnchor('talent', 'Blindage F/E')).toBe('talent-blindage-f-e');
+		expect(glossaryAnchor('tox', ' -A__b- ')).toBe('tox-a-b');
+	});
+
+	it('gives each catalog entry a unique, not empty anchor', () => {
+		const anchors = (
+			[
+				['keyword', catalog.keywords],
+				['effect', catalog.effects],
+				['ability', catalog.abilities],
+				['talent', catalog.talents],
+				['tox', catalog.tox]
+			] as const
+		).flatMap(([type, list]) => list.map((e) => glossaryAnchor(type, e.id)));
+		expect(anchors.length).toBeGreaterThan(400);
+		expect(new Set(anchors).size).toBe(anchors.length);
+		for (const anchor of anchors) expect(anchor).toMatch(/^[a-z]+-[a-z0-9]+(-[a-z0-9]+)*$/);
 	});
 });

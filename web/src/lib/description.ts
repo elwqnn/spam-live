@@ -99,6 +99,11 @@ function parse(text: string, data: Data, out: Segment[]) {
 
 export const fold = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase();
 
+export const glossaryAnchor = (type: string, id: string) =>
+	`${type}-${fold(id)
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-|-$/g, '')}`;
+
 export function matchKeyword<T extends { name: string }>(text: string, keywords: readonly T[]) {
 	const needle = fold(text);
 	let best: T | undefined;

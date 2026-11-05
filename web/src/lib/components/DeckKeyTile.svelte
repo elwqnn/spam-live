@@ -50,7 +50,7 @@
 		<CardBadgeStack class="ml-auto justify-end">
 			{#each mix as [element, count] (element)}
 				<CardBadge type="element" value={element} display="compact"
-					><span class="tabular-nums">×{count}</span></CardBadge
+					><span class="tabular-nums">{count}</span></CardBadge
 				>
 			{/each}
 		</CardBadgeStack>

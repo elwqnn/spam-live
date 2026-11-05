@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { rank, search } from './search';
+import { highlight, rank, search } from './search';
 
 const id = (s: string) => s;
 
@@ -14,6 +14,20 @@ describe('rank', () => {
 
 	it('finds a word prefix after an earlier substring', () => {
 		expect(rank('Restaurant Taunt', 'tau')).toBe(1);
+	});
+});
+
+describe('highlight', () => {
+	it('splits the name around the ranked match, with the original letters', () => {
+		expect(highlight('Taunt', 'TAU')).toEqual(['', 'Tau', 'nt']);
+		expect(highlight('Restaurant Taunt', 'tau')).toEqual(['Restaurant ', 'Tau', 'nt']);
+		expect(highlight('Restaurant', 'tau')).toEqual(['Res', 'tau', 'rant']);
+		expect(highlight('Épine Médusine', ' med ')).toEqual(['Épine ', 'Méd', 'usine']);
+	});
+
+	it('keeps the name whole without a match', () => {
+		expect(highlight('Fire', 'tau')).toEqual(['Fire', '', '']);
+		expect(highlight('Fire', ' ')).toEqual(['Fire', '', '']);
 	});
 });
 

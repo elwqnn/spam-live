@@ -9,6 +9,5 @@ export function formatChange(change: number | null | undefined, locale: Locale) 
 		minimumFractionDigits: 1,
 		maximumFractionDigits: 1
 	}).format(points);
-	const unit = m.points({ value }, { locale });
-	return { sign, value, text: sign ? `${sign > 0 ? '▲' : '▼'} ${unit}` : unit };
+	return { sign, value, text: m.points({ value }, { locale }) };
 }

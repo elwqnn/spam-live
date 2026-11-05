@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { Download04Icon } from '@hugeicons/core-free-icons';
+	import { ArrowRight02Icon, Download04Icon } from '@hugeicons/core-free-icons';
 	import { formatDate, href, type Schemas } from '#lib';
 	import TitleRow from '#lib/components/TitleRow.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
@@ -87,7 +87,12 @@
 					<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
 						<time datetime={release.publishedAt}>{formatDate(release.publishedAt)}</time>
 						<a class={link} href={release.url} rel="external"
-							>{m.download_notes()} <span aria-hidden="true">→</span></a
+							>{m.download_notes()}
+							<HugeiconsIcon
+								icon={ArrowRight02Icon}
+								aria-hidden="true"
+								class="inline size-[1em] align-[-0.125em]"
+							/></a
 						>
 					</div>
 				</div>
@@ -113,7 +118,12 @@
 						{data.missing ? m.download_none() : m.download_error()}
 					</h2>
 					<a class="text-sm text-muted-foreground {link}" href="{REPO}/releases" rel="external"
-						>{m.download_releases()} <span aria-hidden="true">→</span></a
+						>{m.download_releases()}
+						<HugeiconsIcon
+							icon={ArrowRight02Icon}
+							aria-hidden="true"
+							class="inline size-[1em] align-[-0.125em]"
+						/></a
 					>
 				</div>
 			{/if}
@@ -137,7 +147,12 @@
 			<li><a class={link} href={href('/privacy')}>{m.footer_privacy()}</a></li>
 			<li>
 				<a class={link} href={REPO} rel="external"
-					>{m.download_source()} <span aria-hidden="true">→</span></a
+					>{m.download_source()}
+					<HugeiconsIcon
+						icon={ArrowRight02Icon}
+						aria-hidden="true"
+						class="inline size-[1em] align-[-0.125em]"
+					/></a
 				>
 			</li>
 		</ul>

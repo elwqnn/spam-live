@@ -25,7 +25,7 @@
 	aria-label={name}
 	closedby="any"
 	onclose={() => closed++}
-	class="lightbox dark m-auto max-h-none max-w-none overflow-visible bg-transparent text-foreground backdrop:bg-black/82 motion-safe:backdrop:animate-in motion-safe:backdrop:fade-in"
+	class="lightbox m-auto max-h-none max-w-none overflow-visible bg-transparent text-foreground backdrop:bg-black/82 motion-safe:backdrop:animate-in motion-safe:backdrop:fade-in"
 >
 	<div
 		class="grain fixed inset-0 opacity-[.01] motion-safe:animate-in motion-safe:fade-in"

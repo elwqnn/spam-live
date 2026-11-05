@@ -67,7 +67,7 @@
 				bare ? '' : compact ? 'px-1.5' : 'px-2',
 				type === 'element'
 					? [
-							`el-${key} text-el dark:[--el-mix:75%]`,
+							`el-${key} text-el [--el-mix:75%]`,
 							!bare && 'bg-[color-mix(in_oklab,var(--el)_20%,var(--card))]'
 						]
 					: type === 'rarity'

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { href } from '#lib';
+	import { glossaryAnchor, href } from '#lib';
 	import { badgeVariants } from '#lib/components/ui/badge/index.js';
 	import Tooltip from './Tooltip.svelte';
 
@@ -17,7 +17,7 @@
 
 <Tooltip content={hint} class="max-w-72 p-3 text-sm leading-6"
 	>{#snippet children(tip)}<a
-			href={href(`/glossary?type=keyword#keyword-${keyword.id}`)}
+			href={href(`/glossary#${glossaryAnchor('keyword', keyword.id)}`)}
 			class={[
 				badgeVariants({ variant: 'secondary' }),
 				'underline decoration-dotted underline-offset-2'

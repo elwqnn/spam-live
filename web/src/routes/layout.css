@@ -8,65 +8,7 @@
 @import '@fontsource/ibm-plex-mono/500.css';
 @import '@fontsource/raleway/800.css';
 
-@custom-variant dark (&:is(.dark *));
-
 :root {
-	--background: #f3f1ea;
-	--foreground: #1c1b18;
-	--card: #fbfaf6;
-	--card-foreground: #1c1b18;
-	--popover: #fbfaf6;
-	--popover-foreground: #1c1b18;
-	--tile: #ffffff;
-	--row: #eceae2;
-	--primary: #1c1b18;
-	--primary-foreground: #f3f1ea;
-	--secondary: #e6e3da;
-	--secondary-foreground: #1c1b18;
-	--muted: #eceae2;
-	--muted-foreground: #66645c;
-	--accent: #eceae2;
-	--accent-foreground: #1c1b18;
-	--destructive: oklch(0.51 0.2 27.325);
-	--up: #367030;
-	--down: #b03c26;
-	--border: rgba(23, 23, 21, 0.1);
-	--input: rgba(23, 23, 21, 0.16);
-	--ring: rgba(28, 27, 24, 0.55);
-	--grain: 0.03;
-	--spring: cubic-bezier(0.3, 1.6, 0.5, 1);
-	--el: #a3a199;
-	--el-mix: 60%;
-	--el-tint: #171715;
-	--el-fire: #e2603f;
-	--el-water: #4a90c2;
-	--el-nature: #6fa760;
-	--el-earth: #c99a45;
-	--el-shadow: #9a7fd0;
-	--el-light: #e8c95a;
-	--el-divine: #d987b4;
-	--plum: #543b78;
-	--terra: #e36140;
-	--straw: #edc966;
-	--slate: #4585b3;
-	--moss: #6b9e5e;
-	--shader-plum: var(--plum);
-	--shader-terra: oklch(from var(--terra) 0.53 c h);
-	--shader-straw: oklch(from var(--straw) 0.53 c h);
-	--shader-slate: oklch(from var(--slate) 0.5 c h);
-	--side: clamp(1.5rem, (100vw - 75rem) / 6, 4rem);
-	--reach: 10rem;
-	--gutter: 1.25rem;
-	--contour: color-mix(in oklab, var(--foreground) 8%, transparent);
-}
-
-@media (width >= 40rem) {
-	:root {
-		--gutter: 2rem;
-	}
-}
-
-.dark {
 	--background: #171715;
 	--foreground: #f2f1ea;
 	--card: #1d1d1a;
@@ -90,14 +32,37 @@
 	--input: rgba(255, 255, 255, 0.12);
 	--ring: rgba(242, 234, 211, 0.5);
 	--grain: 0.05;
+	--spring: cubic-bezier(0.3, 1.6, 0.5, 1);
+	--el: #a3a199;
 	--el-mix: 100%;
 	--el-tint: #f2f1ea;
-	--contour: color-mix(in oklab, var(--foreground) 10%, transparent);
+	--el-fire: #e2603f;
+	--el-water: #4a90c2;
+	--el-nature: #6fa760;
+	--el-earth: #c99a45;
+	--el-shadow: #9a7fd0;
+	--el-light: #e8c95a;
+	--el-divine: #d987b4;
+	--plum: #543b78;
+	--terra: #e36140;
+	--straw: #edc966;
+	--slate: #4585b3;
+	--moss: #6b9e5e;
 	--shader-plum: oklch(from var(--plum) 0.66 calc(c * 1.7) h);
 	--shader-terra: oklch(from var(--terra) 0.7 c h);
 	--shader-straw: var(--straw);
 	--shader-slate: oklch(from var(--slate) 0.68 calc(c * 1.2) h);
+	--side: clamp(1.5rem, (100vw - 75rem) / 6, 4rem);
+	--reach: 10rem;
+	--gutter: 1.25rem;
+	--contour: color-mix(in oklab, var(--foreground) 10%, transparent);
 	color-scheme: dark;
+}
+
+@media (width >= 40rem) {
+	:root {
+		--gutter: 2rem;
+	}
 }
 
 .el-fire {
@@ -120,9 +85,6 @@
 }
 .el-divine {
 	--el: var(--el-divine);
-}
-:root:not(.dark) .el-light {
-	--el-mix: 45%;
 }
 
 @theme inline {

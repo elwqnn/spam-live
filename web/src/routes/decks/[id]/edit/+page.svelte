@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { HugeiconsIcon } from '@hugeicons/svelte';
+	import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 	import { href } from '#lib';
 	import DeckForm from '#lib/components/DeckForm.svelte';
 	import TitleRow from '#lib/components/TitleRow.svelte';
@@ -15,7 +17,13 @@
 <TitleRow class="grid gap-2 row">
 	<a
 		class="eyebrow wrap-anywhere text-muted-foreground transition-colors hover:text-foreground"
-		href={href(`/decks/${data.deck.id}`)}><span aria-hidden="true">←</span> {data.deck.name}</a
+		href={href(`/decks/${data.deck.id}`)}
+		><HugeiconsIcon
+			icon={ArrowLeft02Icon}
+			aria-hidden="true"
+			class="inline size-[1em] align-[-0.125em]"
+		/>
+		{data.deck.name}</a
 	>
 	<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">{m.edit_deck()}</h1>
 </TitleRow>

@@ -4,7 +4,7 @@
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
 
 	export const buttonVariants = tv({
-		base: "group/button inline-flex shrink-0 items-center justify-center rounded-sm border bg-clip-padding text-xs font-medium tracking-[.06em] whitespace-nowrap uppercase transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		base: "group/button inline-flex shrink-0 items-center justify-center rounded-sm border bg-clip-padding text-xs font-medium tracking-[.06em] whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive/50 aria-invalid:ring-2 aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 		variants: {
 			variant: {
 				default:
@@ -16,7 +16,7 @@
 				ghost:
 					'border-transparent hover:border-border hover:bg-muted hover:text-foreground aria-expanded:bg-muted',
 				destructive:
-					'border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/40 dark:bg-destructive/20 dark:hover:bg-destructive/30',
+					'border-destructive/30 bg-destructive/20 text-destructive hover:bg-destructive/30 focus-visible:border-destructive/40 focus-visible:ring-destructive/40',
 				link: 'border-transparent text-primary underline-offset-4 hover:underline'
 			},
 			size: {

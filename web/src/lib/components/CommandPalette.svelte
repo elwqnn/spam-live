@@ -1,22 +1,19 @@
-<script lang="ts" module>
-	export type Action = { id: string; label: string; hint?: string; run: () => void };
-</script>
-
 <script lang="ts">
 	import { tick } from 'svelte';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { Search01Icon } from '@hugeicons/core-free-icons';
+	import { ArrowDown02Icon, ArrowUp02Icon, Search01Icon } from '@hugeicons/core-free-icons';
 	import { goto } from '$app/navigation';
-	import { api, entryName, href, type Card, type Schemas } from '#lib';
-	import { search } from '#lib/search.js';
+	import { api, entryName, glossaryAnchor, href, type Card, type Schemas } from '#lib';
+	import { highlight, search } from '#lib/search.js';
 	import { shortcut } from '#lib/shortcut.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
-	import CardBadge from './CardBadge.svelte';
+	import CardBadge, { ELEMENTS, RARITIES } from './CardBadge.svelte';
 	import CardBadgeStack from './CardBadgeStack.svelte';
+	import ToxIcon from './ToxIcon.svelte';
 
-	let { actions, mac }: { actions: Action[]; mac: boolean } = $props();
+	let { mac }: { mac: boolean } = $props();
 
 	const TYPES = [
 		['keyword', 'keywords', m.glossary_keyword],
@@ -26,15 +23,23 @@
 		['tox', 'tox', m.glossary_tox]
 	] as const;
 
-	type Entry = { type: string; id: string; name: string; label: () => string };
+	type Entry = {
+		type: string;
+		id: string;
+		name: string;
+		label: () => string;
+		data: Record<string, unknown>;
+	};
+	type Badge = ['element' | 'rarity' | 'income' | 'cooldown', string | number];
 	type Option = {
 		key: string;
 		label: string;
-		go?: string;
-		run?: () => void;
+		go: string;
 		card?: Card;
+		entry?: Entry;
+		element?: string;
+		badges?: Badge[];
 		detail?: string;
-		hint?: string;
 	};
 
 	const uid = $props.id();
@@ -64,7 +69,13 @@
 				cards = c.data ?? [];
 				if (glossary)
 					entries = TYPES.flatMap(([type, key, label]) =>
-						glossary[key].map((e) => ({ type, id: e.id, name: entryName(e), label }))
+						glossary[key].map((e) => ({
+							type,
+							id: e.id,
+							name: entryName(e),
+							label,
+							data: 'data' in e ? e.data : {}
+						}))
 					);
 				if (!c.data || !glossary) loaded = undefined;
 			})
@@ -116,7 +127,12 @@
 					key: `card-${card.id}`,
 					label: card.name ?? card.id,
 					go: `/cards/${card.id}`,
-					card
+					card,
+					badges: [
+						['element', card.element],
+						['rarity', card.rarity],
+						['income', card.goldIncome]
+					]
 				}))
 			},
 			{
@@ -126,28 +142,33 @@
 					key: `deck-${deck.id}`,
 					label: deck.name,
 					go: `/decks/${deck.id}`,
+					badges: Object.keys(ELEMENTS)
+						.filter((el) => cards.some((c) => c.element === el && deck.cards.includes(c.id)))
+						.map((el): Badge => ['element', el]),
 					detail: m.by_author({ name: deck.authorName })
 				}))
 			},
 			{
 				id: 'glossary',
 				label: m.nav_glossary(),
-				options: search(entries, q, (e) => e.name, 8).map((e): Option => ({
-					key: `${e.type}-${e.id}`,
-					label: e.name,
-					go: `/glossary?type=${e.type}#${e.type}-${e.id}`,
-					detail: e.label()
-				}))
-			},
-			{
-				id: 'actions',
-				label: m.palette_actions(),
-				options: (q ? search(actions, q, (a) => a.label) : actions).map((a): Option => ({
-					key: `action-${a.id}`,
-					label: a.label,
-					hint: a.hint,
-					run: a.run
-				}))
+				options: search(entries, q, (e) => e.name, 8).map((e): Option => {
+					const { rarity, cooldown } = e.data;
+					const element = /^Boost(.+)$/.exec(e.id)?.[1].toLowerCase() ?? '';
+					return {
+						key: `${e.type}-${e.id}`,
+						label: e.name,
+						go: `/glossary#${glossaryAnchor(e.type, e.id)}`,
+						entry: e,
+						element: e.type === 'effect' && Object.hasOwn(ELEMENTS, element) ? element : undefined,
+						badges:
+							e.type === 'tox' && typeof rarity === 'string' && Object.hasOwn(RARITIES, rarity)
+								? [['rarity', rarity]]
+								: e.type === 'ability' && typeof cooldown === 'number'
+									? [['cooldown', cooldown]]
+									: [],
+						detail: e.label()
+					};
+				})
 			}
 		].filter((g) => g.options.length)
 	);
@@ -162,8 +183,7 @@
 	function run(option: Option | undefined) {
 		if (!option) return;
 		dialog?.close();
-		if (option.go) goto(href(option.go));
-		else option.run?.();
+		goto(href(option.go));
 	}
 
 	async function move(step: number) {
@@ -192,14 +212,15 @@
 <Button
 	variant="ghost"
 	size="sm"
-	class="text-muted-foreground hover:border-transparent"
+	class="bg-muted text-muted-foreground hover:border-transparent"
 	onclick={open}
 	aria-haspopup="dialog"
 	aria-keyshortcuts={mac ? 'Meta+K' : 'Control+K'}
 >
-	<HugeiconsIcon icon={Search01Icon} /><span class="sr-only">{m.palette_open()}</span><kbd
-		aria-hidden="true"
-		class="key-hint">{mac ? '⌘' : 'Ctrl'} K</kbd
+	<HugeiconsIcon icon={Search01Icon} />
+	Search
+	<span class="sr-only">{m.palette_open()}</span><kbd aria-hidden="true" class="key-hint"
+		>{mac ? 'Cmd' : 'Ctrl'} K</kbd
 	>
 </Button>
 
@@ -250,14 +271,14 @@
 				</div>
 				{#each group.options as option (option.key)}
 					{@const i = options.indexOf(option)}
-					{@const card = option.card}
+					{@const { card, entry } = option}
+					{@const [before, match, after] = highlight(option.label, q)}
 					<button
 						type="button"
 						id="{uid}-{i}"
 						role="option"
 						tabindex="-1"
 						aria-selected={i === index}
-						aria-keyshortcuts={option.hint}
 						class={[
 							'flex min-h-10 w-full cursor-pointer items-center gap-3 px-4 py-1.5 text-left text-sm',
 							i === index && 'bg-row'
@@ -269,24 +290,41 @@
 							<img
 								src="/art/avatar/{card.id}.webp"
 								alt=""
+								aria-hidden="true"
 								loading="lazy"
 								decoding="async"
 								class="el-{card.element} size-7 shrink-0 rounded-xs border-2 border-(--el) bg-(--el)"
 							/>
+						{:else if entry?.type === 'tox' && entry.data.modificatorImage}
+							<ToxIcon id={entry.id} image class="size-7" />
+						{:else if option.element}
+							<img
+								src="/art/ui/element_{option.element}.webp"
+								alt=""
+								aria-hidden="true"
+								decoding="async"
+								class="size-7 shrink-0"
+							/>
 						{/if}
-						<span class="min-w-0 flex-1 truncate">{option.label}</span>
-						{#if card}
+						<span class="min-w-0 flex-1 truncate"
+							>{before}<mark
+								class="bg-transparent font-semibold text-current underline underline-offset-2"
+								>{match}</mark
+							>{after}</span
+						>
+						{#if option.badges?.length}
 							<CardBadgeStack class="shrink-0 flex-nowrap">
-								<CardBadge type="element" value={card.element} display="compact" />
-								<CardBadge type="rarity" value={card.rarity} display="compact" />
+								{#each option.badges as [type, value] (type + value)}
+									<CardBadge {type} {value} display="compact" />
+								{/each}
 							</CardBadgeStack>
-						{:else if option.detail}
-							<span class="max-w-[40%] shrink-0 truncate text-xs text-muted-foreground"
-								>{option.detail}</span
-							>
-						{:else if option.hint}
-							<kbd aria-hidden="true" class="uppercase max-sm:hidden pointer-coarse:hidden"
-								>{option.hint}</kbd
+						{/if}
+						{#if option.detail}
+							<span
+								class={[
+									'max-w-[40%] shrink-0 truncate text-xs text-muted-foreground',
+									group.id === 'decks' && 'max-sm:hidden'
+								]}>{option.detail}</span
 							>
 						{/if}
 					</button>
@@ -302,8 +340,12 @@
 		class="hidden items-center gap-5 border-t px-4 py-2 text-xs text-muted-foreground sm:flex"
 		aria-hidden="true"
 	>
-		<span class="flex items-center gap-1.5"><kbd>↑</kbd><kbd>↓</kbd>{m.palette_move()}</span>
-		<span class="flex items-center gap-1.5"><kbd>↵</kbd>{m.palette_select()}</span>
+		<span class="flex items-center gap-1.5"
+			><kbd><HugeiconsIcon icon={ArrowUp02Icon} class="size-3" /></kbd><kbd
+				><HugeiconsIcon icon={ArrowDown02Icon} class="size-3" /></kbd
+			>{m.palette_move()}</span
+		>
+		<span class="flex items-center gap-1.5"><kbd>{m.key_enter()}</kbd>{m.palette_select()}</span>
 		<span class="flex items-center gap-1.5"><kbd>Esc</kbd>{m.close()}</span>
 	</div>
 </dialog>

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { HugeiconsIcon } from '@hugeicons/svelte';
+	import { ArrowRight02Icon } from '@hugeicons/core-free-icons';
 	import { href } from '#lib';
 	import Arrow from '#lib/components/Arrow.svelte';
 	import DeckKeyTile from '#lib/components/DeckKeyTile.svelte';
@@ -61,7 +63,13 @@
 		{@render heading(m.home_top_decks())}
 		<a
 			class="mb-1.5 ml-auto eyebrow text-muted-foreground transition-colors hover:text-foreground"
-			href={href('/stats')}>{m.see_all_stats()} <span aria-hidden="true">→</span></a
+			href={href('/stats')}
+			>{m.see_all_stats()}
+			<HugeiconsIcon
+				icon={ArrowRight02Icon}
+				aria-hidden="true"
+				class="inline size-[1em] align-[-0.125em]"
+			/></a
 		>
 	</div>
 	{#if data.top.length}

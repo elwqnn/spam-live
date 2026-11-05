@@ -35,7 +35,7 @@
 </script>
 
 <div
-	class="pointer-events-none fixed inset-0 hidden opacity-30 min-[1440px]:block dark:opacity-35"
+	class="pointer-events-none fixed inset-0 hidden opacity-35 min-[1440px]:block"
 	aria-hidden="true"
 >
 	{#each SIDES as [place, offset, icons] (place)}

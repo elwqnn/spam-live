@@ -1,12 +1,11 @@
 <!doctype html>
-<html lang="%paraglide.lang%" dir="%paraglide.dir%" class="dark">
+<html lang="%paraglide.lang%" dir="%paraglide.dir%">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
 		<script>
 			try {
-				if (localStorage.theme === 'light') document.documentElement.classList.remove('dark');
 				if (localStorage.getItem('shortcuts') === 'off')
 					document.documentElement.classList.add('keys-off');
 				if (localStorage.getItem('cardStats') === 'off')
