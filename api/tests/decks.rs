@@ -462,6 +462,11 @@ async fn votes(pool: PgPool) {
     assert_eq!(ids(&sorted), [y, x, z]);
     assert_eq!(sorted[0]["votes"], 2);
     assert_eq!(ids(&send(&app, get("/api/decks", "")).await.body), [y, x, z]);
+    let my_votes = |list: &Value| list.as_array().unwrap().iter().map(|d| d.get("myVote").cloned()).collect::<Vec<_>>();
+    assert_eq!(my_votes(&sorted), vec![Some(Value::Null); 3]);
+    let mine = send(&app, get("/api/decks?sort=votes", &c)).await.body;
+    assert_eq!(ids(&mine), [y, x, z]);
+    assert_eq!(my_votes(&mine), [Some(json!(true)), Some(json!(false)), Some(json!(false))]);
     let page = |q: &str| get(&format!("/api/decks?sort=votes&limit=2{q}"), "");
     assert_eq!(ids(&send(&app, page("")).await.body), [y, x]);
     assert_eq!(ids(&send(&app, page("&offset=2")).await.body), [z]);

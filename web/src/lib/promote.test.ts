@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { promote } from './promote';
 
 describe('promote', () => {
-	it('promotes from 5 votes', () => {
-		expect(promote([{ votes: 4 }, { votes: 5 }]).map((p) => p.reasons)).toEqual([[], ['votes']]);
-	});
-
 	it('promotes from a win score of 0.5', () => {
 		expect(promote([{ winScore: 0.4999 }, { winScore: 0.5 }]).map((p) => p.reasons)).toEqual([
 			[],
@@ -14,18 +10,14 @@ describe('promote', () => {
 	});
 
 	it('does not promote a deck with 0 games', () => {
-		expect(promote([{ winScore: null, votes: 0 }, {}])).toEqual([
+		expect(promote([{ winScore: null }, {}])).toEqual([
 			{ reasons: [], large: false },
 			{ reasons: [], large: false }
 		]);
 	});
 
-	it('gives both reasons', () => {
-		expect(promote([{ votes: 9, winScore: 0.6 }])[0].reasons).toEqual(['votes', 'winrate']);
-	});
-
 	it('promotes only the first 3 decks', () => {
-		const decks = Array.from({ length: 5 }, () => ({ votes: 10 }));
+		const decks = Array.from({ length: 5 }, () => ({ winScore: 0.6 }));
 		expect(promote(decks).map((p) => p.reasons.length)).toEqual([1, 1, 1, 0, 0]);
 	});
 

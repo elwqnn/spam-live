@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { percent, type Schemas } from '#lib';
-	import { Badge } from '#lib/components/ui/badge/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { Reason } from '#lib/promote.js';
 	import CardBadge from './CardBadge.svelte';
@@ -46,7 +45,6 @@
 	{/if}
 	<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
 		<span class="text-sm text-muted-foreground tabular-nums">#{String(rank).padStart(2, '0')}</span>
-		{#if reasons.includes('votes')}<Badge variant="outline">{m.top_voted()}</Badge>{/if}
 		<CardBadgeStack class="ml-auto justify-end">
 			{#each mix as [element, count] (element)}
 				<CardBadge type="element" value={element} display="compact"

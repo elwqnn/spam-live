@@ -816,7 +816,9 @@ export interface components {
             myVote?: boolean | null;
             stats: components["schemas"]["DeckStats"];
         };
-        DeckItem: components["schemas"]["Deck"] & components["schemas"]["KeyStats"];
+        DeckItem: components["schemas"]["Deck"] & components["schemas"]["KeyStats"] & {
+            myVote?: boolean | null;
+        };
         DeckKeyStats: {
             cards: string[];
             /** Format: int64 */
@@ -1770,7 +1772,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Public decks. author=me lists the decks of the caller with drafts. Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. games, wins and winRate are the stats of the deck key for the latest catalog version. winRate is null at 0 games. winScore is the lower bound of the 95 % Wilson score interval of winRate, null at 0 games. sort=winrate orders by winScore. q matches part of the deck name, without case. */
+            /** @description Public decks. author=me lists the decks of the caller with drafts. Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. games, wins and winRate are the stats of the deck key for the latest catalog version. winRate is null at 0 games. winScore is the lower bound of the 95 % Wilson score interval of winRate, null at 0 games. sort=winrate orders by winScore. q matches part of the deck name, without case. myVote is null without login. */
             200: {
                 headers: {
                     [name: string]: unknown;

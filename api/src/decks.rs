@@ -111,6 +111,7 @@ pub struct Deck {
 }
 
 #[derive(Serialize, ToSchema, FromRow)]
+#[serde(rename_all = "camelCase")]
 pub struct DeckItem {
     #[serde(flatten)]
     #[sqlx(flatten)]
@@ -118,6 +119,7 @@ pub struct DeckItem {
     #[serde(flatten)]
     #[sqlx(flatten)]
     pub stats: stats::KeyStats,
+    pub my_vote: Option<bool>,
 }
 
 #[derive(Serialize, ToSchema)]
@@ -395,13 +397,15 @@ pub struct DeckQuery {
             Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. \
             games, wins and winRate are the stats of the deck key for the latest catalog version. \
             winRate is null at 0 games. winScore is the lower bound of the 95 % Wilson score interval of winRate, \
-            null at 0 games. sort=winrate orders by winScore. q matches part of the deck name, without case."),
+            null at 0 games. sort=winrate orders by winScore. q matches part of the deck name, without case. \
+            myVote is null without login."),
         (status = 400, body = ErrorBody), (status = 401, body = ErrorBody)))]
 pub async fn list_decks(
     State(s): State<AppState>,
     user: Option<CurrentUser>,
     Query(q): Query<DeckQuery>,
 ) -> Result<Json<Vec<DeckItem>>, ApiError> {
+    let viewer = user.as_ref().map(|u| u.id);
     let (author, drafts) = match q.author.as_deref() {
         None => (None, false),
         Some("me") => {
@@ -434,7 +438,9 @@ pub async fn list_decks(
              FROM deck_results WHERE app_version = $6 GROUP BY deck_key
          )
          SELECT {DECK_COLUMNS}, COALESCE(ws.games, 0) AS games, COALESCE(ws.wins, 0) AS wins, ws.win_rate,
-             ws.win_score
+             ws.win_score,
+             CASE WHEN $9::bigint IS NOT NULL
+                 THEN EXISTS (SELECT 1 FROM votes v WHERE v.deck_id = d.id AND v.user_id = $9) END AS my_vote
          {DECK_FROM} LEFT JOIN ws ON ws.deck_key = d.deck_key
          WHERE ($1::bigint IS NULL OR d.author_id = $1) AND (d.status = 'public' OR $2)
              AND ($3::uuid IS NULL OR $3 = ANY (d.cards))
@@ -450,6 +456,7 @@ pub async fn list_decks(
     .bind(s.catalog.latest())
     .bind(offset)
     .bind(name)
+    .bind(viewer)
     .fetch_all(&s.db)
     .await?;
     Ok(Json(decks))
