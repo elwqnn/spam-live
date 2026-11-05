@@ -53,8 +53,7 @@
 	--side: clamp(1.5rem, (100vw - 75rem) / 6, 4rem);
 	--reach: 10rem;
 	--gutter: 1.25rem;
-	--contour: color-mix(in oklab, var(--foreground) 12%, transparent);
-	--contour-glow: color-mix(in oklab, var(--terra) 28%, transparent);
+	--contour: color-mix(in oklab, var(--foreground) 8%, transparent);
 }
 
 @media (width >= 40rem) {
@@ -89,8 +88,7 @@
 	--grain: 0.05;
 	--el-mix: 100%;
 	--el-tint: #f2f1ea;
-	--contour: color-mix(in oklab, var(--foreground) 14%, transparent);
-	--contour-glow: color-mix(in oklab, var(--terra) 40%, transparent);
+	--contour: color-mix(in oklab, var(--foreground) 10%, transparent);
 	color-scheme: dark;
 }
 
@@ -221,7 +219,8 @@
 			position: absolute;
 			inset-block: 0;
 			width: var(--side);
-			background: linear-gradient(var(--contour-glow), var(--contour) 40rem);
+			border: 0 solid var(--border);
+			background: linear-gradient(var(--contour) 4rem, transparent 28rem) padding-box;
 			mask:
 				url(/contours.svg) 0 0 / 4rem 96rem repeat-y,
 				linear-gradient(#000 0 0) left / 1px 100% no-repeat;
@@ -229,9 +228,11 @@
 		}
 		&::before {
 			right: calc(100% - max(2rem, 50% - 37.5rem));
+			border-left-width: 1px;
 		}
 		&::after {
 			left: calc(100% - max(2rem, 50% - 37.5rem));
+			border-right-width: 1px;
 			mask-position:
 				0 48rem,
 				right;
