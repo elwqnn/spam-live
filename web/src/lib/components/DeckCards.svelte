@@ -62,7 +62,7 @@
 							>
 						{/if}
 						<span class="flex flex-wrap items-baseline gap-x-2">
-							<span class={['text-sm/5', winRateColor(s?.winRate) ?? 'text-foreground']}
+							<span class="text-sm/5 text-foreground" style:color={winRateColor(s?.winRate)}
 								><span class="sr-only">{m.win_rate()}</span> {percent(s?.winRate)}</span
 							>
 							<Change

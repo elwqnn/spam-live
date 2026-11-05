@@ -115,10 +115,10 @@
 	});
 </script>
 
-{#snippet stat(label: string, value: string | number, tone?: string)}
+{#snippet stat(label: string, value: string | number, color?: string)}
 	<div class="grid gap-0.5">
 		<dt class="eyebrow text-muted-foreground">{label}</dt>
-		<dd class={['tabular-nums', tone]}>{value}</dd>
+		<dd class="tabular-nums" style:color>{value}</dd>
 	</div>
 {/snippet}
 

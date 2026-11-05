@@ -16,5 +16,6 @@ const shown = new Intl.NumberFormat('en', { style: 'percent', maximumFractionDig
 
 export function winRateColor(winRate: number | null | undefined) {
 	if (winRate == null || shown.format(winRate) === '50%') return undefined;
-	return winRate > 0.5 ? 'text-up' : 'text-down';
+	const weight = Math.round(Math.min(1, Math.abs(winRate - 0.5) / 0.1) * 100);
+	return `color-mix(in oklab, var(${winRate > 0.5 ? '--up' : '--down'}) ${weight}%, var(--foreground))`;
 }

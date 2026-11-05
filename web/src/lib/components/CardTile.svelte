@@ -36,7 +36,9 @@
 		>
 			<span class="flex items-baseline justify-between gap-3">
 				<span class="min-w-0 truncate text-sm font-medium" aria-hidden="true">{name}</span>
-				<span class={['shrink-0 text-[17px] leading-none font-medium', winRateColor(stats.winRate)]}
+				<span
+					class="shrink-0 text-[17px] leading-none font-medium"
+					style:color={winRateColor(stats.winRate)}
 					><span class="sr-only">{m.win_rate()}</span> {percent(stats.winRate)}</span
 				>
 			</span>

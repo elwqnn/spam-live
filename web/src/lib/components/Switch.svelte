@@ -19,6 +19,6 @@
 	{...rest}
 >
 	<span
-		class="absolute top-0.5 left-0.5 size-4 rounded-full bg-foreground transition-[translate,background-color] duration-150 ease-out group-aria-checked:translate-x-4 group-aria-checked:bg-primary-foreground"
+		class="absolute top-0.5 left-0.5 size-4 rounded-sm bg-foreground transition-[translate,background-color] duration-150 ease-out group-aria-checked:translate-x-4 group-aria-checked:bg-primary-foreground"
 	></span>
 </button>

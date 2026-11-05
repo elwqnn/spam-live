@@ -38,7 +38,10 @@
 	<div class="grid content-start gap-1 p-4">
 		<dt class="eyebrow text-muted-foreground">{label}</dt>
 		<dd class="grid gap-1">
-			<span class={['text-2xl tabular-nums', color && winRateColor(stats?.winRate)]}>{value}</span>
+			<span
+				class="text-2xl tabular-nums"
+				style:color={color ? winRateColor(stats?.winRate) : undefined}>{value}</span
+			>
 			<Change value={change} {color} class="text-sm" />
 		</dd>
 	</div>

@@ -24,25 +24,32 @@ describe('formatChange', () => {
 });
 
 describe('winRateColor', () => {
-	it('gives text-up above 50 %', () => {
-		expect(winRateColor(0.55)).toBe('text-up');
-		expect(winRateColor(0.501)).toBe('text-up');
-		expect(winRateColor(1)).toBe('text-up');
+	const up = (weight: number) => `color-mix(in oklab, var(--up) ${weight}%, var(--foreground))`;
+	const down = (weight: number) => `color-mix(in oklab, var(--down) ${weight}%, var(--foreground))`;
+
+	it('mixes --up by the distance above 50 %', () => {
+		expect(winRateColor(0.51)).toBe(up(10));
+		expect(winRateColor(0.55)).toBe(up(50));
 	});
 
-	it('gives text-down below 50 %', () => {
-		expect(winRateColor(0.45)).toBe('text-down');
-		expect(winRateColor(0.499)).toBe('text-down');
-		expect(winRateColor(0)).toBe('text-down');
+	it('mixes --down by the distance below 50 %', () => {
+		expect(winRateColor(0.45)).toBe(down(50));
 	});
 
-	it('gives no class when the shown value is 50 %', () => {
+	it('gives the full token from 10 points away', () => {
+		expect(winRateColor(0.6)).toBe(up(100));
+		expect(winRateColor(0.75)).toBe(up(100));
+		expect(winRateColor(0.4)).toBe(down(100));
+		expect(winRateColor(0.2)).toBe(down(100));
+	});
+
+	it('gives no color when the shown value is 50 %', () => {
 		expect(winRateColor(0.5)).toBeUndefined();
-		expect(winRateColor(0.5004)).toBeUndefined();
+		expect(winRateColor(0.50004)).toBeUndefined();
 		expect(winRateColor(0.4996)).toBeUndefined();
 	});
 
-	it('gives no class for no value', () => {
+	it('gives no color for no value', () => {
 		expect(winRateColor(null)).toBeUndefined();
 		expect(winRateColor(undefined)).toBeUndefined();
 	});

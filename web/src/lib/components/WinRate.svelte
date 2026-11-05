@@ -16,7 +16,7 @@
 			></span>
 		{/if}
 	</span>
-	<span class={['w-14 text-right text-[13px] tabular-nums', winRateColor(value)]}
+	<span class="w-14 text-right text-[13px] tabular-nums" style:color={winRateColor(value)}
 		>{percent(value)}</span
 	>
 </span>
