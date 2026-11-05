@@ -13,13 +13,15 @@
 		rank,
 		catalog,
 		reasons = [],
-		large = false
+		large = false,
+		stats
 	}: {
 		deck: Schemas['DeckKeyStats'];
 		rank: number;
 		catalog: ReadonlyMap<string, Schemas['CardBase']>;
 		reasons?: Reason[];
 		large?: boolean;
+		stats?: ReadonlyMap<string, Schemas['CardStats']>;
 	} = $props();
 
 	const order = (id: string) => catalog.get(id)?.order ?? Number.MAX_SAFE_INTEGER;
@@ -40,7 +42,7 @@
 	]}
 >
 	{#if reasons.length}
-		<LiveLines line={0.5} speed={1 / 3} class="opacity-7 [:hover>&]:opacity-9" />
+		<LiveLines line={1} speed={1 / 3} class="opacity-12 [:hover>&]:opacity-12" />
 	{/if}
 	<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
 		<span class="text-sm text-muted-foreground tabular-nums">#{String(rank).padStart(2, '0')}</span>
@@ -53,7 +55,7 @@
 			{/each}
 		</CardBadgeStack>
 	</div>
-	<DeckCards {cards} {catalog} {large} />
+	<DeckCards {cards} {catalog} {large} {stats} />
 	{#if large}
 		<p class="mt-auto text-sm text-muted-foreground">
 			<span class="shader-text text-4xl font-medium tracking-tight tabular-nums lg:text-5xl"
@@ -63,7 +65,7 @@
 			<span class="font-semibold text-foreground">{m.top_deck_win_rate()}</span>
 			{m.top_deck_over()}
 			<span class="text-xl text-foreground tabular-nums lg:text-3xl">{deck.games}</span>
-			<span class="font-semibold text-foreground">{m.top_deck_games({ count: deck.games })}</span>
+			<span class="font-semibold text-foreground">{m.games_unit({ count: deck.games })}</span>
 		</p>
 	{:else}
 		<dl class="mt-auto flex flex-wrap gap-x-6 gap-y-2 text-[13px] tabular-nums">

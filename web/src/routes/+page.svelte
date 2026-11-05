@@ -14,6 +14,7 @@
 
 	const catalog = $derived(new Map(data.cards.map((c) => [c.id, c])));
 	const promoted = $derived(promote(data.top));
+	const cardStats = $derived(new Map(data.stats.map((s) => [s.card, s])));
 	const line = 'border-[#fbf8f0]/35 bg-[#171715]/35 hover:border-[#fbf8f0]/70';
 </script>
 
@@ -73,6 +74,7 @@
 						{catalog}
 						reasons={promoted[i].reasons}
 						large={promoted[i].large}
+						stats={promoted[i].large ? cardStats : undefined}
 					/>
 				{/each}
 			</ul>

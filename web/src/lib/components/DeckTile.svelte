@@ -28,7 +28,7 @@
 	]}
 >
 	{#if reasons.length}
-		<LiveLines line={0.5} speed={1 / 3} class="opacity-7 [:hover>&]:opacity-9" />
+		<LiveLines line={1} speed={1 / 3} class="opacity-12 [:hover>&]:opacity-12" />
 	{/if}
 	<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
 		<a

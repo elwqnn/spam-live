@@ -7,14 +7,16 @@ export const load: PageLoad = async ({ fetch, url, untrack }) => {
 		fetch,
 		untrack(() => url.origin)
 	);
-	const [cards, top, recent] = await Promise.all([
+	const [cards, top, recent, stats] = await Promise.all([
 		client.GET('/api/cards', { params: { query: { lang: getLocale() } } }),
 		client.GET('/api/stats/decks', { params: { query: { sort: 'winrate', limit: 6 } } }),
-		client.GET('/api/decks', { params: { query: { sort: 'recent', limit: 6 } } })
+		client.GET('/api/decks', { params: { query: { sort: 'recent', limit: 6 } } }),
+		client.GET('/api/stats/cards')
 	]);
 	return {
 		cards: cards.data ?? [],
 		top: top.data ?? [],
-		recent: recent.data ?? []
+		recent: recent.data ?? [],
+		stats: stats.data ?? []
 	};
 };

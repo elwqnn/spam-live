@@ -85,7 +85,7 @@
 	"top_deck_of": "",
 	"top_deck_win_rate": "win rate",
 	"top_deck_over": "over",
-	"top_deck_games": [
+	"games_unit": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],

@@ -41,7 +41,9 @@
 				>
 			</span>
 			<span class="flex flex-wrap items-baseline justify-between gap-x-3">
-				<span class="eyebrow text-muted-foreground">{m.games()} {stats.games}</span>
+				<span class="eyebrow text-muted-foreground"
+					>{stats.games} {m.games_unit({ count: stats.games })}</span
+				>
 				<Change value={stats.winRateChange} label={m.win_rate()} color class="text-xs" />
 			</span>
 			<span class="flex flex-wrap items-baseline justify-between gap-x-3">

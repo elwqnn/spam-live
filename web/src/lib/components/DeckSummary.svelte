@@ -23,7 +23,9 @@
 			>{m.win_rate()} · {m.version_label({ version: deck.stats.version })}</span
 		>
 		<span class="text-5xl font-medium tracking-tight tabular-nums">{percent(stats.winRate)}</span>
-		<span class="text-sm text-muted-foreground tabular-nums">{m.games()} {stats.games}</span>
+		<span class="text-sm text-muted-foreground tabular-nums"
+			>{stats.games} {m.games_unit({ count: stats.games })}</span
+		>
 	</div>
 	<div class="grid min-w-0 content-start">
 		<dl class="cells grid grid-cols-2">
