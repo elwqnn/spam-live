@@ -12,6 +12,7 @@
 	import type { Filter } from '#lib/filter.js';
 	import TitleRow from '#lib/components/TitleRow.svelte';
 	import TrendMenu from '#lib/components/TrendMenu.svelte';
+	import { versionFilter } from '#lib/components/VersionSelect.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
 
@@ -21,17 +22,7 @@
 	const tab = $derived(page.url.searchParams.get('tab') === 'cards' ? 'cards' : 'decks');
 	const link = (active: boolean) =>
 		buttonVariants({ variant: active ? 'secondary' : 'ghost', size: 'sm' });
-	const filters: Filter[] = $derived([
-		{
-			id: 'version',
-			label: m.version(),
-			default: data.versions[0],
-			options: [
-				...data.versions.map((v) => ({ value: v, label: v })),
-				{ value: 'all', label: m.all_versions(), reset: { trend: null } }
-			]
-		}
-	]);
+	const filters: Filter[] = $derived([versionFilter(data.versions)]);
 	const sorts: Filter = $derived({
 		id: 'sort',
 		label: m.sort(),

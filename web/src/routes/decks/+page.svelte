@@ -31,9 +31,13 @@
 		{
 			id: 'card',
 			label: m.card(),
-			options: data.cards
-				.map((c) => ({ value: c.id, label: c.name ?? c.id }))
-				.sort((a, b) => a.label.localeCompare(b.label, getLocale()))
+			default: 'all',
+			options: [
+				{ value: 'all', label: m.all_cards() },
+				...data.cards
+					.map((c) => ({ value: c.id, label: c.name ?? c.id }))
+					.sort((a, b) => a.label.localeCompare(b.label, getLocale()))
+			]
 		}
 	]);
 	const sorts: Filter = $derived({

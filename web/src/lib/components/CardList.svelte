@@ -2,14 +2,16 @@
 	import { onMount, type Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import { queryHref, type Schemas } from '#lib';
-	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
+	import { buttonVariants } from '#lib/components/ui/button/index.js';
 	import type { Filter } from '#lib/filter.js';
 	import { m } from '#lib/paraglide/messages.js';
+	import { cn } from '#lib/utils.js';
 	import CardGrid from './CardGrid.svelte';
 	import CardRow from './CardRow.svelte';
 	import CardStack from './CardStack.svelte';
 	import CardTile from './CardTile.svelte';
 	import FilterBar from './FilterBar.svelte';
+	import Switch from './Switch.svelte';
 
 	let {
 		cards,
@@ -58,25 +60,34 @@
 		{#snippet actions()}
 			{@render extra?.()}
 			{#if stats && mode === 'grid'}
-				<Button
-					variant={shown ? 'secondary' : 'ghost'}
-					size="sm"
-					aria-pressed={shown}
-					class="in-[.stats-off]:border-transparent in-[.stats-off]:bg-transparent in-[.stats-off]:hover:border-border in-[.stats-off]:hover:bg-muted"
-					onclick={toggleStats}>{m.stats()}</Button
-				>
+				<label class="flex items-center gap-2 text-sm">
+					{m.stats()}
+					<Switch
+						checked={shown}
+						class="in-[.stats-off]:border-foreground/25! in-[.stats-off]:bg-transparent! in-[.stats-off]:*:translate-x-0! in-[.stats-off]:*:bg-foreground!"
+						onclick={toggleStats}
+					/>
+				</label>
 			{/if}
 			{#if showToggle}
-				<nav class="flex gap-1" aria-label={m.view()}>
+				<div
+					role="group"
+					aria-label={m.view()}
+					class="flex h-8 overflow-hidden rounded-sm border border-foreground/25"
+				>
 					{#each views as [key, label] (key)}
 						<a
-							class={buttonVariants({ variant: mode === key ? 'secondary' : 'ghost', size: 'sm' })}
+							class={cn(
+								buttonVariants({ variant: mode === key ? 'secondary' : 'ghost', size: 'sm' }),
+								'h-auto rounded-none border-0 focus-visible:ring-inset',
+								mode !== key && 'text-muted-foreground'
+							)}
 							aria-current={mode === key ? 'true' : undefined}
 							href={queryHref(page.url, { view: key === 'grid' ? null : key })}
 							data-sveltekit-reset="false">{label()}</a
 						>
 					{/each}
-				</nav>
+				</div>
 			{/if}
 		{/snippet}
 	</FilterBar>

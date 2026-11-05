@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ClassValue } from 'svelte/elements';
 	import { page } from '$app/state';
 	import { queryHref } from '#lib';
 	import { buttonVariants } from '#lib/components/ui/button/index.js';
@@ -17,15 +18,7 @@
 	const current = $derived(
 		selection(selected === undefined ? page.url.searchParams.get(filter.id) : selected)
 	);
-	const chosen = $derived(
-		filter.multiple
-			? current
-			: current.length
-				? current.slice(0, 1)
-				: filter.default
-					? [filter.default]
-					: []
-	);
+	const chosen = $derived(filter.multiple ? current : [current[0] ?? filter.default]);
 	const name = (value: string) => filter.options.find((o) => o.value === value)?.label ?? value;
 	const link = (value: string | null, extra?: Record<string, null>) =>
 		queryHref(page.url, { ...reset, ...extra, [filter.id]: value });
@@ -39,17 +32,20 @@
 <button
 	type="button"
 	popovertarget={id}
-	class={buttonVariants({ variant: current.length ? 'secondary' : 'outline', size: 'sm' })}
+	class={buttonVariants({
+		variant: filter.multiple && current.length ? 'secondary' : 'outline',
+		size: 'sm'
+	})}
 	style:anchor-name="--{id}"
 >
-	{#if chosen.length === 1}
-		<span class="sr-only">{filter.label}:</span>
-		<span class="max-w-40 truncate">{name(chosen[0])}</span>
-	{:else}
+	{#if filter.multiple}
 		{filter.label}
-		{#if chosen.length}
-			<span class="rounded-xs bg-foreground/10 px-1 tabular-nums">{chosen.length}</span>
+		{#if current.length}
+			<span class="rounded-xs bg-foreground/10 px-1 tabular-nums">{current.length}</span>
 		{/if}
+	{:else}
+		<span class="text-muted-foreground">{filter.label}<span class="sr-only">:</span></span>
+		<span class="max-w-40 truncate">{name(chosen[0])}</span>
 	{/if}
 	<svg
 		class="size-3.5"
@@ -81,16 +77,19 @@
 					data-sveltekit-reset="false"
 					onclick={filter.multiple ? undefined : close}
 				>
-					<svg
-						class={['size-3.5 shrink-0', !on && 'invisible']}
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2.5"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"><path d="M5 12l5 5L20 7" /></svg
-					>
+					{#if filter.multiple}
+						<span
+							class={[
+								'grid size-3.5 shrink-0 place-items-center rounded-xs border',
+								on ? 'border-primary bg-primary text-primary-foreground' : 'border-foreground/40'
+							]}
+							aria-hidden="true"
+						>
+							{#if on}{@render check('size-3')}{/if}
+						</span>
+					{:else}
+						{@render check(['size-3.5 shrink-0', !on && 'invisible'])}
+					{/if}
 					<span class="min-w-0 flex-1 truncate">{option.label}</span>
 					{#if option.count != null}
 						<span class="text-xs text-muted-foreground tabular-nums">{option.count}</span>
@@ -99,12 +98,27 @@
 			</li>
 		{/each}
 	</ul>
-	<div class="mt-1 border-t pt-1">
-		<a
-			class={[item, 'text-muted-foreground hover:text-foreground']}
-			href={link(null)}
-			data-sveltekit-reset="false"
-			onclick={close}>{m.clear()}</a
-		>
-	</div>
+	{#if filter.multiple && current.length}
+		<div class="mt-1 border-t pt-1">
+			<a
+				class={[item, 'text-muted-foreground hover:text-foreground']}
+				href={link(null)}
+				data-sveltekit-reset="false"
+				onclick={close}>{m.clear()}</a
+			>
+		</div>
+	{/if}
 </div>
+
+{#snippet check(cls: ClassValue)}
+	<svg
+		class={cls}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2.5"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		aria-hidden="true"><path d="M5 12l5 5L20 7" /></svg
+	>
+{/snippet}

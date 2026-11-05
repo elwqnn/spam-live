@@ -8,10 +8,8 @@ export type FilterOption = {
 export type Filter = {
 	id: string;
 	label: string;
-	multiple?: boolean;
-	default?: string;
 	options: FilterOption[];
-};
+} & ({ multiple: true; default?: undefined } | { multiple?: false; default: string });
 
 export const selection = (param: string | null) => param?.split(',').filter(Boolean) ?? [];
 

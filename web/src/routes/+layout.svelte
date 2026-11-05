@@ -9,6 +9,7 @@
 	import CardPreview from '#lib/components/CardPreview.svelte';
 	import CommandPalette, { type Action } from '#lib/components/CommandPalette.svelte';
 	import Dialog from '#lib/components/Dialog.svelte';
+	import Switch from '#lib/components/Switch.svelte';
 	import Tooltip from '#lib/components/Tooltip.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { m } from '#lib/paraglide/messages.js';
@@ -189,18 +190,11 @@
 	</dl>
 	<div class="mt-5 flex items-center gap-3 border-t pt-4">
 		<span id="shortcuts-single" class="flex-1 text-sm">{m.shortcut_single()}</span>
-		<button
-			type="button"
-			role="switch"
-			aria-checked={single}
+		<Switch
+			checked={single}
 			aria-labelledby="shortcuts-single"
-			class="group relative h-5.5 w-9.5 flex-none cursor-pointer rounded-sm border border-foreground/25 transition-colors aria-checked:border-primary aria-checked:bg-primary"
 			onclick={() => setSingle(!single)}
-		>
-			<span
-				class="absolute top-0.5 left-0.5 size-4 rounded-full bg-foreground transition-[translate,background-color] duration-150 ease-out group-aria-checked:translate-x-4 group-aria-checked:bg-primary-foreground"
-			></span>
-		</button>
+		/>
 	</div>
 	<div class="mt-5 flex justify-end">
 		<Button variant="ghost" size="sm" commandfor="shortcuts" command="close">{m.close()}</Button>
