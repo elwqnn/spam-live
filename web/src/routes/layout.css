@@ -52,8 +52,15 @@
 	--moss: #6b9e5e;
 	--side: clamp(1.5rem, (100vw - 75rem) / 6, 4rem);
 	--reach: 10rem;
+	--gutter: 1.25rem;
 	--contour: color-mix(in oklab, var(--foreground) 12%, transparent);
 	--contour-glow: color-mix(in oklab, var(--terra) 28%, transparent);
+}
+
+@media (width >= 40rem) {
+	:root {
+		--gutter: 2rem;
+	}
 }
 
 .dark {
@@ -269,11 +276,11 @@
 }
 
 @utility row {
-	@apply px-4 py-8 sm:px-6 sm:py-10;
+	@apply px-(--gutter) py-8;
 }
 
 @utility section-head {
-	@apply px-4 pt-8 pb-2 sm:px-6 sm:pt-10;
+	@apply px-(--gutter) pt-8 pb-2;
 }
 
 @utility key-hint {

@@ -20,7 +20,7 @@
 
 <CardStack>
 	{#each data.artists as artist (artist.cards[0].id)}
-		<li class="grid gap-3 px-4 py-5 sm:grid-cols-[16rem_minmax(0,1fr)] sm:gap-6 sm:px-6">
+		<li class="grid gap-3 px-(--gutter) py-5 sm:grid-cols-[16rem_minmax(0,1fr)] sm:gap-6">
 			<div>
 				<h2 class="font-heading text-xl font-normal tracking-tight">{artist.name}</h2>
 				{#if artist.links.length}

@@ -34,7 +34,7 @@
 	<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">{m.admin_title()}</h1>
 </TitleRow>
 
-<nav class="flex flex-wrap gap-1 px-4 py-3 sm:px-6">
+<nav class="flex flex-wrap gap-1 px-(--gutter) py-3">
 	{#each tabs as [key, label] (key)}
 		<a
 			class={link(data.tab === key)}
@@ -45,16 +45,16 @@
 </nav>
 
 {#if form?.error}
-	<p role="alert" class="px-4 py-3 text-sm text-destructive sm:px-6">{form.error}</p>
+	<p role="alert" class="px-(--gutter) py-3 text-sm text-destructive">{form.error}</p>
 {:else if form}
-	<p role="status" class="px-4 py-3 text-sm text-muted-foreground sm:px-6">{m.admin_done()}</p>
+	<p role="status" class="px-(--gutter) py-3 text-sm text-muted-foreground">{m.admin_done()}</p>
 {/if}
 
 {#if data.tab === 'reports'}
 	{#if data.reports.length}
 		<ul class="divide-y">
 			{#each data.reports as r (r.id)}
-				<li class="grid gap-2 px-4 py-4 text-sm sm:px-6">
+				<li class="grid gap-2 px-(--gutter) py-4 text-sm">
 					<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
 						<Badge variant="outline">
 							{r.targetType === 'deck' ? m.admin_deck() : m.admin_comment()}
@@ -157,7 +157,7 @@
 			<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
 				{#each data.disputed as d (d.gameUid)}
 					<li
-						class="flex flex-col gap-3 p-4 transition-colors [contain-intrinsic-size:auto_360px] [content-visibility:auto] hover:bg-row sm:p-5"
+						class="flex flex-col gap-3 px-(--gutter) py-4 transition-colors [contain-intrinsic-size:auto_360px] [content-visibility:auto] hover:bg-row sm:py-5"
 					>
 						<div class="grid gap-1">
 							<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
@@ -198,21 +198,21 @@
 		<Table.Root>
 			<Table.Header>
 				<Table.Row>
-					<Table.Head class="pl-4 sm:pl-6">{m.card()}</Table.Head>
+					<Table.Head class="pl-(--gutter)">{m.card()}</Table.Head>
 					<Table.Head class="text-right">{m.admin_seen()}</Table.Head>
 					<Table.Head>{m.admin_first_seen()}</Table.Head>
-					<Table.Head class="pr-4 sm:pr-6">{m.admin_last_seen()}</Table.Head>
+					<Table.Head class="pr-(--gutter)">{m.admin_last_seen()}</Table.Head>
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
 				{#each data.unknown as c (c.cardId)}
 					<Table.Row>
-						<Table.Cell class="pl-4 font-mono text-xs break-all whitespace-normal sm:pl-6"
+						<Table.Cell class="pl-(--gutter) font-mono text-xs break-all whitespace-normal"
 							>{c.cardId}</Table.Cell
 						>
 						<Table.Cell class="text-right tabular-nums">{c.seenCount}</Table.Cell>
 						<Table.Cell><Time iso={c.firstSeen} /></Table.Cell>
-						<Table.Cell class="pr-4 sm:pr-6"><Time iso={c.lastSeen} /></Table.Cell>
+						<Table.Cell class="pr-(--gutter)"><Time iso={c.lastSeen} /></Table.Cell>
 					</Table.Row>
 				{/each}
 			</Table.Body>

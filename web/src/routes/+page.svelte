@@ -65,7 +65,7 @@
 			</ul>
 		</div>
 	{:else}
-		<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">{m.home_no_top_decks()}</p>
+		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.home_no_top_decks()}</p>
 	{/if}
 </section>
 
@@ -82,15 +82,13 @@
 			</ul>
 		</div>
 	{:else}
-		<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">
+		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">
 			{m.home_no_recent_decks()}
 		</p>
 	{/if}
 </section>
 
-<section
-	class="relative isolate flex flex-wrap items-end justify-between gap-6 bg-card row sm:py-12"
->
+<section class="relative isolate flex flex-wrap items-end justify-between gap-6 bg-card row">
 	<LiveLines line={0.5} speed={1 / 3} class="opacity-7 [:hover>&]:opacity-9" />
 	<div class="grid max-w-xl gap-3">
 		{@render heading(m.import_title())}

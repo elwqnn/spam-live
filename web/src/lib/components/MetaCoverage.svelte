@@ -69,7 +69,7 @@
 	{#if result.played}
 		<div>
 			<div class="cells grid sm:grid-cols-2 lg:grid-cols-3">
-				<div class="grid content-start gap-5 px-4 py-6 sm:col-span-2 sm:px-6 lg:col-span-1">
+				<div class="grid content-start gap-5 px-(--gutter) py-6 sm:col-span-2 lg:col-span-1">
 					<div class="grid gap-2">
 						<span class="text-5xl font-medium tracking-tight tabular-nums"
 							>{percent(result.share)}</span
@@ -111,7 +111,7 @@
 						</div>
 					{/if}
 				</div>
-				<div class="grid content-start gap-2.5 px-4 py-6 sm:px-6">
+				<div class="grid content-start gap-2.5 px-(--gutter) py-6">
 					<h3 class="eyebrow text-[10px] text-muted-foreground">{m.by_rarity()}</h3>
 					<ul class="grid gap-2">
 						{#each ordered(result.rarities, RARITIES) as [key, count] (key)}
@@ -119,7 +119,7 @@
 						{/each}
 					</ul>
 				</div>
-				<div class="grid content-start gap-2.5 px-4 py-6 sm:px-6">
+				<div class="grid content-start gap-2.5 px-(--gutter) py-6">
 					<h3 class="eyebrow text-[10px] text-muted-foreground">{m.by_element()}</h3>
 					<ul class="grid gap-2">
 						{#each ordered(result.elements, ELEMENTS) as [key, count] (key)}
@@ -130,6 +130,6 @@
 			</div>
 		</div>
 	{:else}
-		<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">{m.no_coverage()}</p>
+		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.no_coverage()}</p>
 	{/if}
 </section>

@@ -68,7 +68,7 @@
 				{#each data.matches as match (match.gameUid)}
 					{@const [label, variant] = results[match.result]}
 					<li
-						class="flex flex-col gap-3 p-4 transition-colors [contain-intrinsic-size:auto_360px] [content-visibility:auto] hover:bg-row sm:p-5"
+						class="flex flex-col gap-3 px-(--gutter) py-4 transition-colors [contain-intrinsic-size:auto_360px] [content-visibility:auto] hover:bg-row sm:py-5"
 					>
 						<div class="grid gap-1">
 							<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
@@ -99,13 +99,13 @@
 			</ul>
 		</div>
 	{:else}
-		<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">
+		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">
 			{m.me_no_matches()}
 			<a class="underline underline-offset-4" href={href('/import')}>{m.import_title()}</a>
 		</p>
 	{/if}
 	{#if !data.first || data.next}
-		<nav class="flex justify-between gap-2 border-t px-4 py-3 sm:px-6" aria-label={m.pages()}>
+		<nav class="flex justify-between gap-2 border-t px-(--gutter) py-3" aria-label={m.pages()}>
 			{#if !data.first}
 				<a class={link} href={queryHref(page.url, { before: null })}>{m.first_page()}</a>
 			{:else}
@@ -132,7 +132,7 @@
 			</ul>
 		</div>
 	{:else}
-		<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">{m.me_no_decks()}</p>
+		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.me_no_decks()}</p>
 	{/if}
 </section>
 
@@ -144,7 +144,7 @@
 	{#if data.devices.length}
 		<ul class="divide-y">
 			{#each data.devices as device (device.id)}
-				<li class="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-4 text-sm sm:px-6">
+				<li class="flex flex-wrap items-center gap-x-3 gap-y-1 px-(--gutter) py-4 text-sm">
 					<span class="font-medium">{m.device_n({ id: device.id })}</span>
 					<span class="text-muted-foreground"
 						>{m.device_linked()} <Time iso={device.createdAt} /></span
@@ -165,7 +165,7 @@
 			{/each}
 		</ul>
 	{:else}
-		<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">{m.no_devices()}</p>
+		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.no_devices()}</p>
 	{/if}
 </section>
 

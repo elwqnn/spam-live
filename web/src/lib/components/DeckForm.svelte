@@ -133,7 +133,7 @@
 					{@const detail = slot && details[slot.id]}
 					<li
 						class={[
-							'grid content-start gap-3 px-4 py-4 sm:px-6',
+							'grid content-start gap-3 px-(--gutter) py-4',
 							target === i && 'ring-2 ring-ring ring-inset'
 						]}
 					>
@@ -234,7 +234,7 @@
 				{#each filtered as card (card.id)}
 					{@const chosen = slots.some((s) => s?.id === card.id)}
 					{@const action = chosen ? m.picked() : target !== null ? m.replace() : m.add()}
-					<li class="flex flex-wrap items-center gap-2 px-4 py-2 sm:px-6">
+					<li class="flex flex-wrap items-center gap-2 px-(--gutter) py-2">
 						<span class="text-sm font-medium">{card.name ?? card.id}</span>
 						<CardBadge type="element" value={card.element} />
 						<CardBadge type="rarity" value={card.rarity} />
@@ -249,7 +249,7 @@
 						>
 					</li>
 				{:else}
-					<li class="px-4 py-2 text-sm text-muted-foreground sm:px-6">{m.no_cards()}</li>
+					<li class="px-(--gutter) py-2 text-sm text-muted-foreground">{m.no_cards()}</li>
 				{/each}
 			</ul>
 		</div>

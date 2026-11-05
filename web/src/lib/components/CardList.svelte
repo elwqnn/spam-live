@@ -53,7 +53,7 @@
 	}
 </script>
 
-<div class="px-4 py-3 sm:px-6">
+<div class="px-(--gutter) py-3">
 	<FilterBar {filters}>
 		{#snippet actions()}
 			{@render extra?.()}

@@ -26,7 +26,7 @@
 
 <li
 	class={[
-		'relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-row sm:gap-4 sm:px-6',
+		'relative flex items-center gap-3 px-(--gutter) py-3 transition-colors hover:bg-row sm:gap-4',
 		active && 'bg-row'
 	]}
 	aria-current={active ? 'true' : undefined}

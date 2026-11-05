@@ -247,7 +247,7 @@
 				{/if}
 			</div>
 
-			<div class="grid gap-1 bg-muted px-4 py-4 sm:px-6">
+			<div class="grid gap-1 bg-muted px-(--gutter) py-4">
 				<p>{m.import_keep_10()}</p>
 				<p class="text-muted-foreground">
 					{m.import_app()}

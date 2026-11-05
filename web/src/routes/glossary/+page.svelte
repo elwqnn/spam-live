@@ -101,7 +101,7 @@
 	</form>
 </TitleRow>
 
-<div class="px-4 py-3 sm:px-6">
+<div class="px-(--gutter) py-3">
 	<FilterBar {filters} />
 </div>
 
@@ -112,7 +112,7 @@
 			<li
 				id={anchor}
 				class={[
-					'grid gap-3 px-4 py-5 transition-colors target:bg-row sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-6 sm:px-6',
+					'grid gap-3 px-(--gutter) py-5 transition-colors target:bg-row sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-6',
 					target === anchor && 'bg-row'
 				]}
 			>

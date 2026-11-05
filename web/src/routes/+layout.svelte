@@ -104,7 +104,7 @@
 
 <div class="sides flex min-h-dvh flex-col overflow-x-clip lg:px-8">
 	<header
-		class="head mx-auto flex w-full max-w-300 flex-wrap items-center gap-x-8 gap-y-3 px-4 py-4 sm:px-6 sm:py-5 lg:border-x"
+		class="head mx-auto flex w-full max-w-300 flex-wrap items-center gap-x-8 gap-y-3 px-(--gutter) py-4 sm:py-5 lg:border-x"
 	>
 		<a href={href('/')} class="text-[17px] font-semibold tracking-wide"
 			>SPAM<span class="text-muted-foreground">.live</span></a
@@ -138,7 +138,7 @@
 			{@render children()}
 		</main>
 
-		<footer class="flex flex-wrap items-center gap-x-5 gap-y-3 px-4 py-6 sm:px-6">
+		<footer class="flex flex-wrap items-center gap-x-5 gap-y-3 px-(--gutter) py-6">
 			<p class="basis-full text-[13px] text-muted-foreground sm:basis-auto">
 				{m.footer_disclaimer()}
 			</p>

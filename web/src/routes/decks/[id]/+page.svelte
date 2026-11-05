@@ -155,7 +155,7 @@
 	<div>
 		<div class="cells grid sm:grid-cols-2">
 			{#each stats as [label, s] (label)}
-				<div class="grid gap-3 px-4 py-6 sm:px-6">
+				<div class="grid gap-3 px-(--gutter) py-6">
 					<h3 class="eyebrow text-muted-foreground">{label}</h3>
 					<dl class="grid grid-cols-3 gap-2">
 						<div class="grid gap-0.5">
@@ -186,7 +186,7 @@
 		{#if data.comments.length}
 			<ul class="divide-y">
 				{#each data.comments as c (c.id)}
-					<li class="grid gap-2 px-4 py-4 sm:px-6">
+					<li class="grid gap-2 px-(--gutter) py-4">
 						<div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
 							<Author name={c.authorName} avatar={c.authorAvatar} />
 							<Time iso={c.createdAt} class="text-xs text-muted-foreground" />
@@ -230,7 +230,7 @@
 				{/each}
 			</ul>
 		{:else}
-			<p class="px-4 pb-8 text-sm text-muted-foreground sm:px-6 sm:pb-10">{m.no_comments()}</p>
+			<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.no_comments()}</p>
 		{/if}
 
 		{#if me}

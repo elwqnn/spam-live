@@ -26,7 +26,7 @@
 </script>
 
 <li
-	class="flex flex-col gap-3 p-4 transition-colors [contain-intrinsic-size:auto_200px] [content-visibility:auto] hover:bg-row sm:p-5"
+	class="flex flex-col gap-3 px-(--gutter) py-4 transition-colors [contain-intrinsic-size:auto_200px] [content-visibility:auto] hover:bg-row sm:py-5"
 >
 	<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
 		<span class="text-sm text-muted-foreground tabular-nums">#{String(rank).padStart(2, '0')}</span>

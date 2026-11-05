@@ -54,7 +54,7 @@
 	<p class="text-sm text-muted-foreground">{m.stats_intro()}</p>
 </TitleRow>
 
-<div class="px-4 py-3 sm:px-6">
+<div class="px-(--gutter) py-3">
 	<FilterBar {filters}>
 		{#snippet actions()}
 			{#if tab === 'decks'}<FilterMenu filter={sorts} />{:else}<TrendMenu />{/if}
@@ -64,7 +64,7 @@
 
 <MetaCoverage cards={data.cards} stats={data.cardStats} />
 
-<nav class="flex gap-1 px-4 py-3 sm:px-6">
+<nav class="flex gap-1 px-(--gutter) py-3">
 	<a
 		class={link(tab === 'decks')}
 		aria-current={tab === 'decks' ? 'page' : undefined}
@@ -96,7 +96,7 @@
 			{#if card}
 				<CardRow {card} stats={row} />
 			{:else}
-				<li class="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+				<li class="flex items-center justify-between gap-3 px-(--gutter) py-3">
 					<span class="text-sm text-muted-foreground"
 						>{m.unknown_card()} {row.card.slice(0, 8)}</span
 					>

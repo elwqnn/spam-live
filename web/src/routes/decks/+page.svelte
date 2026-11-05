@@ -59,7 +59,7 @@
 	<Button href={href('/decks/new')}>{m.new_deck()}</Button>
 </TitleRow>
 
-<div class="flex flex-wrap items-center gap-2 px-4 py-3 sm:px-6">
+<div class="flex flex-wrap items-center gap-2 px-(--gutter) py-3">
 	{#if data.me}
 		<nav class="flex gap-1">
 			<a
@@ -108,7 +108,7 @@
 {/if}
 
 {#if data.prev || data.next}
-	<nav class="flex justify-between gap-2 px-4 py-3 sm:px-6" aria-label={m.pages()}>
+	<nav class="flex justify-between gap-2 px-(--gutter) py-3" aria-label={m.pages()}>
 		{#if data.prev}
 			<a class={link(false)} href={queryHref(page.url, data.prev)}
 				>{data.sort === 'recent' ? m.first_page() : m.previous_page()}</a
