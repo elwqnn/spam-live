@@ -29,7 +29,7 @@
 		class="relative flex flex-col items-center gap-5 px-4 pt-16 pb-20 text-center sm:px-6 sm:pt-20 sm:pb-24"
 	>
 		<h1
-			class="font-heading text-3xl/none font-normal tracking-[-0.025em] text-balance sm:text-4xl/none xl:text-5xl/none"
+			class="font-heading text-3xl/none font-normal tracking-[-0.025em] text-balance italic sm:text-4xl/none xl:text-5xl/none"
 		>
 			{m.home_title()}
 		</h1>
