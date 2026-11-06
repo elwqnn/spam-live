@@ -264,7 +264,7 @@
 	"privacy_intro": "Cette page indique quelles données le site garde sur vous, pourquoi, pendant combien de temps, et comment les supprimer.",
 	"privacy_who_title": "Qui gère le site",
 	"privacy_who_text": "SPAM.live est un site de fans non officiel, fait par des joueurs. Il n'est pas affilié à Ticroco, le studio qui développe SPAM.",
-	"privacy_contact": "Contact : TODO",
+	"privacy_contact": "Contact :",
 	"privacy_store_title": "Les données que nous gardons",
 	"privacy_store_steam": "Votre SteamID, votre nom Steam et l'adresse de votre avatar Steam. Steam nous les donne quand vous vous connectez.",
 	"privacy_store_account": "Votre AccountId SPAM (l'identifiant de votre compte de jeu), dès votre premier import.",

@@ -48,7 +48,12 @@
 	<section class="grid gap-2 row *:max-w-2xl">
 		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.privacy_who_title()}</h2>
 		<p>{m.privacy_who_text()}</p>
-		<p>{m.privacy_contact()}</p>
+		<p>
+			{m.privacy_contact()}
+			<a class="underline underline-offset-4" href="mailto:elwann.gmt@gmail.com"
+				>elwann.gmt@gmail.com</a
+			>
+		</p>
 	</section>
 
 	<section class="grid gap-2 row *:max-w-2xl">
