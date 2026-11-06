@@ -5,6 +5,7 @@
 	import * as Chart from '#lib/components/ui/chart/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
+	import ElementLegend from './ElementLegend.svelte';
 	import { rateDomain } from './turns.js';
 
 	let { data }: { data: Schemas['HistoryStats'] } = $props();
@@ -93,20 +94,7 @@
 	{#if dates.length < 2}
 		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.history_few()}</p>
 	{:else}
-		<ul class="flex flex-wrap gap-x-4 gap-y-1 px-(--gutter) pt-2">
-			{#each series as s (s.key)}
-				<li class="flex items-center gap-1.5 text-xs text-muted-foreground">
-					<img
-						src="/art/ui/element_{s.key}.webp"
-						alt=""
-						aria-hidden="true"
-						decoding="async"
-						class="size-4"
-					/>
-					{s.label}
-				</li>
-			{/each}
-		</ul>
+		<ElementLegend />
 		<div class="divide-y" bind:clientWidth={width}>
 			{#each charts as chart (chart.id)}
 				<figure class="grid gap-3 px-(--gutter) py-4">

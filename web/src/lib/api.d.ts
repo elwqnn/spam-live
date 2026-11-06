@@ -660,6 +660,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/stats/counters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["counters"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/stats/decks": {
         parameters: {
             query?: never;
@@ -668,6 +684,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["deck_stats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/duos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["duos"];
         put?: never;
         post?: never;
         delete?: never;
@@ -700,6 +732,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["matchups"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["overview"];
         put?: never;
         post?: never;
         delete?: never;
@@ -889,6 +937,29 @@ export interface components {
             /** Format: int64 */
             votes: number;
         };
+        Counter: {
+            /** Format: uuid */
+            card: string;
+            /** Format: int64 */
+            games: number;
+            /** Format: double */
+            winRate?: number | null;
+            /** Format: double */
+            winScore?: number | null;
+            /** Format: int64 */
+            wins: number;
+        };
+        Counters: {
+            cards: components["schemas"]["Counter"][];
+            /** Format: int64 */
+            games: number;
+        };
+        DayMatches: {
+            /** Format: date */
+            day: string;
+            /** Format: int64 */
+            matches: number;
+        };
         Deck: {
             appVersion: string;
             authorAvatar?: string | null;
@@ -997,6 +1068,17 @@ export interface components {
             uploaderIds: number[];
             /** Format: int32 */
             winnerSeat?: number | null;
+        };
+        Duo: {
+            cards: string[];
+            /** Format: int64 */
+            games: number;
+            /** Format: double */
+            winRate?: number | null;
+            /** Format: double */
+            winScore?: number | null;
+            /** Format: int64 */
+            wins: number;
         };
         ElementWeek: {
             element: string;
@@ -1192,6 +1274,15 @@ export interface components {
             appOnline: number;
             /** Format: int64 */
             webOnline: number;
+        };
+        Overview: {
+            days: components["schemas"]["DayMatches"][];
+            /** Format: int64 */
+            decks: number;
+            /** Format: int64 */
+            matches: number;
+            /** Format: int64 */
+            players: number;
         };
         PaceStats: {
             cards: components["schemas"]["CardPace"][];
@@ -3101,6 +3192,39 @@ export interface operations {
             };
         };
     };
+    counters: {
+        parameters: {
+            query?: {
+                /** @example all */
+                version?: string;
+                /** @example 0c8c383b-2207-4d18-b378-4f2a3795a58e,f16bc1f8-5cea-4acf-9e2a-0614062cb9b8 */
+                against?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Targets: the deck results whose deck has all the against cards. games: the count of targets. cards: each card of the opposing deck that is not in against, with 10 games or more. wins: the games that the opposing deck won. Sorted by winScore, winRate and games, descending, then card. At most 12. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Counters"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
     deck_stats: {
         parameters: {
             query?: {
@@ -3122,6 +3246,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DeckKeyStats"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    duos: {
+        parameters: {
+            query?: {
+                /** @example all */
+                version?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pairs of 2 different cards in the same deck result (cards sorted), with 20 games or more in 2 different decks or more. Sorted by winScore, winRate and games, descending, then the cards. At most 12. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Duo"][];
                 };
             };
             400: {
@@ -3173,6 +3328,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MatchupStats"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    overview: {
+        parameters: {
+            query?: {
+                /** @example all */
+                version?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description matches: distinct ranked matches. players: distinct users that uploaded these matches (a count only). decks: distinct deck keys. days: the ranked matches per UTC day of the match end, for the 30 UTC days that end today, oldest first, 0 for a day with no match. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Overview"];
                 };
             };
             400: {

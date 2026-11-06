@@ -64,7 +64,7 @@
 	"all_cards": "All cards",
 	"card_zoom": "View {name} large",
 	"stats_title": "Stats",
-	"stats_intro": "Matchups between the most played cards, the length of the matches and the meta of each week. Only ranked matches between players count. Mirror matches and disputed matches do not count.",
+	"stats_intro": "The meta of each version: the most played cards, how they do against each other and with each other, and the length of the matches. Only ranked matches between players count; mirror matches and disputed matches do not.",
 	"card": "Card",
 	"no_stats": "No match for this version.",
 	"error_not_found": "Page not found",
@@ -503,5 +503,60 @@
 			}
 		}
 	],
-	"turns_few": "Not enough games yet."
+	"turns_few": "Not enough games yet.",
+	"overview_title": "Overview",
+	"overview_text": "The ranked matches of this version, the players who uploaded them and the different decks. The chart shows the matches of the last 30 days.",
+	"overview_matches": "Matches",
+	"overview_players": "Players",
+	"overview_decks": "Decks",
+	"overview_chart": "Matches per day, last 30 days (UTC)",
+	"overview_chart_label": "Bar chart of the ranked matches per day for the last 30 days, in UTC.",
+	"overview_day": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} match",
+				"countPlural=*": "{count} matches"
+			}
+		}
+	],
+	"metamap_title": "Meta map",
+	"metamap_text": "Each dot is a card: how often decks play it, and how often these decks win. Only cards with at least {min} games.",
+	"metamap_label": "Chart of the cards: play rate from left to right, win rate from bottom to top.",
+	"metamap_list": "The same values are in the card list.",
+	"metamap_hidden": [
+		{
+			"declarations": ["input count", "input min", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} card with fewer than {min} games is not on the map.",
+				"countPlural=*": "{count} cards with fewer than {min} games are not on the map."
+			}
+		}
+	],
+	"metamap_picks": "Meta picks",
+	"metamap_underplayed": "Underplayed",
+	"metamap_overplayed": "Overplayed",
+	"metamap_weak": "Rare and weak",
+	"counters_title": "What beats these cards",
+	"counters_text": "Choose 1 to 4 cards. The list shows the cards that win most often against decks with all of them. A card needs {min} games.",
+	"counters_pick": "Cards",
+	"counters_max": "Up to {max} cards",
+	"counters_remove": "Remove {name}",
+	"counters_empty": "Choose 1 or more cards to see what beats them.",
+	"counters_games": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} game against decks with these cards",
+				"countPlural=*": "{count} games against decks with these cards"
+			}
+		}
+	],
+	"counters_none": "No card has {min} games against them yet.",
+	"duos_title": "Best duos",
+	"duos_text": "2 cards in the same deck, whatever the 2 other cards are, with at least {min} games in at least 2 different decks. The order uses a reliable score (the lower bound of the Wilson interval), as for decks.",
+	"duos_none": "No duo has {min} games in 2 different decks yet."
 }

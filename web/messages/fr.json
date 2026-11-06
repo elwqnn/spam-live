@@ -64,7 +64,7 @@
 	"all_cards": "Toutes les cartes",
 	"card_zoom": "Voir {name} en grand",
 	"stats_title": "Statistiques",
-	"stats_intro": "Les affrontements entre les cartes les plus jouées, la durée des matchs et la méta de chaque semaine. Seuls les matchs classés entre joueurs comptent. Les matchs miroirs et les matchs contestés ne comptent pas.",
+	"stats_intro": "La méta de chaque version : les cartes les plus jouées, leurs résultats les unes contre les autres et ensemble, et la durée des matchs. Seuls les matchs classés entre joueurs comptent ; les matchs miroirs et les matchs contestés ne comptent pas.",
 	"card": "Carte",
 	"no_stats": "Aucun match pour cette version.",
 	"error_not_found": "Page introuvable",
@@ -503,5 +503,60 @@
 			}
 		}
 	],
-	"turns_few": "Pas encore assez de parties."
+	"turns_few": "Pas encore assez de parties.",
+	"overview_title": "Vue d'ensemble",
+	"overview_text": "Les matchs classés de cette version, les joueurs qui les ont importés et les decks différents. Le graphique montre les matchs des 30 derniers jours.",
+	"overview_matches": "Matchs",
+	"overview_players": "Joueurs",
+	"overview_decks": "Decks",
+	"overview_chart": "Matchs par jour, 30 derniers jours (UTC)",
+	"overview_chart_label": "Diagramme en barres des matchs classés par jour sur les 30 derniers jours, en UTC.",
+	"overview_day": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} match",
+				"countPlural=*": "{count} matchs"
+			}
+		}
+	],
+	"metamap_title": "Paysage de la méta",
+	"metamap_text": "Chaque point est une carte : à quelle fréquence les decks la jouent, et à quelle fréquence ces decks gagnent. Seules les cartes avec au moins {min} parties.",
+	"metamap_label": "Graphique des cartes : taux de jeu de gauche à droite, taux de victoire de bas en haut.",
+	"metamap_list": "Les mêmes valeurs sont dans la liste des cartes.",
+	"metamap_hidden": [
+		{
+			"declarations": ["input count", "input min", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} carte avec moins de {min} parties n'apparaît pas sur le graphique.",
+				"countPlural=*": "{count} cartes avec moins de {min} parties n'apparaissent pas sur le graphique."
+			}
+		}
+	],
+	"metamap_picks": "Piliers de la méta",
+	"metamap_underplayed": "Sous-estimées",
+	"metamap_overplayed": "Surjouées",
+	"metamap_weak": "Rares et faibles",
+	"counters_title": "Que jouer contre ces cartes",
+	"counters_text": "Choisissez de 1 à 4 cartes. La liste montre les cartes qui gagnent le plus souvent contre les decks qui les contiennent toutes. Une carte doit avoir {min} parties.",
+	"counters_pick": "Cartes",
+	"counters_max": "{max} cartes au maximum",
+	"counters_remove": "Retirer {name}",
+	"counters_empty": "Choisissez 1 carte ou plus pour voir ce qui les bat.",
+	"counters_games": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} partie contre des decks avec ces cartes",
+				"countPlural=*": "{count} parties contre des decks avec ces cartes"
+			}
+		}
+	],
+	"counters_none": "Aucune carte n'a encore {min} parties contre elles.",
+	"duos_title": "Meilleurs duos",
+	"duos_text": "2 cartes dans le même deck, quelles que soient les 2 autres cartes, avec au moins {min} parties dans au moins 2 decks différents. Le classement utilise un score fiable (la borne basse de l'intervalle de Wilson), comme pour les decks.",
+	"duos_none": "Aucun duo n'a encore {min} parties dans 2 decks différents."
 }

@@ -177,6 +177,158 @@ pub struct VersionQuery {
 }
 
 #[derive(Serialize, ToSchema)]
+pub struct Overview {
+    pub matches: i64,
+    pub players: i64,
+    pub decks: i64,
+    pub days: Vec<DayMatches>,
+}
+
+#[derive(Serialize, ToSchema, FromRow)]
+pub struct DayMatches {
+    pub day: NaiveDate,
+    pub matches: i64,
+}
+
+#[utoipa::path(get, path = "/api/stats/overview", tag = "stats", params(VersionQuery),
+    responses((status = 200, body = Overview,
+        description = "matches: distinct ranked matches. players: distinct users that uploaded these matches (a count \
+            only). decks: distinct deck keys. days: the ranked matches per UTC day of the match end, for the 30 UTC days \
+            that end today, oldest first, 0 for a day with no match."),
+        (status = 400, body = ErrorBody)))]
+pub async fn overview(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
+    let version = version(&s, q.version.as_deref())?;
+    let (matches, players, decks): (i64, i64, i64) = sqlx::query_as(
+        "WITH r AS (SELECT game_uid, deck_key FROM deck_results WHERE $1::text IS NULL OR app_version = $1)
+         SELECT (SELECT count(DISTINCT game_uid) FROM r),
+             (SELECT count(DISTINCT user_id) FROM uploads WHERE game_uid IN (SELECT game_uid FROM r)),
+             (SELECT count(DISTINCT deck_key) FROM r)",
+    )
+    .bind(&version)
+    .fetch_one(&s.db)
+    .await?;
+    let days: Vec<DayMatches> = sqlx::query_as(
+        "WITH t AS (SELECT (now() AT TIME ZONE 'UTC')::date AS today),
+         d AS (SELECT generate_series(today - 29, today, interval '1 day')::date AS day FROM t),
+         m AS (
+             SELECT (end_utc AT TIME ZONE 'UTC')::date AS day, count(DISTINCT game_uid) AS n FROM deck_results, t
+             WHERE ($1::text IS NULL OR app_version = $1) AND (end_utc AT TIME ZONE 'UTC')::date >= today - 29
+             GROUP BY 1
+         )
+         SELECT d.day, coalesce(m.n, 0) AS matches FROM d LEFT JOIN m USING (day) ORDER BY d.day",
+    )
+    .bind(&version)
+    .fetch_all(&s.db)
+    .await?;
+    Ok(public(Overview { matches, players, decks, days }))
+}
+
+#[derive(Serialize, ToSchema, FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct Duo {
+    pub cards: Vec<Uuid>,
+    pub games: i64,
+    pub wins: i64,
+    pub win_rate: Option<f64>,
+    pub win_score: Option<f64>,
+}
+
+#[utoipa::path(get, path = "/api/stats/duos", tag = "stats", params(VersionQuery),
+    responses((status = 200, body = Vec<Duo>,
+        description = "Pairs of 2 different cards in the same deck result (cards sorted), with 20 games or more in \
+            2 different decks or more. Sorted by winScore, winRate and games, descending, then the cards. At most 12."),
+        (status = 400, body = ErrorBody)))]
+pub async fn duos(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
+    let version = version(&s, q.version.as_deref())?;
+    let rows: Vec<Duo> = sqlx::query_as(
+        "SELECT ARRAY[a.card, b.card] AS cards, count(*) AS games, count(*) FILTER (WHERE r.win) AS wins,
+             win_rate(count(*), count(*) FILTER (WHERE r.win)) AS win_rate,
+             win_score(count(*), count(*) FILTER (WHERE r.win)) AS win_score
+         FROM deck_results r
+         CROSS JOIN LATERAL unnest(r.deck_key) AS a (card)
+         CROSS JOIN LATERAL unnest(r.deck_key) AS b (card)
+         WHERE ($1::text IS NULL OR r.app_version = $1) AND a.card < b.card
+         GROUP BY a.card, b.card HAVING count(*) >= 20 AND count(DISTINCT r.deck_key) >= 2
+         ORDER BY win_score DESC, win_rate DESC, games DESC, a.card, b.card LIMIT 12",
+    )
+    .bind(&version)
+    .fetch_all(&s.db)
+    .await?;
+    Ok(public(rows))
+}
+
+#[derive(Deserialize, IntoParams)]
+#[into_params(parameter_in = Query)]
+pub struct CountersQuery {
+    #[param(example = "all")]
+    pub version: Option<String>,
+    #[param(example = "0c8c383b-2207-4d18-b378-4f2a3795a58e,f16bc1f8-5cea-4acf-9e2a-0614062cb9b8")]
+    pub against: Option<String>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct Counters {
+    pub games: i64,
+    pub cards: Vec<Counter>,
+}
+
+#[derive(Serialize, ToSchema, FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct Counter {
+    pub card: Uuid,
+    pub games: i64,
+    pub wins: i64,
+    pub win_rate: Option<f64>,
+    pub win_score: Option<f64>,
+}
+
+fn against(v: Option<&str>) -> Result<Vec<Uuid>, ApiError> {
+    let bad = || ApiError::new(StatusCode::BAD_REQUEST, "against must be 1 to 4 different card ids");
+    let ids: Vec<Uuid> = v.unwrap_or("").split(',').map(str::parse).collect::<Result<_, _>>().map_err(|_| bad())?;
+    let mut unique = ids.clone();
+    unique.sort();
+    unique.dedup();
+    if ids.len() > 4 || unique.len() != ids.len() {
+        return Err(bad());
+    }
+    Ok(ids)
+}
+
+#[utoipa::path(get, path = "/api/stats/counters", tag = "stats", params(CountersQuery),
+    responses((status = 200, body = Counters,
+        description = "Targets: the deck results whose deck has all the against cards. games: the count of targets. \
+            cards: each card of the opposing deck that is not in against, with 10 games or more. wins: the games that \
+            the opposing deck won. Sorted by winScore, winRate and games, descending, then card. At most 12."),
+        (status = 400, body = ErrorBody)))]
+pub async fn counters(State(s): State<AppState>, Query(q): Query<CountersQuery>) -> Result<Response, ApiError> {
+    let version = version(&s, q.version.as_deref())?;
+    let against = against(q.against.as_deref())?;
+    let games: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM deck_results WHERE ($1::text IS NULL OR app_version = $1) AND deck_key @> $2",
+    )
+    .bind(&version)
+    .bind(&against)
+    .fetch_one(&s.db)
+    .await?;
+    let cards: Vec<Counter> = sqlx::query_as(
+        "SELECT c.card, count(*) AS games, count(*) FILTER (WHERE o.win) AS wins,
+             win_rate(count(*), count(*) FILTER (WHERE o.win)) AS win_rate,
+             win_score(count(*), count(*) FILTER (WHERE o.win)) AS win_score
+         FROM deck_results r
+         JOIN deck_results o ON o.game_uid = r.game_uid AND o.deck_key <> r.deck_key
+         CROSS JOIN LATERAL unnest(o.deck_key) AS c (card)
+         WHERE ($1::text IS NULL OR r.app_version = $1) AND r.deck_key @> $2 AND NOT c.card = ANY($2)
+         GROUP BY c.card HAVING count(*) >= 10
+         ORDER BY win_score DESC, win_rate DESC, games DESC, c.card LIMIT 12",
+    )
+    .bind(&version)
+    .bind(&against)
+    .fetch_all(&s.db)
+    .await?;
+    Ok(public(Counters { games, cards }))
+}
+
+#[derive(Serialize, ToSchema)]
 pub struct MatchupStats {
     pub cards: Vec<Uuid>,
     pub cells: Vec<Matchup>,
@@ -435,6 +587,9 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/api/stats/decks", get(deck_stats))
         .route("/api/stats/cards", get(card_stats))
+        .route("/api/stats/overview", get(overview))
+        .route("/api/stats/duos", get(duos))
+        .route("/api/stats/counters", get(counters))
         .route("/api/stats/matchups", get(matchups))
         .route("/api/stats/pace", get(pace))
         .route("/api/stats/turns", get(turns))

@@ -22,7 +22,7 @@ struct M {
     winner: Option<i16>,
     days: i32,
     turns: i32,
-    end: Option<&'static str>,
+    end: Option<String>,
 }
 
 fn m(seat0: &[Uuid], seat1: &[Uuid], winner: Option<i16>) -> M {
@@ -60,7 +60,7 @@ async fn add(pool: &PgPool, n: &mut u64, m: M, times: usize) {
         .bind(m.disputed)
         .bind(m.days)
         .bind(m.turns)
-        .bind(m.end)
+        .bind(&m.end)
         .execute(pool)
         .await
         .unwrap();
@@ -510,7 +510,7 @@ async fn history_stats(pool: PgPool) {
         k(1),
     ];
     let n = &mut 0;
-    let on = |end, version, winner| M { end: Some(end), version, ..m(&x, &y, winner) };
+    let on = |end: &str, version, winner| M { end: Some(end.into()), version, ..m(&x, &y, winner) };
     add(&pool, n, on("2026-03-04T12:00:00Z", "1.27.0", Some(0)), 1).await;
     add(&pool, n, on("2026-03-08T23:30:00Z", "1.28.1", Some(1)), 1).await;
     add(&pool, n, on("2026-03-09T00:30:00Z", "1.28.1", None), 1).await;
@@ -593,4 +593,170 @@ async fn turn_stats(pool: PgPool) {
     let all = send(&app, get("/api/stats/turns?version=all", "")).await.body;
     assert_eq!(all["cards"][0], card_turns(1, &[(5, 3, 2), (9, 2, 1), (12, 2, 2)]));
     assert_eq!(send(&app, get("/api/stats/turns?version=latest", "")).await.status, StatusCode::BAD_REQUEST);
+}
+
+#[sqlx::test]
+async fn overview_stats(pool: PgPool) {
+    let app = app(pool.clone());
+    let empty = send(&app, get("/api/stats/overview", "")).await.body;
+    assert_eq!((&empty["matches"], &empty["players"], &empty["decks"]), (&json!(0), &json!(0), &json!(0)));
+    let today = chrono::Utc::now().date_naive();
+    let days = |body: &Value| -> Vec<(String, i64)> {
+        body["days"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|d| (d["day"].as_str().unwrap().to_string(), d["matches"].as_i64().unwrap()))
+            .collect()
+    };
+    let empty_days = days(&empty);
+    assert_eq!(empty_days.len(), 30);
+    assert_eq!(empty_days[0].0, (today - chrono::Days::new(29)).to_string());
+    assert_eq!(empty_days[29].0, today.to_string());
+    assert!(empty_days.iter().all(|d| d.1 == 0));
+
+    let deck = |s: u32| (s..s + 4).map(k).collect::<Vec<_>>();
+    let (a, b, c) = (deck(1), deck(5), deck(9));
+    let n = &mut 0;
+    let late = format!("{}T23:30:00Z", today - chrono::Days::new(2));
+    let early = format!("{}T00:30:00Z", today - chrono::Days::new(1));
+    add(&pool, n, M { end: Some(late), ..m(&a, &b, Some(0)) }, 1).await;
+    add(&pool, n, M { end: Some(early), ..m(&a, &c, Some(1)) }, 2).await;
+    add(&pool, n, M { ai: true, ..m(&a, &b, Some(0)) }, 1).await;
+    add(&pool, n, M { version: "1.27.0", days: 40, ..m(&b, &c, Some(0)) }, 1).await;
+    let (_, _) = user(&pool, "76561190000000001").await;
+    let (_, _) = user(&pool, "76561190000000002").await;
+    let (_, _) = user(&pool, "76561190000000003").await;
+    sqlx::query(
+        "INSERT INTO uploads (game_uid, user_id, seat)
+         SELECT 'match-1', id, 0 FROM users WHERE steam_id = '76561190000000001'
+         UNION ALL SELECT 'match-1', id, 1 FROM users WHERE steam_id = '76561190000000002'
+         UNION ALL SELECT 'match-2', id, 0 FROM users WHERE steam_id = '76561190000000001'
+         UNION ALL SELECT 'match-4', id, 0 FROM users WHERE steam_id = '76561190000000003'
+         UNION ALL SELECT 'match-5', id, 0 FROM users WHERE steam_id = '76561190000000003'",
+    )
+    .execute(&pool)
+    .await
+    .unwrap();
+
+    let res = send(&app, get("/api/stats/overview", "")).await;
+    assert_eq!(res.status, StatusCode::OK);
+    assert_eq!(res.headers["cache-control"], "public, max-age=300");
+    assert_eq!((&res.body["matches"], &res.body["players"], &res.body["decks"]), (&json!(3), &json!(2), &json!(3)));
+    let got = days(&res.body);
+    assert_eq!(got.len(), 30);
+    assert_eq!(got[27], ((today - chrono::Days::new(2)).to_string(), 1));
+    assert_eq!(got[28], ((today - chrono::Days::new(1)).to_string(), 2));
+    assert_eq!(got.iter().map(|d| d.1).sum::<i64>(), 3);
+
+    let old = send(&app, get("/api/stats/overview?version=1.27.0", "")).await.body;
+    assert_eq!((&old["matches"], &old["players"], &old["decks"]), (&json!(1), &json!(1), &json!(2)));
+    assert!(days(&old).iter().all(|d| d.1 == 0));
+    let all = send(&app, get("/api/stats/overview?version=all", "")).await.body;
+    assert_eq!((&all["matches"], &all["players"], &all["decks"]), (&json!(4), &json!(3), &json!(3)));
+    assert_eq!(send(&app, get("/api/stats/overview?version=latest", "")).await.status, StatusCode::BAD_REQUEST);
+}
+
+fn duo(a: u32, b: u32, games: i64, wins: i64) -> Value {
+    json!({
+        "cards": [k(a), k(b)], "games": games, "wins": wins,
+        "winRate": wins as f64 / games as f64, "winScore": wilson(games, wins)
+    })
+}
+
+#[sqlx::test]
+async fn duo_stats(pool: PgPool) {
+    let app = app(pool.clone());
+    assert_eq!(send(&app, get("/api/stats/duos", "")).await.body, json!([]));
+    let deck = |s: u32| (s..s + 4).map(k).collect::<Vec<_>>();
+    let (a, b, c) = (deck(1), deck(5), deck(9));
+    let d = vec![k(1), k(2), k(13), k(14)];
+    let b2 = vec![k(5), k(6), k(15), k(16)];
+    let c2 = vec![k(9), k(10), k(17), k(18)];
+    let e = deck(19);
+    let n = &mut 0;
+    add(&pool, n, m(&a, &b, Some(0)), 6).await;
+    add(&pool, n, m(&a, &b, Some(1)), 4).await;
+    add(&pool, n, m(&a, &c, Some(0)), 6).await;
+    add(&pool, n, m(&a, &c, Some(1)), 4).await;
+    add(&pool, n, m(&d, &b2, Some(0)), 10).await;
+    add(&pool, n, m(&c2, &e, Some(0)), 5).await;
+    add(&pool, n, m(&c2, &e, Some(1)), 4).await;
+    add(&pool, n, M { version: "1.27.0", ..m(&b, &c, Some(0)) }, 10).await;
+    add(&pool, n, M { version: "1.27.0", ..m(&b2, &c2, Some(0)) }, 10).await;
+
+    let res = send(&app, get("/api/stats/duos", "")).await;
+    assert_eq!(res.status, StatusCode::OK);
+    assert_eq!(res.headers["cache-control"], "public, max-age=300");
+    let expected = json!([duo(1, 2, 30, 22), duo(5, 6, 20, 4)]);
+    assert_eq!(rounded(res.body), rounded(expected.clone()));
+    assert_eq!(rounded(send(&app, get("/api/stats/duos?version=1.28.1", "")).await.body), rounded(expected));
+
+    let old = send(&app, get("/api/stats/duos?version=1.27.0", "")).await.body;
+    assert_eq!(rounded(old), rounded(json!([duo(5, 6, 20, 20), duo(9, 10, 20, 0)])));
+    let all = send(&app, get("/api/stats/duos?version=all", "")).await.body;
+    assert_eq!(rounded(json!(all.as_array().unwrap()[..2])), rounded(json!([duo(1, 2, 30, 22), duo(5, 6, 40, 24)])));
+    assert_eq!((&all[2]["cards"], &all[2]["games"], &all[2]["wins"]), (&json!([k(9), k(10)]), &json!(39), &json!(9)));
+    assert_eq!(all.as_array().unwrap().len(), 3);
+    assert_eq!(send(&app, get("/api/stats/duos?version=latest", "")).await.status, StatusCode::BAD_REQUEST);
+}
+
+fn counter(id: u32, games: i64, wins: i64) -> Value {
+    json!({
+        "card": k(id), "games": games, "wins": wins,
+        "winRate": wins as f64 / games as f64, "winScore": wilson(games, wins)
+    })
+}
+
+#[sqlx::test]
+async fn counter_stats(pool: PgPool) {
+    let app = app(pool.clone());
+    let q = |query: &str| get(&format!("/api/stats/counters?{query}"), "");
+    let one = format!("against={}", k(1));
+    let two = format!("against={},{}", k(1), k(2));
+    assert_eq!(send(&app, q(&one)).await.body, json!({ "games": 0, "cards": [] }));
+    let deck = |s: u32| (s..s + 4).map(k).collect::<Vec<_>>();
+    let (a, b, d) = (deck(1), deck(5), deck(14));
+    let c = vec![k(1), k(9), k(10), k(11)];
+    let n = &mut 0;
+    add(&pool, n, m(&a, &b, Some(1)), 6).await;
+    add(&pool, n, m(&a, &b, Some(0)), 4).await;
+    add(&pool, n, m(&c, &b, Some(1)), 5).await;
+    add(&pool, n, m(&a, &c, Some(1)), 7).await;
+    add(&pool, n, m(&a, &c, Some(0)), 3).await;
+    add(&pool, n, m(&d, &a, Some(0)), 9).await;
+    add(&pool, n, M { version: "1.27.0", ..m(&a, &b, Some(0)) }, 10).await;
+
+    let res = send(&app, q(&one)).await;
+    assert_eq!(res.status, StatusCode::OK);
+    assert_eq!(res.headers["cache-control"], "public, max-age=300");
+    let b_cards = |g, w| (5..9).map(|i| counter(i, g, w)).collect::<Vec<_>>();
+    let c_cards = |g, w| (9..12).map(|i| counter(i, g, w)).collect::<Vec<_>>();
+    let a_cards = |g, w| (2..5).map(|i| counter(i, g, w)).collect::<Vec<_>>();
+    let cards = [b_cards(15, 11), c_cards(10, 7), a_cards(10, 3)].concat();
+    assert_eq!(rounded(res.body), rounded(json!({ "games": 44, "cards": cards })));
+
+    let both = send(&app, q(&two)).await.body;
+    let cards = [c_cards(10, 7), b_cards(10, 6)].concat();
+    assert_eq!(rounded(both), rounded(json!({ "games": 29, "cards": cards })));
+    let reversed = send(&app, q(&format!("against={},{}&version=1.28.1", k(2), k(1)))).await.body;
+    assert_eq!(reversed["games"], 29);
+
+    let old = send(&app, q(&format!("{one}&version=1.27.0"))).await.body;
+    assert_eq!(rounded(old), rounded(json!({ "games": 10, "cards": b_cards(10, 0) })));
+    let all = send(&app, q(&format!("{one}&version=all"))).await.body;
+    assert_eq!(all["games"], 54);
+    assert!(rounded(all["cards"].clone()).as_array().unwrap().contains(&rounded(counter(5, 25, 11))));
+
+    let five = (1..6).map(|i| k(i).to_string()).collect::<Vec<_>>().join(",");
+    for bad in [
+        String::new(),
+        "against=".into(),
+        format!("against={five}"),
+        "against=nope".into(),
+        format!("against={},{}", k(1), k(1)),
+        format!("{one}&version=latest"),
+    ] {
+        assert_eq!(send(&app, q(&bad)).await.status, StatusCode::BAD_REQUEST, "{bad}");
+    }
 }

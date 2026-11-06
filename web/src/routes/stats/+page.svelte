@@ -3,8 +3,12 @@
 	import TitleRow from '#lib/components/TitleRow.svelte';
 	import { versionFilter } from '#lib/components/VersionSelect.svelte';
 	import { m } from '#lib/paraglide/messages.js';
+	import Counters from './Counters.svelte';
+	import Duos from './Duos.svelte';
 	import History from './History.svelte';
 	import Matchups from './Matchups.svelte';
+	import MetaMap from './MetaMap.svelte';
+	import Overview from './Overview.svelte';
 	import Pace from './Pace.svelte';
 	import Turns from './Turns.svelte';
 	import type { PageProps } from './$types';
@@ -29,7 +33,15 @@
 	<FilterBar filters={[versionFilter(data.versions)]} />
 </div>
 
+<Overview data={data.overview} />
+
+<MetaMap data={data.stats} {catalog} />
+
 <Matchups data={data.matchups} {catalog} />
+
+<Counters data={data.counters} against={data.against} cards={data.cards} {catalog} />
+
+<Duos data={data.duos} {catalog} />
 
 <Pace data={data.pace} {catalog} />
 

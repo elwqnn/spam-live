@@ -61,10 +61,10 @@
 	popover
 	{id}
 	aria-label={filter.label}
-	class="max-h-80 w-56 max-w-[calc(100vw-1rem)] overflow-y-auto rounded-sm border bg-popover p-1 text-popover-foreground [position-area:block-end_span-inline-end] [position-try-fallbacks:flip-inline,flip-block,flip-block_flip-inline] supports-[position-area:block-end]:m-0 supports-[position-area:block-end]:my-1"
+	class="max-h-80 w-56 max-w-[calc(100vw-1rem)] overflow-x-hidden overflow-y-auto rounded-sm border bg-popover p-1 text-popover-foreground [position-area:block-end_span-inline-end] [position-try-fallbacks:flip-inline,flip-block,flip-block_flip-inline] supports-[position-area:block-end]:m-0 supports-[position-area:block-end]:my-1"
 	style:position-anchor="--{id}"
 >
-	<ul class="grid">
+	<ul class="grid grid-cols-1">
 		{#each filter.options as option (option.value)}
 			{@const on = chosen.includes(option.value)}
 			<li>
