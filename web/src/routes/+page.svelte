@@ -20,9 +20,6 @@
 	const promoted = $derived(promote(data.top));
 	const cardStats = $derived(new Map(data.stats.map((s) => [s.card, s])));
 	const line = 'border-[#fbf8f0]/35 bg-[#171715]/35 hover:border-[#fbf8f0]/70';
-	const fan = $derived(
-		[...new Set([...(data.top[0]?.cards ?? []), ...data.cards.map((c) => c.id)])].slice(0, 5)
-	);
 
 	let row: HTMLElement | undefined;
 	let start = $state(true);
@@ -226,4 +223,4 @@
 	{/if}
 </section>
 
-<DesktopCta version={data.release?.version} cards={fan} {catalog} />
+<DesktopCta version={data.release?.version} cards={data.cards.slice(0, 36).map((c) => c.id)} />
