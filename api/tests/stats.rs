@@ -224,7 +224,7 @@ async fn deck_detail_stats_and_winrate_sort(pool: PgPool) {
     assert_eq!(none["stats"]["all"], json!({ "games": 0, "wins": 0, "winRate": null, "winScore": null }));
 
     sqlx::query("UPDATE decks SET status = 'public', published_at = now()").execute(&pool).await.unwrap();
-    send(&app, req("PUT", &format!("/api/decks/{}/vote", ids[2]), &b, None)).await;
+    send(&app, req("PUT", &format!("/api/decks/{}/vote", ids[2]), &b, Some(json!({ "value": 1 })))).await;
     let sorted = send(&app, get("/api/decks?sort=winrate", "")).await.body;
     let order: Vec<_> = sorted.as_array().unwrap().iter().map(|d| d["id"].as_i64().unwrap()).collect();
     assert_eq!(order, [ids[0], ids[2], ids[4], ids[1], ids[3]]);

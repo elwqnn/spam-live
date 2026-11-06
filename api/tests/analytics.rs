@@ -275,7 +275,7 @@ async fn admin_analytics(pool: PgPool) {
     send(&app, req("POST", &format!("/api/decks/{public}/publish"), &a, None)).await;
     send(&app, req("POST", "/api/decks", &a, Some(deck("D1")))).await;
     send(&app, req("POST", "/api/decks", &b, Some(deck("D2")))).await;
-    send(&app, req("PUT", &format!("/api/decks/{public}/vote"), &b, None)).await;
+    send(&app, req("PUT", &format!("/api/decks/{public}/vote"), &b, Some(json!({ "value": 1 })))).await;
     send(&app, req("POST", &format!("/api/decks/{public}/comments"), &b, Some(json!({ "body": "gg" })))).await;
 
     for (user, version, hours, online) in [

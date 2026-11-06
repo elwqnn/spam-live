@@ -241,7 +241,7 @@ async fn deck_changes_are_author_only(pool: PgPool) {
     assert_eq!(created.body["authorId"], a_id);
     assert_eq!(created.body["authorName"], "76561190000000001");
     assert_eq!(created.body["guideHtml"], "<p>Play <strong>well</strong></p>\n");
-    assert_eq!(created.body["votes"], 0);
+    assert_eq!((created.body["upvotes"].clone(), created.body["downvotes"].clone()), (json!(0), json!(0)));
     let id = created.body["id"].as_i64().unwrap();
     let uri = format!("/api/decks/{id}");
     let patch = |cookie: &str, body: Value| req("PATCH", &uri, cookie, Some(body));
@@ -259,7 +259,7 @@ async fn deck_changes_are_author_only(pool: PgPool) {
     let anonymous = send(&app, get(&uri, "")).await;
     assert_eq!(anonymous.status, StatusCode::OK);
     assert_eq!(anonymous.body["myVote"], Value::Null);
-    assert_eq!(send(&app, get(&uri, &b)).await.body["myVote"], false);
+    assert_eq!(send(&app, get(&uri, &b)).await.body["myVote"], Value::Null);
     assert_eq!(send(&app, patch(&b, json!({ "name": "x" }))).await.status, StatusCode::FORBIDDEN);
     assert_eq!(send(&app, req("DELETE", &uri, &b, None)).await.status, StatusCode::FORBIDDEN);
     assert_eq!(action(&app, &b, id, "unpublish").await.status, StatusCode::FORBIDDEN);
@@ -435,41 +435,56 @@ async fn votes(pool: PgPool) {
     let x = create(&app, &a, "X", SEAT0_CARDS).await;
     let y = create(&app, &a, "Y", SEAT1_CARDS).await;
     let z = create(&app, &a, "Z", SEAT0_CARDS).await;
+    let w = create(&app, &a, "W", SEAT1_CARDS).await;
     let draft = create(&app, &a, "Draft", SEAT0_CARDS).await;
-    for id in [x, y, z] {
+    for id in [x, y, z, w] {
         action(&app, &a, id, "publish").await;
     }
-    let vote =
-        |method: &'static str, cookie: &str, id: i64| req(method, &format!("/api/decks/{id}/vote"), cookie, None);
+    let put = |cookie: &str, id: i64, value: i64| {
+        req("PUT", &format!("/api/decks/{id}/vote"), cookie, Some(json!({ "value": value })))
+    };
+    let delete = |cookie: &str, id: i64| req("DELETE", &format!("/api/decks/{id}/vote"), cookie, None);
+    let seen = async |cookie: &str, id: i64| {
+        let body = send(&app, get(&format!("/api/decks/{id}"), cookie)).await.body;
+        (body["upvotes"].clone(), body["downvotes"].clone(), body["myVote"].clone())
+    };
 
     for _ in 0..2 {
-        assert_eq!(send(&app, vote("PUT", &b, x)).await.status, StatusCode::NO_CONTENT);
+        assert_eq!(send(&app, put(&b, x, 1)).await.status, StatusCode::NO_CONTENT);
     }
-    let seen = send(&app, get(&format!("/api/decks/{x}"), &b)).await.body;
-    assert_eq!((seen["votes"].clone(), seen["myVote"].clone()), (json!(1), json!(true)));
-    assert_eq!(send(&app, vote("PUT", &a, x)).await.status, StatusCode::FORBIDDEN);
-    assert_eq!(send(&app, vote("PUT", &b, draft)).await.status, StatusCode::NOT_FOUND);
-    assert_eq!(send(&app, vote("PUT", &b, 999_999)).await.status, StatusCode::NOT_FOUND);
+    assert_eq!(seen(&b, x).await, (json!(1), json!(0), json!(1)));
     for _ in 0..2 {
-        assert_eq!(send(&app, vote("DELETE", &b, x)).await.status, StatusCode::NO_CONTENT);
+        assert_eq!(send(&app, put(&b, x, -1)).await.status, StatusCode::NO_CONTENT);
     }
-    assert_eq!(send(&app, get(&format!("/api/decks/{x}"), &b)).await.body["votes"], 0);
+    assert_eq!(seen(&b, x).await, (json!(0), json!(1), json!(-1)));
+    assert_eq!(seen("", x).await, (json!(0), json!(1), Value::Null));
+    for value in [0, 2] {
+        assert_eq!(send(&app, put(&b, x, value)).await.status, StatusCode::BAD_REQUEST, "{value}");
+    }
+    assert_eq!(send(&app, put(&a, x, 1)).await.status, StatusCode::FORBIDDEN);
+    assert_eq!(send(&app, put(&b, draft, 1)).await.status, StatusCode::NOT_FOUND);
+    assert_eq!(send(&app, put(&b, 999_999, 1)).await.status, StatusCode::NOT_FOUND);
+    for _ in 0..2 {
+        assert_eq!(send(&app, delete(&b, x)).await.status, StatusCode::NO_CONTENT);
+    }
+    assert_eq!(seen(&b, x).await, (json!(0), json!(0), Value::Null));
 
-    for (cookie, id) in [(&b, y), (&c, y), (&b, x)] {
-        send(&app, vote("PUT", cookie, id)).await;
+    for (cookie, id, value) in [(&b, y, 1), (&c, y, 1), (&b, x, 1), (&c, x, -1), (&c, z, -1)] {
+        assert_eq!(send(&app, put(cookie, id, value)).await.status, StatusCode::NO_CONTENT);
     }
     let sorted = send(&app, get("/api/decks?sort=votes", "")).await.body;
-    assert_eq!(ids(&sorted), [y, x, z]);
-    assert_eq!(sorted[0]["votes"], 2);
-    assert_eq!(ids(&send(&app, get("/api/decks", "")).await.body), [y, x, z]);
+    assert_eq!(ids(&sorted), [y, x, w, z]);
+    assert_eq!((sorted[0]["upvotes"].clone(), sorted[0]["downvotes"].clone()), (json!(2), json!(0)));
+    assert_eq!(ids(&send(&app, get("/api/decks", "")).await.body), [y, x, w, z]);
+    assert_eq!(ids(&send(&app, get("/api/decks?sort=winrate", "")).await.body), [y, w, x, z]);
     let my_votes = |list: &Value| list.as_array().unwrap().iter().map(|d| d.get("myVote").cloned()).collect::<Vec<_>>();
-    assert_eq!(my_votes(&sorted), vec![Some(Value::Null); 3]);
+    assert_eq!(my_votes(&sorted), vec![Some(Value::Null); 4]);
     let mine = send(&app, get("/api/decks?sort=votes", &c)).await.body;
-    assert_eq!(ids(&mine), [y, x, z]);
-    assert_eq!(my_votes(&mine), [Some(json!(true)), Some(json!(false)), Some(json!(false))]);
+    assert_eq!(ids(&mine), [y, x, w, z]);
+    assert_eq!(my_votes(&mine), [Some(json!(1)), Some(json!(-1)), Some(Value::Null), Some(json!(-1))]);
     let page = |q: &str| get(&format!("/api/decks?sort=votes&limit=2{q}"), "");
     assert_eq!(ids(&send(&app, page("")).await.body), [y, x]);
-    assert_eq!(ids(&send(&app, page("&offset=2")).await.body), [z]);
+    assert_eq!(ids(&send(&app, page("&offset=2")).await.body), [w, z]);
     assert_eq!(ids(&send(&app, page("&offset=10000")).await.body), Vec::<i64>::new());
     for bad in ["&offset=10001", "&offset=-1"] {
         assert_eq!(send(&app, page(bad)).await.status, StatusCode::BAD_REQUEST, "{bad}");

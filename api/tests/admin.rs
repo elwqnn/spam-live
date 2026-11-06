@@ -216,8 +216,8 @@ async fn account_deletion(pool: PgPool) {
     comment(&app, &a, deck_b, "on b").await;
     comment(&app, &b, deck_a, "b on a").await;
     let kept = comment(&app, &b, deck_b, "b on b").await;
-    send(&app, req("PUT", &format!("/api/decks/{deck_b}/vote"), &a, None)).await;
-    send(&app, req("PUT", &format!("/api/decks/{deck_a}/vote"), &b, None)).await;
+    send(&app, req("PUT", &format!("/api/decks/{deck_b}/vote"), &a, Some(json!({ "value": 1 })))).await;
+    send(&app, req("PUT", &format!("/api/decks/{deck_a}/vote"), &b, Some(json!({ "value": 1 })))).await;
     report(&app, &a, "deck", deck_b).await;
     report(&app, &b, "deck", deck_a).await;
 

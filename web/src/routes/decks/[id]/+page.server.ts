@@ -1,4 +1,4 @@
-import { redirect, type RequestEvent } from '@sveltejs/kit';
+import { fail, redirect, type RequestEvent } from '@sveltejs/kit';
 import { api, href, result } from '#lib';
 import { text } from '#lib/deck.js';
 import type { Actions } from './$types';
@@ -17,10 +17,13 @@ const commentPath = (form: FormData) => ({ path: { id: Number(form.get('id')) } 
 export const actions: Actions = {
 	vote: async (event) => {
 		const { client, deck, form } = await input(event);
-		const res = await (form.get('vote') === '1'
-			? client.PUT('/api/decks/{id}/vote', deck)
-			: client.DELETE('/api/decks/{id}/vote', deck));
-		return result('vote', res);
+		const vote = form.get('vote');
+		if (vote === '0') return result('vote', await client.DELETE('/api/decks/{id}/vote', deck));
+		if (vote !== '1' && vote !== '-1') {
+			return fail(400, { key: 'vote', error: 'vote must be 1, -1 or 0' });
+		}
+		const body = { value: Number(vote) };
+		return result('vote', await client.PUT('/api/decks/{id}/vote', { ...deck, body }));
 	},
 	comment: async (event) => {
 		const { client, deck, form } = await input(event);

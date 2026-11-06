@@ -29,8 +29,10 @@ const MAX_OFFSET: i64 = 10_000;
 
 const DECK_COLUMNS: &str = "d.id, d.author_id, u.display_name AS author_name, u.avatar_url AS author_avatar, d.name,
     d.cards, d.talents, d.status, d.app_version, d.game_deck_id,
-    (SELECT count(*) FROM votes v WHERE v.deck_id = d.id) AS votes, d.created_at, d.updated_at, d.published_at";
-const DECK_FROM: &str = "FROM decks d JOIN users u ON u.id = d.author_id";
+    vc.upvotes, vc.downvotes, d.created_at, d.updated_at, d.published_at";
+const DECK_FROM: &str = "FROM decks d JOIN users u ON u.id = d.author_id
+    LEFT JOIN LATERAL (SELECT count(*) FILTER (WHERE v.value = 1) AS upvotes,
+        count(*) FILTER (WHERE v.value = -1) AS downvotes FROM votes v WHERE v.deck_id = d.id) vc ON true";
 const COMMENT_SELECT: &str = "SELECT c.id, c.deck_id, c.author_id, u.display_name AS author_name,
     u.avatar_url AS author_avatar, c.body, c.created_at, c.updated_at
     FROM comments c JOIN users u ON u.id = c.author_id";
@@ -104,7 +106,8 @@ pub struct Deck {
     pub status: DeckStatus,
     pub app_version: String,
     pub game_deck_id: Option<String>,
-    pub votes: i64,
+    pub upvotes: i64,
+    pub downvotes: i64,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub published_at: Option<DateTime<Utc>>,
@@ -119,7 +122,7 @@ pub struct DeckItem {
     #[serde(flatten)]
     #[sqlx(flatten)]
     pub stats: stats::KeyStats,
-    pub my_vote: Option<bool>,
+    pub my_vote: Option<i16>,
 }
 
 #[derive(Serialize, ToSchema)]
@@ -136,7 +139,7 @@ pub struct DeckDetail {
     pub deck: Deck,
     pub guide: String,
     pub guide_html: String,
-    pub my_vote: Option<bool>,
+    pub my_vote: Option<i16>,
     pub stats: DeckStats,
 }
 
@@ -145,14 +148,13 @@ struct DetailRow {
     #[sqlx(flatten)]
     deck: Deck,
     guide: String,
-    my_vote: Option<bool>,
+    my_vote: Option<i16>,
 }
 
 async fn load(s: &AppState, id: i64, viewer: Option<i64>) -> Result<DeckDetail, ApiError> {
     let row: DetailRow = sqlx::query_as(AssertSqlSafe(format!(
         "SELECT {DECK_COLUMNS}, d.guide,
-             CASE WHEN $2::bigint IS NOT NULL
-                 THEN EXISTS (SELECT 1 FROM votes v WHERE v.deck_id = d.id AND v.user_id = $2) END AS my_vote
+             (SELECT v.value FROM votes v WHERE v.deck_id = d.id AND v.user_id = $2) AS my_vote
          {DECK_FROM} WHERE d.id = $1 AND (d.status = 'public' OR d.author_id = $2)"
     )))
     .bind(id)
@@ -277,7 +279,8 @@ pub async fn preview(_user: CurrentUser, Json(body): Json<GuidePreview>) -> Resu
 }
 
 #[utoipa::path(get, path = "/api/decks/{id}", tag = "decks", params(("id" = i64, Path, description = "Deck ID")),
-    responses((status = 200, body = DeckDetail), (status = 404, body = ErrorBody)))]
+    responses((status = 200, body = DeckDetail,
+        description = "myVote is 1 (up), -1 (down) or null (no vote or no login)."), (status = 404, body = ErrorBody)))]
 pub async fn get_deck(
     State(s): State<AppState>,
     user: Option<CurrentUser>,
@@ -412,8 +415,9 @@ pub struct DeckQuery {
             Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. \
             games, wins and winRate are the stats of the deck key for the latest catalog version. \
             winRate is null at 0 games. winScore is the lower bound of the 95 % Wilson score interval of winRate, \
-            null at 0 games. sort=winrate orders by winScore. q matches part of the deck name, without case. \
-            myVote is null without login."),
+            null at 0 games. sort=votes orders by upvotes - downvotes, then upvotes. \
+            sort=winrate orders by winScore, then upvotes - downvotes. q matches part of the deck name, without case. \
+            myVote is 1 (up), -1 (down) or null (no vote or no login)."),
         (status = 400, body = ErrorBody), (status = 401, body = ErrorBody)))]
 pub async fn list_decks(
     State(s): State<AppState>,
@@ -441,9 +445,9 @@ pub async fn list_decks(
         Some(_) => return Err(bad("q must have 2 to 64 characters")),
     };
     let order = match q.sort.unwrap_or_default() {
-        DeckSort::Votes => "votes DESC, d.id DESC",
+        DeckSort::Votes => "vc.upvotes - vc.downvotes DESC, vc.upvotes DESC, d.id DESC",
         DeckSort::Recent => "COALESCE(d.published_at, d.created_at) DESC, d.id DESC",
-        DeckSort::Winrate => "ws.win_score DESC NULLS LAST, votes DESC, d.id DESC",
+        DeckSort::Winrate => "ws.win_score DESC NULLS LAST, vc.upvotes - vc.downvotes DESC, d.id DESC",
     };
     let decks = sqlx::query_as(AssertSqlSafe(format!(
         "WITH ws AS (
@@ -453,9 +457,7 @@ pub async fn list_decks(
              FROM deck_results WHERE app_version = $6 GROUP BY deck_key
          )
          SELECT {DECK_COLUMNS}, COALESCE(ws.games, 0) AS games, COALESCE(ws.wins, 0) AS wins, ws.win_rate,
-             ws.win_score,
-             CASE WHEN $9::bigint IS NOT NULL
-                 THEN EXISTS (SELECT 1 FROM votes v WHERE v.deck_id = d.id AND v.user_id = $9) END AS my_vote
+             ws.win_score, (SELECT v.value FROM votes v WHERE v.deck_id = d.id AND v.user_id = $9) AS my_vote
          {DECK_FROM} LEFT JOIN ws ON ws.deck_key = d.deck_key
          WHERE ($1::bigint IS NULL OR d.author_id = $1) AND (d.status = 'public' OR $2)
              AND ($3::uuid IS NULL OR $3 = ANY (d.cards))
@@ -641,21 +643,37 @@ pub async fn import(
     Ok(Json(ImportResult { decks }))
 }
 
-#[utoipa::path(put, path = "/api/decks/{id}/vote", tag = "votes", params(("id" = i64, Path, description = "Deck ID")),
-    responses((status = 204, description = "Vote stored"), (status = 403, body = ErrorBody), (status = 404, body = ErrorBody)))]
+#[derive(Deserialize, ToSchema)]
+pub struct VoteInput {
+    #[schema(minimum = -1, maximum = 1)]
+    pub value: i16,
+}
+
+#[utoipa::path(put, path = "/api/decks/{id}/vote", tag = "votes", request_body = VoteInput,
+    params(("id" = i64, Path, description = "Deck ID")),
+    responses((status = 204, description = "Vote stored. value is 1 (up) or -1 (down). A new vote replaces the old one."),
+        (status = 400, body = ErrorBody), (status = 403, body = ErrorBody), (status = 404, body = ErrorBody)))]
 pub async fn put_vote(
     State(s): State<AppState>,
     user: CurrentUser,
     Path(id): Path<i64>,
+    Json(input): Json<VoteInput>,
 ) -> Result<StatusCode, ApiError> {
+    if !matches!(input.value, 1 | -1) {
+        return Err(bad("value must be 1 or -1"));
+    }
     if public_deck_author(&s.db, id).await? == user.id {
         return Err(forbidden("you cannot vote for your own deck"));
     }
-    sqlx::query("INSERT INTO votes (deck_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING")
-        .bind(id)
-        .bind(user.id)
-        .execute(&s.db)
-        .await?;
+    sqlx::query(
+        "INSERT INTO votes (deck_id, user_id, value) VALUES ($1, $2, $3)
+         ON CONFLICT (deck_id, user_id) DO UPDATE SET value = EXCLUDED.value",
+    )
+    .bind(id)
+    .bind(user.id)
+    .bind(input.value)
+    .execute(&s.db)
+    .await?;
     Ok(StatusCode::NO_CONTENT)
 }
 

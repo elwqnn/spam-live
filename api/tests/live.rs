@@ -74,7 +74,7 @@ async fn public_deck_changes_send_signals(pool: PgPool) {
 
     let third = create(&app, &a).await;
     call(&app, &a, "POST", format!("/api/decks/{third}/publish"), None).await;
-    call(&app, &b, "PUT", format!("/api/decks/{third}/vote"), None).await;
+    call(&app, &b, "PUT", format!("/api/decks/{third}/vote"), Some(json!({ "value": 1 }))).await;
     call(&app, &b, "POST", format!("/api/decks/{third}/comments"), Some(json!({ "body": "nice" }))).await;
     let report = json!({ "targetType": "deck", "targetId": third, "reason": "bad" });
     call(&app, &b, "POST", "/api/reports".into(), Some(report)).await;

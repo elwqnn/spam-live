@@ -448,9 +448,10 @@ pub async fn run(db: &PgPool, catalog: &Catalog) -> Result<(), Box<dyn Error>> {
         rng.shuffle(&mut voters);
         voters.truncate(rng.below(26));
         for v in voters {
-            sqlx::query("INSERT INTO votes (deck_id, user_id, created_at) VALUES ($1, $2, $3)")
+            sqlx::query("INSERT INTO votes (deck_id, user_id, value, created_at) VALUES ($1, $2, $3, $4)")
                 .bind(id)
                 .bind(users[v])
+                .bind(if rng.chance(0.2) { -1i16 } else { 1 })
                 .bind(rng.between(published, now))
                 .execute(db)
                 .await?;

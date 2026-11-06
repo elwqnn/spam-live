@@ -898,6 +898,8 @@ export interface components {
             cards: string[];
             /** Format: date-time */
             createdAt: string;
+            /** Format: int64 */
+            downvotes: number;
             gameDeckId?: string | null;
             /** Format: int64 */
             id: number;
@@ -909,16 +911,18 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
             /** Format: int64 */
-            votes: number;
+            upvotes: number;
         };
         DeckDetail: components["schemas"]["Deck"] & {
             guide: string;
             guideHtml: string;
-            myVote?: boolean | null;
+            /** Format: int32 */
+            myVote?: number | null;
             stats: components["schemas"]["DeckStats"];
         };
         DeckItem: components["schemas"]["Deck"] & components["schemas"]["KeyStats"] & {
-            myVote?: boolean | null;
+            /** Format: int32 */
+            myVote?: number | null;
         };
         DeckKeyStats: {
             cards: string[];
@@ -1331,6 +1335,10 @@ export interface components {
             /** Format: date-time */
             start: string;
             version: string;
+        };
+        VoteInput: {
+            /** Format: int32 */
+            value: number;
         };
     };
     responses: never;
@@ -1932,7 +1940,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Public decks. author=me lists the decks of the caller with drafts. Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. games, wins and winRate are the stats of the deck key for the latest catalog version. winRate is null at 0 games. winScore is the lower bound of the 95 % Wilson score interval of winRate, null at 0 games. sort=winrate orders by winScore. q matches part of the deck name, without case. myVote is null without login. */
+            /** @description Public decks. author=me lists the decks of the caller with drafts. Page with offset for sort=votes and sort=winrate, and with before (publication time) for sort=recent. games, wins and winRate are the stats of the deck key for the latest catalog version. winRate is null at 0 games. winScore is the lower bound of the 95 % Wilson score interval of winRate, null at 0 games. sort=votes orders by upvotes - downvotes, then upvotes. sort=winrate orders by winScore, then upvotes - downvotes. q matches part of the deck name, without case. myVote is 1 (up), -1 (down) or null (no vote or no login). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2151,6 +2159,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description myVote is 1 (up), -1 (down) or null (no vote or no login). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2432,14 +2441,26 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoteInput"];
+            };
+        };
         responses: {
-            /** @description Vote stored */
+            /** @description Vote stored. value is 1 (up) or -1 (down). A new vote replaces the old one. */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
             };
             403: {
                 headers: {

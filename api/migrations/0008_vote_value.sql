@@ -1,0 +1,2 @@
+ALTER TABLE votes ADD COLUMN value smallint NOT NULL DEFAULT 1 CHECK (value IN (-1, 1));
+ALTER TABLE votes ALTER COLUMN value DROP DEFAULT;

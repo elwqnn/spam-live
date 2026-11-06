@@ -7,6 +7,7 @@
 	import Author from '#lib/components/Author.svelte';
 	import DeckCards from '#lib/components/DeckCards.svelte';
 	import DeckSummary from '#lib/components/DeckSummary.svelte';
+	import DeckVotes from '#lib/components/DeckVotes.svelte';
 	import Description from '#lib/components/Description.svelte';
 	import Dialog from '#lib/components/Dialog.svelte';
 	import Guide from '#lib/components/Guide.svelte';
@@ -75,25 +76,7 @@
 	</div>
 
 	<div class="flex flex-wrap items-center gap-2">
-		{#if !me && open}
-			<Button variant="outline" size="sm" href={loginHref(page.url)} rel="external">
-				{m.vote()} <span class="tabular-nums">{deck.votes}</span>
-			</Button>
-		{:else if me && open && !author}
-			<form method="POST" action="?/vote" use:enhance={closeAfter}>
-				<input type="hidden" name="vote" value={deck.myVote ? '0' : '1'} />
-				<Button
-					type="submit"
-					size="sm"
-					variant={deck.myVote ? 'secondary' : 'outline'}
-					aria-pressed={!!deck.myVote}
-				>
-					{m.vote()} <span class="tabular-nums">{deck.votes}</span>
-				</Button>
-			</form>
-		{:else}
-			<span class="text-sm tabular-nums">{m.votes()}: {deck.votes}</span>
-		{/if}
+		<DeckVotes {deck} />
 		{#if me && open && !author}<Report type="deck" id={deck.id} />{/if}
 		{#if author}
 			<Button variant="outline" size="sm" href={href(`/decks/${deck.id}/edit`)}>{m.edit()}</Button>
