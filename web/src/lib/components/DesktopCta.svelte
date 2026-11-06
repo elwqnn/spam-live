@@ -118,7 +118,7 @@
 
 	@media (prefers-reduced-motion: no-preference) {
 		.lane {
-			animation: slide 60s linear infinite;
+			animation: slide 120s linear infinite;
 		}
 		.lane:nth-child(2) {
 			animation-direction: reverse;
