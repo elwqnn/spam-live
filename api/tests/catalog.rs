@@ -361,14 +361,14 @@ async fn glossary_without_lists() {
 async fn real_catalog_glossary() {
     let catalog = real_catalog();
     let app = api::router(state_with(lazy_pool(), "https://steamcommunity.com/openid/login", catalog));
-    let cards = send(&app, get("/api/cards", "")).await.body;
+    let cards = send(&app, get("/api/cards?version=1.28.1", "")).await.body;
     let order: std::collections::HashMap<_, _> = cards
         .as_array()
         .unwrap()
         .iter()
         .map(|c| (c["id"].as_str().unwrap().to_string(), c["order"].as_i64().unwrap()))
         .collect();
-    let g = send(&app, get("/api/glossary", "")).await.body;
+    let g = send(&app, get("/api/glossary?version=1.28.1", "")).await.body;
     let len = |key: &str| g[key].as_array().unwrap().len();
     assert_eq!((len("keywords"), len("effects"), len("abilities"), len("talents")), (26, 16, 227, 86));
     assert!(len("tox") > 0);

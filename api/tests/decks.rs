@@ -72,7 +72,7 @@ async fn import_new_unchanged_updated(pool: PgPool) {
     assert_eq!(d["cards"], json!(SEAT0_CARDS));
     assert_eq!(d["talents"], json!([0, 1, 2, 0]));
     assert_eq!(d["gameDeckId"], G1);
-    assert_eq!(d["appVersion"], "1.28.1");
+    assert_eq!(d["appVersion"], "1.29");
 
     let again = import(&app, &cookie, &[first]).await;
     assert_eq!(results(&again)[0].1, "unchanged");
