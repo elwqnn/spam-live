@@ -30,10 +30,12 @@ void main(){
 		start: number;
 		resize: ResizeObserver;
 		view: IntersectionObserver;
+		page: ResizeObserver;
 	};
 
 	const shown: HTMLCanvasElement[] = [];
 	const looks = new WeakMap<Element, [number, number, number]>();
+	let origins = new WeakMap<Element, [number, number]>();
 	let count = 0;
 	let shared: Shared | null = null;
 	let broken = false;
@@ -55,10 +57,16 @@ void main(){
 		if (canvas.height !== height) canvas.height = height;
 		if (source.width < width) source.width = width;
 		if (source.height < height) source.height = height;
-		const rect = canvas.getBoundingClientRect();
+		let origin = origins.get(canvas);
+		if (!origin) {
+			const rect = canvas.getBoundingClientRect();
+			origin = [rect.left + scrollX, rect.top + scrollY];
+			origins.set(canvas, origin);
+		}
+		const [left, top] = origin;
 		const [line, speed, gray] = looks.get(canvas) ?? [1, 1, 0];
 		s.gl.viewport(0, 0, width, height);
-		s.gl.uniform2f(s.origin, rect.left + scrollX, -(rect.top + scrollY + height / ratio));
+		s.gl.uniform2f(s.origin, left, -(top + height / ratio));
 		s.gl.uniform1f(s.ratio, ratio);
 		s.gl.uniform1f(s.line, line);
 		s.gl.uniform1f(s.gray, gray);
@@ -93,19 +101,28 @@ void main(){
 			still: matchMedia('(prefers-reduced-motion: reduce)').matches,
 			start: performance.now(),
 			resize: new ResizeObserver((entries) => {
-				for (const entry of entries) draw(s, entry.target as HTMLCanvasElement);
+				for (const entry of entries) {
+					origins.delete(entry.target);
+					draw(s, entry.target as HTMLCanvasElement);
+				}
 			}),
 			view: new IntersectionObserver((entries) => {
 				for (const entry of entries) {
 					const canvas = entry.target as HTMLCanvasElement;
 					hide(canvas);
 					if (!entry.isIntersecting) continue;
+					origins.delete(canvas);
 					shown.push(canvas);
 					if (s.still) draw(s, canvas);
 				}
 				if (!s.still) frame ||= requestAnimationFrame(loop);
+			}),
+			page: new ResizeObserver(() => {
+				origins = new WeakMap();
+				if (s.still) for (const canvas of shown) draw(s, canvas);
 			})
 		};
+		s.page.observe(document.documentElement);
 		return s;
 	};
 
@@ -122,6 +139,7 @@ void main(){
 
 			return () => {
 				hide(canvas);
+				origins.delete(canvas);
 				s.resize.unobserve(canvas);
 				s.view.unobserve(canvas);
 				if (--count) return;
@@ -129,6 +147,7 @@ void main(){
 				frame = 0;
 				s.resize.disconnect();
 				s.view.disconnect();
+				s.page.disconnect();
 				s.gl.getExtension('WEBGL_lose_context')?.loseContext();
 				shared = null;
 			};
