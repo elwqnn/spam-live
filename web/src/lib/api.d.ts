@@ -740,22 +740,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/stats/matchups": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["matchups"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/stats/overview": {
         parameters: {
             query?: never;
@@ -780,22 +764,6 @@ export interface paths {
             cookie?: never;
         };
         get: operations["pace"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/stats/turns": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["turns"];
         put?: never;
         post?: never;
         delete?: never;
@@ -896,16 +864,21 @@ export interface components {
         CardPace: {
             /** Format: uuid */
             card: string;
+            curve: components["schemas"]["TurnGroup"][];
+            /** Format: double */
+            gap: number;
             /** Format: int64 */
             longGames: number;
             /** Format: double */
-            longWinRate?: number | null;
+            longWinRate: number;
             /** Format: int64 */
             longWins: number;
+            /** Format: double */
+            margin: number;
             /** Format: int64 */
             shortGames: number;
             /** Format: double */
-            shortWinRate?: number | null;
+            shortWinRate: number;
             /** Format: int64 */
             shortWins: number;
         };
@@ -929,11 +902,6 @@ export interface components {
             abilities: components["schemas"]["AbilityRef"][];
             talents: string[];
             tox: string[];
-        };
-        CardTurns: {
-            /** Format: uuid */
-            card: string;
-            turns: components["schemas"]["TurnResult"][];
         };
         CatalogVersion: {
             languages: string[];
@@ -1234,22 +1202,6 @@ export interface components {
             /** Format: int64 */
             total: number;
         };
-        Matchup: {
-            /** Format: uuid */
-            card: string;
-            /** Format: int64 */
-            games: number;
-            /** Format: uuid */
-            opponent: string;
-            /** Format: double */
-            winRate?: number | null;
-            /** Format: int64 */
-            wins: number;
-        };
-        MatchupStats: {
-            cards: string[];
-            cells: components["schemas"]["Matchup"][];
-        };
         Me: {
             avatarUrl?: string | null;
             displayName: string;
@@ -1315,9 +1267,10 @@ export interface components {
             players: number;
         };
         PaceStats: {
-            cards: components["schemas"]["CardPace"][];
+            long: components["schemas"]["CardPace"][];
             /** Format: int32 */
             median?: number | null;
+            short: components["schemas"]["CardPace"][];
             turns: components["schemas"]["TurnBucket"][];
         };
         Ping: {
@@ -1409,16 +1362,13 @@ export interface components {
             /** Format: int32 */
             turns: number;
         };
-        TurnResult: {
+        TurnGroup: {
             /** Format: int64 */
             games: number;
             /** Format: int32 */
-            turns: number;
+            start: number;
             /** Format: int64 */
             wins: number;
-        };
-        TurnStats: {
-            cards: components["schemas"]["CardTurns"][];
         };
         UnknownCard: {
             /** Format: uuid */
@@ -3381,37 +3331,6 @@ export interface operations {
             };
         };
     };
-    matchups: {
-        parameters: {
-            query?: {
-                /** @example all */
-                version?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description cards: the 12 most played cards (deck results with the card, then card id). cells: 1 item for each ordered pair of 2 different cards of cards with 1 game or more. games: the deck results where the deck has card and the opposing deck has opponent. wins: the part of games where the deck with card won. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MatchupStats"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorBody"];
-                };
-            };
-        };
-    };
     overview: {
         parameters: {
             query?: {
@@ -3455,44 +3374,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description turns: the match count for each turn count. median: the median turn count (percentile_disc 0.5), null when there is no match. cards: short is turn count <= median, long is turn count > median. The win rates are null at 0 games. */
+            /** @description turns: the match count for each turn count. median: the median turn count of the version (percentile_disc 0.5), null for all and when there is no match. A match is short when its turn count is at most the median of its own version, else long. short and long: at most 5 cards with 20 games or more in each part whose gap (shortWinRate - longWinRate) is larger than its 99.9 % margin of error (z = 3.29, strict because about 150 cards are tested at once); short has a positive gap, long a negative gap, both sorted by |gap| - margin descending, then card. curve: the games and wins of the card by group of 3 turns (start = t - (t - 1) % 3). */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["PaceStats"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorBody"];
-                };
-            };
-        };
-    };
-    turns: {
-        parameters: {
-            query?: {
-                /** @example all */
-                version?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description cards: the 12 most played cards, in the matchups order. turns: 1 item for each match turn count with 1 game or more for the card, sorted by turns. games: the deck results with the card in matches with this turn count. wins: the part of games that the deck won. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TurnStats"];
                 };
             };
             400: {

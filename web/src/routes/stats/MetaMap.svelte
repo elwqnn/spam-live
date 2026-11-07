@@ -1,25 +1,30 @@
 <script lang="ts">
-	import { ScatterChart, Tooltip } from 'layerchart';
-	import { href, percent, type CardMap, type Schemas } from '#lib';
+	import { HugeiconsIcon } from '@hugeicons/svelte';
+	import { ArrowExpand01Icon, ZoomInAreaIcon, ZoomOutAreaIcon } from '@hugeicons/core-free-icons';
+	import { Html, ScatterChart, type ChartState } from 'layerchart';
+	import { href, percent, winRateColor, type CardMap, type Schemas } from '#lib';
 	import { ELEMENTS } from '#lib/components/CardBadge.svelte';
+	import { Button } from '#lib/components/ui/button/index.js';
 	import * as Chart from '#lib/components/ui/chart/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import ElementLegend from './ElementLegend.svelte';
-	import { rateDomain } from './turns.js';
+	import { rateDomain } from './domain.js';
 
 	let { data, catalog }: { data: Schemas['CardStats'][]; catalog: CardMap } = $props();
 
 	type Dot = {
 		card: string;
 		name: string;
-		element: string;
+		element: string | null;
 		playRate: number;
 		winRate: number;
 		games: number;
 	};
 
 	const MIN_GAMES = 20;
+	const MAX_ZOOM = 8;
+	const TIP = 208;
 	const number = new Intl.NumberFormat(getLocale());
 
 	const dots: Dot[] = $derived(
@@ -27,11 +32,10 @@
 			.filter((s) => s.games >= MIN_GAMES && s.winRate != null)
 			.map((s) => {
 				const card = catalog.get(s.card);
-				const element = card && Object.hasOwn(ELEMENTS, card.element) ? card.element : '';
 				return {
 					card: s.card,
 					name: card?.name ?? s.card.slice(0, 8),
-					element,
+					element: card ? card.element : null,
 					playRate: s.playRate,
 					winRate: s.winRate ?? 0,
 					games: s.games
@@ -39,16 +43,13 @@
 			})
 	);
 	const hidden = $derived(data.length - dots.length);
-	const series = $derived(
-		[...Object.keys(ELEMENTS), ''].map((key) => ({
-			key: key || 'unknown',
-			label: key ? ELEMENTS[key]() : m.unknown_card(),
-			color: key ? `var(--el-${key})` : 'var(--foreground)',
-			data: dots.filter((d) => d.element === key)
-		}))
-	);
 	const config = $derived(
-		Object.fromEntries(series.map((s) => [s.key, { label: s.label, color: s.color }]))
+		Object.fromEntries(
+			Object.keys(ELEMENTS).map((key) => [
+				key,
+				{ label: ELEMENTS[key](), color: `var(--el-${key})` }
+			])
+		)
 	);
 	const median = $derived.by(() => {
 		const rates = dots.map((d) => d.playRate).sort((a, b) => a - b);
@@ -73,13 +74,49 @@
 		},
 		yAxis: {
 			ticks: 5,
-			format: (v: number) => percent(v),
-			label: m.win_rate(),
-			labelPlacement: 'start' as const
-		},
-		points: { r: 5, stroke: 'var(--background)', strokeWidth: 1 }
+			format: (v: number) => percent(v)
+		}
 	});
-	const corner = 'pointer-events-none absolute eyebrow text-[10px] text-muted-foreground';
+	const padding = { top: 44, right: 8, bottom: 40, left: 44 };
+
+	let context = $state<ChartState>();
+	let scale = $state(1);
+	let active = $state.raw<Dot | null>(null);
+	let tipHeight = $state(0);
+	const zoomed = $derived(scale > 1.001);
+	const size = $derived(scale >= 4 ? 32 : 22);
+	const transform = $derived({
+		mode: 'domain' as const,
+		scaleExtent: [1, MAX_ZOOM] as [number, number],
+		domainExtent: { x: { min: 'data', max: 'data' }, y: { min: 'data', max: 'data' } } as const,
+		scrollActivationKey: 'control' as const,
+		disablePointer: !zoomed
+	});
+	const tools = $derived([
+		{
+			label: m.metamap_zoom_out(),
+			icon: ZoomOutAreaIcon,
+			off: !zoomed,
+			run: () => context?.transformState?.zoomOut()
+		},
+		{
+			label: m.metamap_zoom_in(),
+			icon: ZoomInAreaIcon,
+			off: scale >= MAX_ZOOM - 0.001,
+			run: () => context?.transformState?.zoomIn()
+		},
+		{
+			label: m.metamap_zoom_reset(),
+			icon: ArrowExpand01Icon,
+			off: !zoomed,
+			run: () => context?.transformState?.reset()
+		}
+	]);
+	const show = (dot: Dot) => (active = dot);
+	const hide = (dot: Dot) => {
+		if (active === dot) active = null;
+	};
+	const corner = 'pointer-events-none absolute z-1 eyebrow text-[10px] text-muted-foreground';
 </script>
 
 <section aria-labelledby="metamap-title">
@@ -92,39 +129,127 @@
 	{#if dots.length}
 		<ElementLegend />
 		<figure class="grid gap-3 px-(--gutter) py-4">
-			<div role="img" aria-label={m.metamap_label()} class="relative h-80 sm:h-96">
+			<div role="group" aria-label={m.metamap_label()} class="relative h-80 sm:h-96">
+				<span class="absolute top-0 left-0 flex h-8 items-center text-xs text-muted-foreground"
+					>{m.win_rate()}</span
+				>
+				<div class="absolute top-0 right-0 z-1 flex items-center gap-1">
+					<span class="mr-2 hidden text-xs text-muted-foreground sm:inline pointer-coarse:hidden"
+						>{m.metamap_zoom_hint()}</span
+					>
+					{#each tools as tool (tool.label)}
+						<Button
+							variant="outline"
+							size="icon-sm"
+							aria-label={tool.label}
+							aria-disabled={tool.off ? 'true' : undefined}
+							class="aria-disabled:cursor-default aria-disabled:opacity-50"
+							onclick={() => tool.off || tool.run()}
+						>
+							<HugeiconsIcon icon={tool.icon} aria-hidden="true" class="size-4" />
+						</Button>
+					{/each}
+				</div>
 				<Chart.Container {config} class="aspect-auto h-full w-full">
 					<ScatterChart
+						data={dots}
 						x="playRate"
 						y="winRate"
-						{series}
 						{xDomain}
 						{yDomain}
 						{annotations}
-						padding={{ top: 24, right: 8, bottom: 40, left: 44 }}
+						{padding}
+						{transform}
+						tooltipContext={false}
 						props={chartProps}
+						onTransform={(t) => (scale = t.scale)}
+						bind:context
 					>
-						{#snippet tooltip()}
-							<Tooltip.Root variant="none">
-								{#snippet children({ data: dot }: { data: Dot })}
+						{#snippet marks()}{/snippet}
+						{#snippet aboveContext({ context: c })}
+							<Html clip={false} class="overflow-clip">
+								{#each dots as dot (dot.card)}
+									{@const x = c.xScale(dot.playRate)}
+									{@const y = c.yScale(dot.winRate)}
+									{#if x >= 0 && x <= c.width && y >= 0 && y <= c.height}
+										<a
+											href={href(`/cards/${dot.card}`)}
+											draggable="false"
+											class={[
+												'group absolute -translate-1/2 rounded-xs focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2',
+												active === dot && 'z-10'
+											]}
+											style:left="{x}px"
+											style:top="{y}px"
+											onpointerenter={() => show(dot)}
+											onpointerleave={() => hide(dot)}
+											onfocus={(e) => e.currentTarget.matches(':focus-visible') && show(dot)}
+											onblur={() => hide(dot)}
+										>
+											{#if dot.element != null}
+												<img
+													src="/art/avatar/{dot.card}.webp"
+													alt=""
+													loading="lazy"
+													decoding="async"
+													draggable="false"
+													class="el-{dot.element} block rounded-xs border-2 border-(--el) bg-(--el) transition-colors group-hover:border-foreground"
+													style:width="{size}px"
+													style:height="{size}px"
+												/>
+											{:else}
+												<span class="block size-2.5 rounded-xs bg-foreground"></span>
+											{/if}
+											<span class="sr-only">{dot.name}</span>
+										</a>
+									{/if}
+								{/each}
+							</Html>
+							{#if active}
+								{@const x = c.xScale(active.playRate)}
+								{@const y = c.yScale(active.winRate)}
+								<Html clip={false} pointerEvents={false}>
 									<div
-										class="grid min-w-36 gap-1 rounded-sm border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground"
+										class="absolute grid gap-2 rounded-sm border bg-popover p-2.5 text-xs text-popover-foreground"
+										style:width="{TIP}px"
+										style:left="{Math.max(
+											-padding.left,
+											padding.left + x + 16 + TIP > c.containerWidth ? x - 16 - TIP : x + 16
+										)}px"
+										style:top="{Math.min(
+											Math.max(-padding.top, y - tipHeight / 2),
+											c.height + padding.bottom - tipHeight
+										)}px"
+										bind:offsetHeight={tipHeight}
+										aria-hidden="true"
 									>
-										<div class="font-medium">{dot.name}</div>
-										{#each [[m.win_rate(), percent(dot.winRate)], [m.play_rate(), percent(dot.playRate)], [m.games(), number.format(dot.games)]] as [label, value] (label)}
-											<div class="flex justify-between gap-4">
-												<span class="text-muted-foreground">{label}</span>
-												<span class="font-medium tabular-nums">{value}</span>
-											</div>
-										{/each}
+										<div class="flex items-center gap-2.5">
+											{#if active.element != null}
+												<img
+													src="/art/avatar/{active.card}.webp"
+													alt=""
+													decoding="async"
+													class="el-{active.element} size-12 shrink-0 rounded-xs border-2 border-(--el) bg-(--el)"
+												/>
+											{/if}
+											<span class="text-sm font-medium">{active.name}</span>
+										</div>
+										<dl class="grid gap-1 tabular-nums">
+											{#each [[m.win_rate(), percent(active.winRate), winRateColor(active.winRate)], [m.play_rate(), percent(active.playRate), undefined], [m.games(), number.format(active.games), undefined]] as [label, value, color] (label)}
+												<div class="flex justify-between gap-4">
+													<dt class="text-muted-foreground">{label}</dt>
+													<dd class="font-medium" style:color>{value}</dd>
+												</div>
+											{/each}
+										</dl>
 									</div>
-								{/snippet}
-							</Tooltip.Root>
+								</Html>
+							{/if}
 						{/snippet}
 					</ScatterChart>
 				</Chart.Container>
-				<span class="{corner} top-8 right-3">{m.metamap_picks()}</span>
-				<span class="{corner} top-8 left-14">{m.metamap_underplayed()}</span>
+				<span class="{corner} top-13 right-3">{m.metamap_picks()}</span>
+				<span class="{corner} top-13 left-14">{m.metamap_underplayed()}</span>
 				<span class="{corner} right-3 bottom-13">{m.metamap_overplayed()}</span>
 				<span class="{corner} bottom-13 left-14">{m.metamap_weak()}</span>
 			</div>

@@ -1,86 +1,70 @@
 <script lang="ts">
-	import { LineChart } from 'layerchart';
-	import { percent, type Schemas } from '#lib';
+	import { formatChange, percent, winRateColor, type Schemas } from '#lib';
 	import { ELEMENTS } from '#lib/components/CardBadge.svelte';
-	import * as Chart from '#lib/components/ui/chart/index.js';
+	import Change from '#lib/components/Change.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
-	import ElementLegend from './ElementLegend.svelte';
-	import { rateDomain } from './turns.js';
+	import Sparkline from './Sparkline.svelte';
+	import { fullWeeks, isoDay, monday, spanRange } from './spark.js';
 
 	let { data }: { data: Schemas['HistoryStats'] } = $props();
 
-	type Row = { date: Date; [element: string]: Date | number | null };
-
-	const keys = Object.keys(ELEMENTS);
+	const WEEKS = 8;
 	const day = new Intl.DateTimeFormat(getLocale(), {
 		day: 'numeric',
 		month: 'short',
 		timeZone: 'UTC'
 	});
-	const full = new Intl.DateTimeFormat(getLocale(), { dateStyle: 'medium', timeZone: 'UTC' });
+	const date = (week: string) => day.format(new Date(`${week}T00:00:00Z`));
 
-	const charts = $derived.by(() => {
-		const share: Row[] = [];
-		const rate: Row[] = [];
-		for (const week of new Set(data.weeks.map((w) => w.week))) {
-			const items = data.weeks.filter((w) => w.week === week);
-			const date = new Date(week);
-			const total = items.reduce((n, w) => n + w.games, 0);
-			const find = (key: string) => items.find((w) => w.element === key);
-			share.push({
-				date,
-				...Object.fromEntries(keys.map((k) => [k, (find(k)?.games ?? 0) / total]))
-			});
-			rate.push({ date, ...Object.fromEntries(keys.map((k) => [k, find(k)?.winRate ?? null])) });
-		}
-		const values = rate.flatMap((r) => keys.map((k) => r[k])).filter((v) => typeof v === 'number');
-		return [
-			{ id: 'share', title: m.history_share(), rows: share, domain: undefined },
-			{ id: 'rate', title: m.win_rate(), rows: rate, domain: rateDomain(values) }
-		];
+	const span = $derived(
+		fullWeeks(
+			data.weeks.map((w) => w.week),
+			new Date(),
+			WEEKS
+		)
+	);
+	const table = $derived.by(() => {
+		if (!span) return [];
+		const { recent } = span;
+		const totals = recent.map((week) =>
+			data.weeks.filter((w) => w.week === week).reduce((n, w) => n + w.games, 0)
+		);
+		const starts = new Set(data.versions.map((v) => isoDay(monday(new Date(v.start)))));
+		const ticks = recent.flatMap((week, i) => (starts.has(week) ? [i] : []));
+		return Object.keys(ELEMENTS)
+			.map((key) => {
+				const items = recent.map((week) =>
+					data.weeks.find((w) => w.week === week && w.element === key)
+				);
+				const share = items.map((w, i) => (totals[i] ? (w?.games ?? 0) / totals[i] : null));
+				const rate = items.map((w) => w?.winRate ?? null);
+				const now = items[WEEKS - 1];
+				const before = items[WEEKS - 2];
+				return {
+					key,
+					share,
+					rate,
+					ticks,
+					current: now ? share[WEEKS - 1] : null,
+					winRate: now?.winRate ?? null,
+					shareChange: now && totals[WEEKS - 2] ? share[WEEKS - 1]! - share[WEEKS - 2]! : null,
+					rateChange: now && before ? now.winRate - before.winRate : null
+				};
+			})
+			.sort((a, b) => (b.current ?? -1) - (a.current ?? -1));
 	});
-	const dates = $derived(charts[0].rows.map((r) => r.date));
-	const end = $derived(dates.length ? dates[dates.length - 1].getTime() + 7 * 864e5 : 0);
 
-	let width = $state(0);
-	const step = $derived(Math.ceil(dates.length / Math.max(2, Math.floor((width - 120) / 64))));
-	const series = keys.map((k) => ({ key: k, label: ELEMENTS[k](), color: `var(--el-${k})` }));
-	const config = Object.fromEntries(series.map((s) => [s.key, { label: s.label, color: s.color }]));
-	const chartProps = $derived({
-		xAxis: {
-			ticks: () => dates.filter((_, i) => i % step === 0),
-			format: (v: Date) => day.format(v)
-		},
-		yAxis: { ticks: 4, format: (v: number) => percent(v) },
-		spline: { strokeWidth: 2 }
-	});
-	const starts = $derived(
-		data.versions
-			.map((v) => ({ version: v.version, date: new Date(v.start) }))
-			.filter((v) => dates.length && v.date >= dates[0] && v.date.getTime() < end)
-	);
-	const xDomain = $derived([
-		dates[0],
-		new Date(Math.max(+dates[dates.length - 1], ...starts.map((v) => +v.date)))
-	]);
-	const annotations = $derived(
-		starts.map((v) => ({
-			type: 'line' as const,
-			x: v.date,
-			label: v.version,
-			labelPlacement:
-				+v.date - +xDomain[0] > 0.85 * (+xDomain[1] - +xDomain[0])
-					? ('top-left' as const)
-					: ('top-right' as const),
-			labelXOffset: 4,
-			props: {
-				line: { class: 'stroke-muted-foreground/50! [stroke-dasharray:4_4]' },
-				label: { class: 'fill-muted-foreground' }
-			}
-		}))
-	);
-	const padding = { top: 8, right: 8, bottom: 36, left: 48 };
+	const against = (value: number | null) => {
+		const change = formatChange(value, getLocale());
+		if (!change) return '';
+		const against = m.history_against();
+		return change.sign > 0
+			? m.change_up({ value: change.value, against })
+			: change.sign < 0
+				? m.change_down({ value: change.value, against })
+				: m.change_none({ against });
+	};
 </script>
 
 <section aria-labelledby="history-title">
@@ -91,36 +75,84 @@
 		<p class="text-sm text-muted-foreground">{m.history_text()}</p>
 		<p class="mt-1 eyebrow text-muted-foreground">{m.history_note()}</p>
 	</div>
-	{#if dates.length < 2}
+	{#if !span}
 		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.history_few()}</p>
 	{:else}
-		<ElementLegend />
-		<div class="divide-y" bind:clientWidth={width}>
-			{#each charts as chart (chart.id)}
-				<figure class="grid gap-3 px-(--gutter) py-4">
-					<figcaption class="eyebrow text-muted-foreground">{chart.title}</figcaption>
-					<Chart.Container {config} class="aspect-auto h-60 w-full">
-						<LineChart
-							data={chart.rows}
-							x="date"
-							{series}
-							{padding}
-							{annotations}
-							{xDomain}
-							yDomain={chart.domain}
-							yBaseline={chart.domain ? null : 0}
-							props={chartProps}
-						>
-							{#snippet tooltip()}
-								<Chart.Tooltip
-									labelFormatter={(v: Date) => m.history_week({ date: full.format(v) })}
-									valueFormatter={percent}
-								/>
-							{/snippet}
-						</LineChart>
-					</Chart.Container>
-				</figure>
-			{/each}
+		<div>
+			<table class="w-full text-sm tabular-nums">
+				<caption class="sr-only">{m.history_caption()}</caption>
+				<thead>
+					<tr class="text-left eyebrow text-[10px] text-muted-foreground">
+						<th scope="col" class="py-2 pl-(--gutter) font-medium">{m.history_element()}</th>
+						<th scope="col" class="px-2 py-2 font-medium">{m.history_share()}</th>
+						<th scope="col" class="py-2 pr-(--gutter) pl-2 font-medium">{m.win_rate()}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each table as row (row.key)}
+						<tr class="border-t">
+							<th scope="row" class="py-3 pl-(--gutter) text-left font-normal">
+								<span class="flex items-center gap-2">
+									<img
+										src="/art/ui/element_{row.key}.webp"
+										alt=""
+										aria-hidden="true"
+										decoding="async"
+										class="size-5 shrink-0"
+									/>
+									<span class="whitespace-nowrap">{ELEMENTS[row.key]()}</span>
+								</span>
+							</th>
+							<td class="px-2 py-3">
+								<div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+									<span class="grid min-w-16">
+										<span>{percent(row.current)}</span>
+										{#if row.shareChange != null}
+											<span aria-hidden="true"
+												><Change value={row.shareChange} class="text-xs" /></span
+											>
+											<span class="sr-only">{against(row.shareChange)}</span>
+										{/if}
+									</span>
+									<Sparkline
+										values={row.share}
+										range={spanRange(row.share, 0.02)}
+										ticks={row.ticks}
+										width={96}
+										height={24}
+										color="var(--el-{row.key})"
+									/>
+								</div>
+							</td>
+							<td class="py-3 pr-(--gutter) pl-2">
+								<div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+									<span class="grid min-w-16">
+										<span style:color={winRateColor(row.winRate)}>{percent(row.winRate)}</span>
+										{#if row.rateChange != null}
+											<span aria-hidden="true"
+												><Change value={row.rateChange} color class="text-xs" /></span
+											>
+											<span class="sr-only">{against(row.rateChange)}</span>
+										{/if}
+									</span>
+									<Sparkline
+										values={row.rate}
+										range={spanRange(row.rate, 0.04)}
+										mid={0.5}
+										ticks={row.ticks}
+										width={96}
+										height={24}
+										color="var(--el-{row.key})"
+									/>
+								</div>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
 		</div>
+		<p class="border-t px-(--gutter) py-3 text-sm text-muted-foreground">
+			{m.history_compare({ last: date(span.last), before: date(span.before) })}
+		</p>
 	{/if}
 </section>

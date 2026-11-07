@@ -6,11 +6,9 @@
 	import Counters from './Counters.svelte';
 	import Duos from './Duos.svelte';
 	import History from './History.svelte';
-	import Matchups from './Matchups.svelte';
 	import MetaMap from './MetaMap.svelte';
 	import Overview from './Overview.svelte';
 	import Pace from './Pace.svelte';
-	import Turns from './Turns.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -37,14 +35,10 @@
 
 <MetaMap data={data.stats} {catalog} />
 
-<Matchups data={data.matchups} {catalog} />
-
 <Counters data={data.counters} against={data.against} cards={data.cards} {catalog} />
 
-<Duos data={data.duos} {catalog} />
+<Duos data={data.duos} stats={data.stats} {catalog} />
 
 <Pace data={data.pace} {catalog} />
-
-<Turns data={data.turns} {catalog} />
 
 <History data={data.history} />

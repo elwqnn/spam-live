@@ -1,11 +1,20 @@
 <script lang="ts">
 	import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { Cancel01Icon } from '@hugeicons/core-free-icons';
+	import { Add01Icon, Cancel01Icon, Search01Icon } from '@hugeicons/core-free-icons';
 	import { page } from '$app/state';
-	import { href, percent, queryHref, type Card, type CardMap, type Schemas } from '#lib';
-	import FilterMenu from '#lib/components/FilterMenu.svelte';
-	import { buttonVariants } from '#lib/components/ui/button/index.js';
-	import { toggle, type Filter } from '#lib/filter.js';
+	import {
+		fold,
+		href,
+		percent,
+		queryHref,
+		winRateColor,
+		type Card,
+		type CardMap,
+		type Schemas
+	} from '#lib';
+	import CardThumb from '#lib/components/CardThumb.svelte';
+	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
+	import { toggle } from '#lib/filter.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 
@@ -21,14 +30,16 @@
 	const MAX = 4;
 	const number = new Intl.NumberFormat(getLocale());
 	const name = (id: string) => catalog.get(id)?.name ?? id.slice(0, 8);
-	const pick: Filter = $derived({
-		id: 'against',
-		label: m.counters_pick(),
-		multiple: true,
-		options: cards
-			.map((c) => ({ value: c.id, label: c.name ?? c.id }))
+
+	let dialog = $state<HTMLDialogElement>();
+	let query = $state('');
+	const options = $derived(
+		cards
+			.filter((c) => !against.includes(c.id))
+			.map((c) => ({ card: c, label: c.name ?? c.id, key: fold(c.name ?? c.id) }))
 			.sort((a, b) => a.label.localeCompare(b.label, getLocale()))
-	});
+	);
+	const shown = $derived(options.filter((o) => o.key.includes(fold(query.trim()))));
 </script>
 
 {#snippet avatar(id: string, size: string)}
@@ -51,33 +62,104 @@
 		</h2>
 		<p class="text-sm text-muted-foreground">{m.counters_text({ min: MIN_GAMES })}</p>
 	</div>
-	<div
-		class="flex flex-wrap items-center gap-2 px-(--gutter) pt-2 pb-4"
-		data-sveltekit-reset="false"
-	>
-		<FilterMenu filter={pick} selected={against.length ? against.join(',') : null} />
-		{#each against as id (id)}
-			<a
-				href={queryHref(page.url, { against: toggle(against, id) })}
-				class={buttonVariants({ variant: 'secondary', size: 'sm' })}
-				aria-label={m.counters_remove({ name: name(id) })}
-			>
-				{@render avatar(id, 'size-5')}
-				<span class={[!catalog.has(id) && 'font-mono text-xs']}>{name(id)}</span>
-				<HugeiconsIcon icon={Cancel01Icon} aria-hidden="true" class="size-3.5" />
-			</a>
-		{/each}
+	<div class="grid gap-3 px-(--gutter) pt-2 pb-5" data-sveltekit-reset="false">
+		<ul class="grid max-w-md grid-cols-4 gap-2 pt-[2.2%] pl-[2.2%] sm:gap-3">
+			{#each against as id (id)}
+				<li class="relative">
+					<CardThumb {id} card={catalog.get(id)} />
+					<a
+						href={queryHref(page.url, { against: toggle(against, id) })}
+						aria-label={m.counters_remove({ name: name(id) })}
+						class="absolute -top-2 -right-2 z-1 grid size-6 place-items-center rounded-xs border bg-popover text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2"
+					>
+						<HugeiconsIcon icon={Cancel01Icon} aria-hidden="true" class="size-3.5" />
+					</a>
+				</li>
+			{/each}
+			{#each Array.from({ length: MAX - against.length }, (_, i) => i) as slot (slot)}
+				<li>
+					<button
+						type="button"
+						commandfor="counters-picker"
+						command="show-modal"
+						aria-label={m.counters_add()}
+						class="grid aspect-[1432/2048] w-full place-items-center rounded-xs border border-dashed border-foreground/25 text-muted-foreground transition-colors hover:border-foreground/60 hover:text-foreground focus-visible:border-foreground/60 focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4"
+					>
+						<HugeiconsIcon icon={Add01Icon} aria-hidden="true" class="size-6" />
+					</button>
+				</li>
+			{/each}
+		</ul>
 		{#if against.length}
 			<a
 				href={queryHref(page.url, { against: null })}
-				class={[buttonVariants({ variant: 'ghost', size: 'sm' }), 'text-muted-foreground']}
+				class={[buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-fit text-muted-foreground']}
 				>{m.clear()}</a
 			>
 		{/if}
-		{#if against.length >= MAX}
-			<span class="text-sm text-muted-foreground">{m.counters_max({ max: MAX })}</span>
-		{/if}
 	</div>
+	{#if against.length < MAX}
+		<dialog
+			bind:this={dialog}
+			id="counters-picker"
+			aria-labelledby="counters-picker-title"
+			closedby="any"
+			onclose={() => (query = '')}
+			class="mx-auto mt-0 mb-auto max-h-dvh w-full max-w-full flex-col border-b bg-popover p-0 text-popover-foreground backdrop:bg-black/60 open:flex sm:mt-[12vh] sm:max-h-[min(40rem,76vh)] sm:max-w-2xl sm:border"
+		>
+			<h2
+				id="counters-picker-title"
+				class="px-4 pt-4 pb-2 font-heading text-2xl font-normal tracking-tight"
+			>
+				{m.counters_picker()}
+			</h2>
+			<div class="flex items-center gap-3 border-b pr-2 pl-4">
+				<HugeiconsIcon
+					icon={Search01Icon}
+					aria-hidden="true"
+					class="size-4 shrink-0 text-muted-foreground"
+				/>
+				<input
+					type="search"
+					bind:value={query}
+					aria-label={m.counters_search()}
+					placeholder={m.counters_search()}
+					class="h-12 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+				/>
+				<Button
+					variant="ghost"
+					size="icon-sm"
+					commandfor="counters-picker"
+					command="close"
+					aria-label={m.close()}
+				>
+					<HugeiconsIcon icon={Cancel01Icon} aria-hidden="true" class="size-4" />
+				</Button>
+			</div>
+			<div class="min-h-0 flex-1 overflow-y-auto p-2" data-sveltekit-reset="false">
+				{#if shown.length}
+					<ul class="grid grid-cols-2 gap-1 sm:grid-cols-3">
+						{#each shown as option (option.card.id)}
+							<li>
+								<a
+									href={queryHref(page.url, { against: toggle(against, option.card.id) })}
+									onclick={() => dialog?.close()}
+									class="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
+								>
+									{@render avatar(option.card.id, 'size-7')}
+									<span class="min-w-0 truncate">{option.label}</span>
+								</a>
+							</li>
+						{/each}
+					</ul>
+				{:else}
+					<p class="px-2 py-6 text-center text-sm text-muted-foreground">
+						{m.counters_no_match()}
+					</p>
+				{/if}
+			</div>
+		</dialog>
+	{/if}
 	{#if !data}
 		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.counters_empty()}</p>
 	{:else}
@@ -99,7 +181,9 @@
 								<span class="min-w-0 flex-1 font-mono text-xs">{row.card.slice(0, 8)}</span>
 							{/if}
 							<span class="grid justify-items-end tabular-nums">
-								<span><span class="sr-only">{m.win_rate()}</span> {percent(row.winRate)}</span>
+								<span style:color={winRateColor(row.winRate)}
+									><span class="sr-only">{m.win_rate()}</span> {percent(row.winRate)}</span
+								>
 								<span class="text-xs text-muted-foreground"
 									>{number.format(row.games)} {m.games_unit({ count: row.games })}</span
 								>

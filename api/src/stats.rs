@@ -329,63 +329,11 @@ pub async fn counters(State(s): State<AppState>, Query(q): Query<CountersQuery>)
 }
 
 #[derive(Serialize, ToSchema)]
-pub struct MatchupStats {
-    pub cards: Vec<Uuid>,
-    pub cells: Vec<Matchup>,
-}
-
-#[derive(Serialize, ToSchema, FromRow)]
-#[serde(rename_all = "camelCase")]
-pub struct Matchup {
-    pub card: Uuid,
-    pub opponent: Uuid,
-    pub games: i64,
-    pub wins: i64,
-    pub win_rate: Option<f64>,
-}
-
-async fn top_cards(db: &PgPool, version: Option<&str>) -> Result<Vec<Uuid>, sqlx::Error> {
-    sqlx::query_scalar(
-        "SELECT c.card FROM deck_results r CROSS JOIN LATERAL unnest(r.deck_key) AS c (card)
-         WHERE $1::text IS NULL OR r.app_version = $1
-         GROUP BY c.card ORDER BY count(*) DESC, c.card LIMIT 12",
-    )
-    .bind(version)
-    .fetch_all(db)
-    .await
-}
-
-#[utoipa::path(get, path = "/api/stats/matchups", tag = "stats", params(VersionQuery),
-    responses((status = 200, body = MatchupStats,
-        description = "cards: the 12 most played cards (deck results with the card, then card id). cells: 1 item for \
-            each ordered pair of 2 different cards of cards with 1 game or more. games: the deck results where the deck \
-            has card and the opposing deck has opponent. wins: the part of games where the deck with card won."),
-        (status = 400, body = ErrorBody)))]
-pub async fn matchups(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
-    let version = version(&s, q.version.as_deref())?;
-    let cards = top_cards(&s.db, version.as_deref()).await?;
-    let cells: Vec<Matchup> = sqlx::query_as(
-        "SELECT a.card, b.card AS opponent, count(*) AS games, count(*) FILTER (WHERE r.win) AS wins,
-             win_rate(count(*), count(*) FILTER (WHERE r.win)) AS win_rate
-         FROM deck_results r
-         JOIN deck_results o ON o.game_uid = r.game_uid AND o.deck_key <> r.deck_key
-         CROSS JOIN LATERAL unnest(r.deck_key) AS a (card)
-         CROSS JOIN LATERAL unnest(o.deck_key) AS b (card)
-         WHERE ($1::text IS NULL OR r.app_version = $1) AND a.card = ANY($2) AND b.card = ANY($2) AND a.card <> b.card
-         GROUP BY a.card, b.card ORDER BY a.card, b.card",
-    )
-    .bind(&version)
-    .bind(&cards)
-    .fetch_all(&s.db)
-    .await?;
-    Ok(public(MatchupStats { cards, cells }))
-}
-
-#[derive(Serialize, ToSchema)]
 pub struct PaceStats {
     pub turns: Vec<TurnBucket>,
     pub median: Option<i32>,
-    pub cards: Vec<CardPace>,
+    pub short: Vec<CardPace>,
+    pub long: Vec<CardPace>,
 }
 
 #[derive(Serialize, ToSchema, FromRow)]
@@ -394,26 +342,91 @@ pub struct TurnBucket {
     pub matches: i64,
 }
 
-#[derive(Serialize, ToSchema, FromRow)]
+#[derive(Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CardPace {
     pub card: Uuid,
     pub short_games: i64,
     pub short_wins: i64,
-    pub short_win_rate: Option<f64>,
+    pub short_win_rate: f64,
     pub long_games: i64,
     pub long_wins: i64,
-    pub long_win_rate: Option<f64>,
+    pub long_win_rate: f64,
+    pub gap: f64,
+    pub margin: f64,
+    pub curve: Vec<TurnGroup>,
 }
 
-const PACE_MATCHES: &str = "SELECT DISTINCT r.game_uid, m.turn_count FROM deck_results r
+#[derive(Serialize, ToSchema, FromRow)]
+pub struct TurnGroup {
+    pub start: i32,
+    pub games: i64,
+    pub wins: i64,
+}
+
+#[derive(FromRow)]
+struct PaceRow {
+    card: Uuid,
+    short_games: i64,
+    short_wins: i64,
+    long_games: i64,
+    long_wins: i64,
+}
+
+#[derive(FromRow)]
+struct CardGroup {
+    card: Uuid,
+    start: i32,
+    games: i64,
+    wins: i64,
+}
+
+const PACE_GAMES: i64 = 20;
+const PACE_Z: f64 = 3.29;
+const PACE_LIST: usize = 5;
+
+fn pace_lists(rows: Vec<PaceRow>) -> (Vec<CardPace>, Vec<CardPace>) {
+    let mut cards: Vec<CardPace> = rows
+        .into_iter()
+        .filter(|r| r.short_games >= PACE_GAMES && r.long_games >= PACE_GAMES)
+        .map(|r| {
+            let (n1, n2) = (r.short_games as f64, r.long_games as f64);
+            let (p1, p2) = (r.short_wins as f64 / n1, r.long_wins as f64 / n2);
+            CardPace {
+                card: r.card,
+                short_games: r.short_games,
+                short_wins: r.short_wins,
+                short_win_rate: p1,
+                long_games: r.long_games,
+                long_wins: r.long_wins,
+                long_win_rate: p2,
+                gap: p1 - p2,
+                margin: PACE_Z * (p1 * (1.0 - p1) / n1 + p2 * (1.0 - p2) / n2).sqrt(),
+                curve: Vec::new(),
+            }
+        })
+        .filter(|c| c.gap.abs() > c.margin)
+        .collect();
+    let lead = |c: &CardPace| c.gap.abs() - c.margin;
+    cards.sort_by(|a, b| lead(b).total_cmp(&lead(a)).then(a.card.cmp(&b.card)));
+    let (mut short, mut long): (Vec<_>, Vec<_>) = cards.into_iter().partition(|c| c.gap > 0.0);
+    short.truncate(PACE_LIST);
+    long.truncate(PACE_LIST);
+    (short, long)
+}
+
+const PACE_MATCHES: &str = "SELECT DISTINCT r.game_uid, r.app_version, m.turn_count FROM deck_results r
     JOIN matches m ON m.game_uid = r.game_uid WHERE $1::text IS NULL OR r.app_version = $1";
 
 #[utoipa::path(get, path = "/api/stats/pace", tag = "stats", params(VersionQuery),
     responses((status = 200, body = PaceStats,
-        description = "turns: the match count for each turn count. median: the median turn count \
-            (percentile_disc 0.5), null when there is no match. cards: short is turn count <= median, long is turn \
-            count > median. The win rates are null at 0 games."),
+        description = "turns: the match count for each turn count. median: the median turn count of the version \
+            (percentile_disc 0.5), null for all and when there is no match. A match is short when its turn count is \
+            at most the median of its own version, else long. short and long: at most 5 cards with 20 games or more \
+            in each part whose gap (shortWinRate - longWinRate) is larger than its 99.9 % margin of error (z = 3.29, strict \
+            because about 150 cards are tested at once); short has a \
+            positive gap, long a negative gap, both sorted by |gap| - margin descending, then card. curve: the games \
+            and wins of the card by group of 3 turns (start = t - (t - 1) % 3)."),
         (status = 400, body = ErrorBody)))]
 pub async fn pace(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
@@ -423,92 +436,55 @@ pub async fn pace(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> R
     .bind(&version)
     .fetch_all(&s.db)
     .await?;
-    let median: Option<i32> = sqlx::query_scalar(AssertSqlSafe(format!(
-        "SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY turn_count) FROM ({PACE_MATCHES}) g"
+    let median: Option<i32> = match &version {
+        Some(_) => {
+            sqlx::query_scalar(AssertSqlSafe(format!(
+                "SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY turn_count) FROM ({PACE_MATCHES}) g"
+            )))
+            .bind(&version)
+            .fetch_one(&s.db)
+            .await?
+        }
+        None => None,
+    };
+    let rows: Vec<PaceRow> = sqlx::query_as(AssertSqlSafe(format!(
+        "WITH g AS ({PACE_MATCHES}),
+         v AS (SELECT app_version, percentile_disc(0.5) WITHIN GROUP (ORDER BY turn_count) AS median
+             FROM g GROUP BY app_version),
+         p AS (SELECT g.game_uid, g.turn_count <= v.median AS short FROM g JOIN v USING (app_version))
+         SELECT c.card, count(*) FILTER (WHERE p.short) AS short_games,
+             count(*) FILTER (WHERE p.short AND r.win) AS short_wins,
+             count(*) FILTER (WHERE NOT p.short) AS long_games,
+             count(*) FILTER (WHERE NOT p.short AND r.win) AS long_wins
+         FROM deck_results r JOIN p ON p.game_uid = r.game_uid
+         CROSS JOIN LATERAL unnest(r.deck_key) AS c (card)
+         GROUP BY c.card"
     )))
     .bind(&version)
-    .fetch_one(&s.db)
-    .await?;
-    let cards: Vec<CardPace> = sqlx::query_as(
-        "SELECT card, short_games, short_wins, win_rate(short_games, short_wins) AS short_win_rate,
-             long_games, long_wins, win_rate(long_games, long_wins) AS long_win_rate
-         FROM (
-             SELECT c.card, count(*) FILTER (WHERE m.turn_count <= $2) AS short_games,
-                 count(*) FILTER (WHERE m.turn_count <= $2 AND r.win) AS short_wins,
-                 count(*) FILTER (WHERE m.turn_count > $2) AS long_games,
-                 count(*) FILTER (WHERE m.turn_count > $2 AND r.win) AS long_wins
-             FROM deck_results r JOIN matches m ON m.game_uid = r.game_uid
-             CROSS JOIN LATERAL unnest(r.deck_key) AS c (card)
-             WHERE $1::text IS NULL OR r.app_version = $1
-             GROUP BY c.card
-         ) t
-         ORDER BY short_games + long_games DESC, card",
-    )
-    .bind(&version)
-    .bind(median)
     .fetch_all(&s.db)
     .await?;
-    Ok(public(PaceStats { turns, median, cards }))
-}
-
-#[derive(Serialize, ToSchema)]
-pub struct TurnStats {
-    pub cards: Vec<CardTurns>,
-}
-
-#[derive(Serialize, ToSchema)]
-pub struct CardTurns {
-    pub card: Uuid,
-    pub turns: Vec<TurnResult>,
-}
-
-#[derive(Serialize, ToSchema)]
-pub struct TurnResult {
-    pub turns: i32,
-    pub games: i64,
-    pub wins: i64,
-}
-
-#[derive(FromRow)]
-struct CardTurn {
-    card: Uuid,
-    turns: i32,
-    games: i64,
-    wins: i64,
-}
-
-#[utoipa::path(get, path = "/api/stats/turns", tag = "stats", params(VersionQuery),
-    responses((status = 200, body = TurnStats,
-        description = "cards: the 12 most played cards, in the matchups order. turns: 1 item for each match turn count \
-            with 1 game or more for the card, sorted by turns. games: the deck results with the card in matches with \
-            this turn count. wins: the part of games that the deck won."),
-        (status = 400, body = ErrorBody)))]
-pub async fn turns(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
-    let version = version(&s, q.version.as_deref())?;
-    let cards = top_cards(&s.db, version.as_deref()).await?;
-    let rows: Vec<CardTurn> = sqlx::query_as(
-        "SELECT c.card, m.turn_count AS turns, count(*) AS games, count(*) FILTER (WHERE r.win) AS wins
+    let (mut short, mut long) = pace_lists(rows);
+    let listed: Vec<Uuid> = short.iter().chain(&long).map(|c| c.card).collect();
+    let groups: Vec<CardGroup> = sqlx::query_as(
+        "SELECT c.card, m.turn_count - (m.turn_count - 1) % 3 AS start, count(*) AS games,
+             count(*) FILTER (WHERE r.win) AS wins
          FROM deck_results r JOIN matches m ON m.game_uid = r.game_uid
          CROSS JOIN LATERAL unnest(r.deck_key) AS c (card)
          WHERE ($1::text IS NULL OR r.app_version = $1) AND c.card = ANY($2)
-         GROUP BY c.card, m.turn_count ORDER BY m.turn_count",
+         GROUP BY 1, 2 ORDER BY 2",
     )
     .bind(&version)
-    .bind(&cards)
+    .bind(&listed)
     .fetch_all(&s.db)
     .await?;
-    let cards = cards
-        .into_iter()
-        .map(|card| CardTurns {
-            card,
-            turns: rows
-                .iter()
-                .filter(|r| r.card == card)
-                .map(|r| TurnResult { turns: r.turns, games: r.games, wins: r.wins })
-                .collect(),
-        })
-        .collect();
-    Ok(public(TurnStats { cards }))
+    for card in short.iter_mut().chain(long.iter_mut()) {
+        card.curve = groups
+            .iter()
+            .filter(|g| g.card == card.card)
+            .map(|g| TurnGroup { start: g.start, games: g.games, wins: g.wins })
+            .collect();
+    }
+    Ok(public(PaceStats { turns, median, short, long }))
 }
 
 #[derive(Serialize, ToSchema)]
@@ -590,8 +566,6 @@ pub fn routes() -> Router<AppState> {
         .route("/api/stats/overview", get(overview))
         .route("/api/stats/duos", get(duos))
         .route("/api/stats/counters", get(counters))
-        .route("/api/stats/matchups", get(matchups))
         .route("/api/stats/pace", get(pace))
-        .route("/api/stats/turns", get(turns))
         .route("/api/stats/history", get(history))
 }
