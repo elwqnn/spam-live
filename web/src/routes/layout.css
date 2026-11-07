@@ -287,6 +287,11 @@
 	@apply px-(--gutter) py-8;
 }
 
+@utility band {
+	height: 1.25rem;
+	background: repeating-linear-gradient(-45deg, var(--border) 0 1px, transparent 1px 7px);
+}
+
 @utility section-head {
 	@apply px-(--gutter) pt-8 pb-2;
 }

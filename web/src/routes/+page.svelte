@@ -164,6 +164,8 @@
 	{/if}
 </section>
 
+<div class="band" aria-hidden="true"></div>
+
 <section>
 	<div class="flex flex-wrap items-center gap-4 section-head">
 		{@render heading(m.home_recent_decks())}
