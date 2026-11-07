@@ -127,7 +127,7 @@
 	aria-labelledby="tiers-banner"
 	class="flex flex-wrap items-center gap-x-8 gap-y-3 px-(--gutter) py-4 hatch"
 >
-	<div class="grid gap-0.5">
+	<div class="-mx-3 -my-1.5 grid gap-0.5 bg-background px-3 py-1.5">
 		<h2 id="tiers-banner" class="font-heading text-xl font-normal tracking-tight">
 			{m.tiers_title()}
 		</h2>
@@ -157,7 +157,7 @@
 		</div>
 	{/if}
 	<a
-		class={[buttonVariants({ variant: 'outline', size: 'sm' }), 'ml-auto']}
+		class={[buttonVariants({ variant: 'outline', size: 'sm' }), 'ml-auto bg-background']}
 		href={href('/stats?tab=tiers')}
 		>{m.tiers_banner_link()}
 		<HugeiconsIcon icon={ArrowRight02Icon} aria-hidden="true" /></a

@@ -115,23 +115,24 @@ pub enum Tier {
 }
 
 const TIER_K: f64 = 30.0;
-const TIER_MIN_GAMES: i64 = 20;
-const TIER_MIN_CARDS: usize = 5;
 const TIER_CUTS: (f64, f64) = (1.5, 0.5);
+
+fn adjusted(games: i64, wins: i64) -> f64 {
+    (wins as f64 + TIER_K * 0.5) / (games as f64 + TIER_K)
+}
 
 pub fn rank(cards: &mut [CardStats]) {
     for c in cards.iter_mut() {
-        c.adjusted_win_rate = (c.games > 0).then(|| (c.wins as f64 + TIER_K * 0.5) / (c.games as f64 + TIER_K));
+        c.adjusted_win_rate = (c.games > 0).then(|| adjusted(c.games, c.wins));
     }
-    let ranked = |c: &CardStats| c.adjusted_win_rate.filter(|_| c.games >= TIER_MIN_GAMES);
-    let adj: Vec<f64> = cards.iter().filter_map(ranked).collect();
+    let adj: Vec<f64> = cards.iter().filter_map(|c| c.adjusted_win_rate).collect();
     let n = adj.len() as f64;
     let mu = adj.iter().sum::<f64>() / n;
     let sigma = (adj.iter().map(|x| (x - mu).powi(2)).sum::<f64>() / n).sqrt();
-    let flat = adj.len() < TIER_MIN_CARDS || adj.iter().all(|&x| x == adj[0]);
+    let flat = adj.iter().all(|&x| x == adj[0]);
     let (s, a) = TIER_CUTS;
     for c in cards.iter_mut() {
-        c.tier = ranked(c).map(|x| match (x - mu) / sigma {
+        c.tier = c.adjusted_win_rate.map(|x| match (x - mu) / sigma {
             _ if flat => Tier::B,
             z if z >= s => Tier::S,
             z if z >= a => Tier::A,
@@ -176,7 +177,8 @@ pub async fn deck_stats(State(s): State<AppState>, Query(q): Query<DeckStatsQuer
             selected version and B is the catalog version before it. The changes are null when A or B has 0 games, \
             and in version mode for all, for the oldest version and for a version that is not in the catalog. \
             adjustedWinRate = (wins + 15) / (games + 30), null at 0 games. tier: S to D from the z-score of \
-            adjustedWinRate over the cards with 20 games or more, null for the other cards."),
+            adjustedWinRate over all the cards with 1 game or more, B for all when all adjustedWinRate values are \
+            equal, null at 0 games."),
         (status = 400, body = ErrorBody)))]
 pub async fn card_stats(State(s): State<AppState>, Query(q): Query<CardStatsQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
@@ -279,8 +281,8 @@ pub struct Duo {
 
 #[utoipa::path(get, path = "/api/stats/duos", tag = "stats", params(VersionQuery),
     responses((status = 200, body = Vec<Duo>,
-        description = "Pairs of 2 different cards in the same deck result (cards sorted), with 20 games or more in \
-            2 different decks or more. Sorted by winScore, winRate and games, descending, then the cards. At most 24."),
+        description = "Pairs of 2 different cards in the same deck result (cards sorted), with any number of games. \
+            Sorted by winScore, winRate and games, descending, then the cards. At most 24."),
         (status = 400, body = ErrorBody)))]
 pub async fn duos(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
@@ -292,7 +294,7 @@ pub async fn duos(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> R
          CROSS JOIN LATERAL unnest(r.deck_key) AS a (card)
          CROSS JOIN LATERAL unnest(r.deck_key) AS b (card)
          WHERE ($1::text IS NULL OR r.app_version = $1) AND a.card < b.card
-         GROUP BY a.card, b.card HAVING count(*) >= 20 AND count(DISTINCT r.deck_key) >= 2
+         GROUP BY a.card, b.card
          ORDER BY win_score DESC, win_rate DESC, games DESC, a.card, b.card LIMIT 24",
     )
     .bind(&version)
@@ -341,8 +343,8 @@ fn against(v: Option<&str>) -> Result<Vec<Uuid>, ApiError> {
 #[utoipa::path(get, path = "/api/stats/counters", tag = "stats", params(CountersQuery),
     responses((status = 200, body = Counters,
         description = "Targets: the deck results whose deck has all the against cards. games: the count of targets. \
-            cards: each card of the opposing deck that is not in against, with 10 games or more. wins: the games that \
-            the opposing deck won. Sorted by winScore, winRate and games, descending, then card. At most 24."),
+            cards: each card of the opposing deck that is not in against, with any number of games. wins: the games \
+            that the opposing deck won. Sorted by winScore, winRate and games, descending, then card. At most 24."),
         (status = 400, body = ErrorBody)))]
 pub async fn counters(State(s): State<AppState>, Query(q): Query<CountersQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
@@ -362,7 +364,7 @@ pub async fn counters(State(s): State<AppState>, Query(q): Query<CountersQuery>)
          JOIN deck_results o ON o.game_uid = r.game_uid AND o.deck_key <> r.deck_key
          CROSS JOIN LATERAL unnest(o.deck_key) AS c (card)
          WHERE ($1::text IS NULL OR r.app_version = $1) AND r.deck_key @> $2 AND NOT c.card = ANY($2)
-         GROUP BY c.card HAVING count(*) >= 10
+         GROUP BY c.card
          ORDER BY win_score DESC, win_rate DESC, games DESC, c.card LIMIT 24",
     )
     .bind(&version)
@@ -397,7 +399,6 @@ pub struct CardPace {
     pub long_wins: i64,
     pub long_win_rate: f64,
     pub gap: f64,
-    pub margin: f64,
     pub curve: Vec<TurnGroup>,
 }
 
@@ -425,14 +426,12 @@ struct CardGroup {
     wins: i64,
 }
 
-const PACE_GAMES: i64 = 20;
-const PACE_Z: f64 = 3.29;
 const PACE_LIST: usize = 10;
 
 fn pace_lists(rows: Vec<PaceRow>) -> (Vec<CardPace>, Vec<CardPace>) {
     let mut cards: Vec<CardPace> = rows
         .into_iter()
-        .filter(|r| r.short_games >= PACE_GAMES && r.long_games >= PACE_GAMES)
+        .filter(|r| r.short_games > 0 && r.long_games > 0)
         .map(|r| {
             let (n1, n2) = (r.short_games as f64, r.long_games as f64);
             let (p1, p2) = (r.short_wins as f64 / n1, r.long_wins as f64 / n2);
@@ -445,13 +444,13 @@ fn pace_lists(rows: Vec<PaceRow>) -> (Vec<CardPace>, Vec<CardPace>) {
                 long_wins: r.long_wins,
                 long_win_rate: p2,
                 gap: p1 - p2,
-                margin: PACE_Z * (p1 * (1.0 - p1) / n1 + p2 * (1.0 - p2) / n2).sqrt(),
                 curve: Vec::new(),
             }
         })
-        .filter(|c| c.gap.abs() > c.margin)
+        .filter(|c| c.gap != 0.0)
         .collect();
-    let lead = |c: &CardPace| c.gap.abs() - c.margin;
+    let lead =
+        |c: &CardPace| c.gap.signum() * (adjusted(c.short_games, c.short_wins) - adjusted(c.long_games, c.long_wins));
     cards.sort_by(|a, b| lead(b).total_cmp(&lead(a)).then(a.card.cmp(&b.card)));
     let (mut short, mut long): (Vec<_>, Vec<_>) = cards.into_iter().partition(|c| c.gap > 0.0);
     short.truncate(PACE_LIST);
@@ -466,10 +465,10 @@ const PACE_MATCHES: &str = "SELECT DISTINCT r.game_uid, r.app_version, m.turn_co
     responses((status = 200, body = PaceStats,
         description = "turns: the match count for each turn count. median: the median turn count of the version \
             (percentile_disc 0.5), null for all and when there is no match. A match is short when its turn count is \
-            at most the median of its own version, else long. short and long: at most 10 cards with 20 games or more \
-            in each part whose gap (shortWinRate - longWinRate) is larger than its 99.9 % margin of error (z = 3.29, strict \
-            because about 150 cards are tested at once); short has a \
-            positive gap, long a negative gap, both sorted by |gap| - margin descending, then card. curve: the games \
+            at most the median of its own version, else long. short and long: at most 10 cards with 1 game or more in \
+            each part. short has a positive gap (shortWinRate - longWinRate), long a negative gap. Both are sorted by the \
+            gap of the adjusted win rates ((wins + 15) / (games + 30)) in the direction of the list, descending, then \
+            card. curve: the games \
             and wins of the card by group of 3 turns (start = t - (t - 1) % 3)."),
         (status = 400, body = ErrorBody)))]
 pub async fn pace(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {

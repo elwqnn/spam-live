@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { ArrowRight01Icon } from '@hugeicons/core-free-icons';
 	import { href, percent, winRateColor, type CardMap, type Schemas } from '#lib';
 	import { cardPreview } from '#lib/components/CardPreview.svelte';
 	import { TONES } from '#lib/components/TierBadge.svelte';
@@ -9,9 +7,7 @@
 
 	let { data, catalog }: { data: Schemas['CardStats'][]; catalog: CardMap } = $props();
 
-	const MIN_GAMES = 20;
 	const tiers = $derived(TIERS.map((tier) => ({ tier, cards: tierCards(data, tier) })));
-	const unranked = $derived(data.filter((s) => !s.tier));
 </script>
 
 {#snippet avatars(cards: Schemas['CardStats'][])}
@@ -51,9 +47,9 @@
 		<h2 id="tiers-title" class="font-heading text-2xl font-normal tracking-tight">
 			{m.tiers_title()}
 		</h2>
-		<p class="text-sm text-muted-foreground">{m.tiers_text({ min: MIN_GAMES })}</p>
+		<p class="text-sm text-muted-foreground">{m.tiers_text()}</p>
 	</div>
-	{#if unranked.length < data.length}
+	{#if data.length}
 		<ol class="divide-y">
 			{#each tiers as { tier, cards } (tier)}
 				<li class="flex min-h-20">
@@ -73,24 +69,6 @@
 			{/each}
 		</ol>
 	{:else}
-		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">
-			{m.tiers_none({ min: MIN_GAMES })}
-		</p>
-	{/if}
-	{#if unranked.length}
-		<details class="group border-t">
-			<summary
-				class="flex cursor-pointer list-none items-center gap-2 px-(--gutter) py-3 text-sm [&::-webkit-details-marker]:hidden"
-			>
-				<HugeiconsIcon
-					icon={ArrowRight01Icon}
-					aria-hidden="true"
-					class="size-4 text-muted-foreground transition-transform group-open:rotate-90 motion-reduce:transition-none"
-				/>
-				{m.tiers_unranked()}
-				<span class="text-muted-foreground tabular-nums">{unranked.length}</span>
-			</summary>
-			<div class="px-(--gutter) pt-1 pb-4">{@render avatars(unranked)}</div>
-		</details>
+		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.no_stats()}</p>
 	{/if}
 </section>

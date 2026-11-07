@@ -12,8 +12,6 @@
 
 	let { data, catalog }: { data: Schemas['PaceStats']; catalog: CardMap } = $props();
 
-	const MIN_GAMES = 20;
-	const POINT_GAMES = 10;
 	const number = new Intl.NumberFormat(getLocale());
 
 	const rows = $derived.by(() => {
@@ -93,10 +91,7 @@
 						<div class="grid gap-1">
 							<div class="flex items-center gap-1">
 								<h3 class="font-medium">{list.title}</h3>
-								<Tooltip
-									content={m.pace_info({ min: MIN_GAMES })}
-									class="max-w-72 p-3 text-sm leading-6"
-								>
+								<Tooltip content={m.pace_info()} class="max-w-72 p-3 text-sm leading-6">
 									{#snippet children(tip)}
 										<button
 											type="button"
@@ -122,7 +117,7 @@
 								class="mt-1 text-sm text-muted-foreground"
 								hidden={!open[list.id]}
 							>
-								{m.pace_info({ min: MIN_GAMES })}
+								{m.pace_info()}
 							</p>
 						</div>
 						{#if list.cards.length}
@@ -204,7 +199,7 @@
 													></span>
 												</span>
 												<Sparkline
-													values={curveRates(row.curve, POINT_GAMES)}
+													values={curveRates(row.curve)}
 													range={[0.2, 0.8]}
 													mid={0.5}
 													class="text-muted-foreground"

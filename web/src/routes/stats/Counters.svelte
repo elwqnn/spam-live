@@ -26,7 +26,6 @@
 	}: { data: Schemas['Counters'] | null; against: string[]; cards: Card[]; catalog: CardMap } =
 		$props();
 
-	const MIN_GAMES = 10;
 	const MAX = 4;
 	const number = new Intl.NumberFormat(getLocale());
 	const name = (id: string) => catalog.get(id)?.name ?? id.slice(0, 8);
@@ -60,7 +59,7 @@
 		<h2 id="counters-title" class="font-heading text-2xl font-normal tracking-tight">
 			{m.counters_title()}
 		</h2>
-		<p class="text-sm text-muted-foreground">{m.counters_text({ min: MIN_GAMES })}</p>
+		<p class="text-sm text-muted-foreground">{m.counters_text()}</p>
 	</div>
 	<div class="grid gap-3 px-(--gutter) pt-2 pb-5" data-sveltekit-reset="false">
 		<ul class="grid max-w-md grid-cols-4 gap-2 pt-[2.2%] pl-[2.2%] sm:gap-3">
@@ -193,9 +192,7 @@
 				</ul>
 			</div>
 		{:else}
-			<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">
-				{m.counters_none({ min: MIN_GAMES })}
-			</p>
+			<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.counters_none()}</p>
 		{/if}
 	{/if}
 </section>

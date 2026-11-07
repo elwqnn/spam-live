@@ -889,8 +889,6 @@ export interface components {
             longWinRate: number;
             /** Format: int64 */
             longWins: number;
-            /** Format: double */
-            margin: number;
             /** Format: int64 */
             shortGames: number;
             /** Format: double */
@@ -2455,7 +2453,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description For each card of the opposing decks (not a card of this deck) with 10 games or more: games, and wins of the deck key of this deck. The same order and limits as the card matchups. A draft is visible only to its author and is not cached. */
+            /** @description For each card of the opposing decks (not a card of this deck) with 1 game or more: games, and wins of the deck key of this deck. The same order and limits as the card matchups. A draft is visible only to its author and is not cached. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3218,7 +3216,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description playRate = deck results with the card / all deck results. winRate is null at 0 games. winRateChange and playRateChange = period A - period B, as fractions. trend week (default): A is the last 7 days and B is the 7 days before, on the match end time, in the selected version. trend version: A is the selected version and B is the catalog version before it. The changes are null when A or B has 0 games, and in version mode for all, for the oldest version and for a version that is not in the catalog. adjustedWinRate = (wins + 15) / (games + 30), null at 0 games. tier: S to D from the z-score of adjustedWinRate over the cards with 20 games or more, null for the other cards. */
+            /** @description playRate = deck results with the card / all deck results. winRate is null at 0 games. winRateChange and playRateChange = period A - period B, as fractions. trend week (default): A is the last 7 days and B is the 7 days before, on the match end time, in the selected version. trend version: A is the selected version and B is the catalog version before it. The changes are null when A or B has 0 games, and in version mode for all, for the oldest version and for a version that is not in the catalog. adjustedWinRate = (wins + 15) / (games + 30), null at 0 games. tier: S to D from the z-score of adjustedWinRate over all the cards with 1 game or more, B for all when all adjustedWinRate values are equal, null at 0 games. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3252,7 +3250,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description For each card of the opposing decks (not this card) with 10 games or more: games, and wins of the deck with this card. strong: winRate above 0.5, sorted by the Wilson lower bound of the wins; weak: winRate below 0.5, sorted by the Wilson lower bound of the losses; then games descending and card. At most 5 each. */
+            /** @description For each card of the opposing decks (not this card) with 1 game or more: games, and wins of the deck with this card. strong: winRate above 0.5, sorted by the Wilson lower bound of the wins; weak: winRate below 0.5, sorted by the Wilson lower bound of the losses; then games descending and card. At most 5 each. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3293,7 +3291,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Targets: the deck results whose deck has all the against cards. games: the count of targets. cards: each card of the opposing deck that is not in against, with 10 games or more. wins: the games that the opposing deck won. Sorted by winScore, winRate and games, descending, then card. At most 24. */
+            /** @description Targets: the deck results whose deck has all the against cards. games: the count of targets. cards: each card of the opposing deck that is not in against, with any number of games. wins: the games that the opposing deck won. Sorted by winScore, winRate and games, descending, then card. At most 24. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3357,7 +3355,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Pairs of 2 different cards in the same deck result (cards sorted), with 20 games or more in 2 different decks or more. Sorted by winScore, winRate and games, descending, then the cards. At most 24. */
+            /** @description Pairs of 2 different cards in the same deck result (cards sorted), with any number of games. Sorted by winScore, winRate and games, descending, then the cards. At most 24. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3439,7 +3437,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description turns: the match count for each turn count. median: the median turn count of the version (percentile_disc 0.5), null for all and when there is no match. A match is short when its turn count is at most the median of its own version, else long. short and long: at most 10 cards with 20 games or more in each part whose gap (shortWinRate - longWinRate) is larger than its 99.9 % margin of error (z = 3.29, strict because about 150 cards are tested at once); short has a positive gap, long a negative gap, both sorted by |gap| - margin descending, then card. curve: the games and wins of the card by group of 3 turns (start = t - (t - 1) % 3). */
+            /** @description turns: the match count for each turn count. median: the median turn count of the version (percentile_disc 0.5), null for all and when there is no match. A match is short when its turn count is at most the median of its own version, else long. short and long: at most 10 cards with 1 game or more in each part. short has a positive gap (shortWinRate - longWinRate), long a negative gap. Both are sorted by the gap of the adjusted win rates ((wins + 15) / (games + 30)) in the direction of the list, descending, then card. curve: the games and wins of the card by group of 3 turns (start = t - (t - 1) % 3). */
             200: {
                 headers: {
                     [name: string]: unknown;

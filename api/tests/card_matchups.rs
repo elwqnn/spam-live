@@ -76,6 +76,8 @@ async fn card_matchups(pool: PgPool) {
     record(&pool, n, "1.29", 22, 10, 40).await;
     record(&pool, n, "1.29", 23, 1, 9).await;
     record(&pool, n, "1.29", 24, 0, 9).await;
+    record(&pool, n, "1.29", 17, 1, 0).await;
+    record(&pool, n, "1.29", 27, 0, 1).await;
     record(&pool, n, "1.28.1", 16, 10, 0).await;
     record(&pool, n, "1.28.1", 26, 0, 10).await;
 
@@ -83,8 +85,8 @@ async fn card_matchups(pool: PgPool) {
     assert_eq!(res.status, StatusCode::OK);
     assert_eq!(res.headers["cache-control"], "public, max-age=300");
     let latest = json!({
-        "strong": [item(11, 12, 12), item(12, 50, 40), item(13, 10, 9)],
-        "weak": [item(21, 12, 0), item(22, 50, 10), item(23, 10, 1)]
+        "strong": [item(11, 12, 12), item(14, 9, 9), item(12, 50, 40), item(13, 10, 9), item(17, 1, 1)],
+        "weak": [item(21, 12, 0), item(24, 9, 0), item(22, 50, 10), item(23, 10, 1), item(27, 1, 0)]
     });
     assert_eq!(res.body, latest);
     assert_eq!(send(&app, get(&url(me(), "?version=1.29"), "")).await.body, latest);
@@ -92,8 +94,10 @@ async fn card_matchups(pool: PgPool) {
     let score = async |games: i64, wins: i64| -> f64 {
         sqlx::query_scalar("SELECT win_score($1, $2)").bind(games).bind(wins).fetch_one(&pool).await.unwrap()
     };
-    assert!(score(12, 12).await > score(50, 40).await);
+    assert!(score(12, 12).await > score(9, 9).await);
+    assert!(score(9, 9).await > score(50, 40).await);
     assert!(score(50, 40).await > score(10, 9).await);
+    assert!(score(10, 9).await > score(1, 1).await);
 
     assert_eq!(
         send(&app, get(&url(me(), "?version=1.28.1"), "")).await.body,
@@ -102,8 +106,8 @@ async fn card_matchups(pool: PgPool) {
     assert_eq!(
         send(&app, get(&url(me(), "?version=all"), "")).await.body,
         json!({
-            "strong": [item(11, 12, 12), item(16, 10, 10), item(12, 50, 40), item(13, 10, 9)],
-            "weak": [item(21, 12, 0), item(26, 10, 0), item(22, 50, 10), item(23, 10, 1)]
+            "strong": [item(11, 12, 12), item(16, 10, 10), item(14, 9, 9), item(12, 50, 40), item(13, 10, 9)],
+            "weak": [item(21, 12, 0), item(26, 10, 0), item(24, 9, 0), item(22, 50, 10), item(23, 10, 1)]
         })
     );
     assert_eq!(send(&app, get(&url(me(), "?version=9.9.9"), "")).await.body, json!({ "strong": [], "weak": [] }));

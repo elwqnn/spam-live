@@ -35,7 +35,6 @@
 		keywords: Schemas['Term'][];
 	} = $props();
 
-	const MIN_GAMES = 10;
 	const resistances = $derived(Object.entries(card.resistances));
 	const version = $derived(page.url.searchParams.get('version'));
 	const tierHref = $derived(
@@ -215,7 +214,7 @@
 			{@render matchupList(m.strong_against(), matchups.strong)}
 			{@render matchupList(m.weak_against(), matchups.weak)}
 		</div>
-		<p class="text-xs text-muted-foreground">{m.card_matchups_text({ min: MIN_GAMES })}</p>
+		<p class="text-xs text-muted-foreground">{m.card_matchups_text()}</p>
 	</section>
 
 	<section class="grid gap-6 row lg:grid-cols-2">

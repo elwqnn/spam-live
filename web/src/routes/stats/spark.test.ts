@@ -32,14 +32,15 @@ describe('sparkPath', () => {
 });
 
 describe('curveRates', () => {
-	it('fills missing groups and hides small groups', () => {
+	it('fills missing groups, keeps small groups and gives null at 0 games', () => {
 		const curve = [
 			{ start: 4, games: 20, wins: 10 },
 			{ start: 10, games: 9, wins: 9 },
-			{ start: 13, games: 10, wins: 3 }
+			{ start: 13, games: 10, wins: 3 },
+			{ start: 16, games: 0, wins: 0 }
 		];
-		expect(curveRates(curve, 10)).toEqual([0.5, null, null, 0.3]);
-		expect(curveRates([], 10)).toEqual([]);
+		expect(curveRates(curve)).toEqual([0.5, null, 1, 0.3, null]);
+		expect(curveRates([])).toEqual([]);
 	});
 });
 

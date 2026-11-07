@@ -12,8 +12,6 @@ use uuid::Uuid;
 
 use crate::{ApiError, AppState, ErrorBody, auth::CurrentUser, catalog::parse_version, public, stats::VersionQuery};
 
-const MIN_GAMES: i64 = 10;
-
 #[derive(Serialize, ToSchema)]
 pub struct CardMatchups {
     pub strong: Vec<CardMatchup>,
@@ -48,7 +46,7 @@ fn version(s: &AppState, v: Option<&str>) -> Result<Option<String>, ApiError> {
 #[utoipa::path(get, path = "/api/stats/cards/{id}/matchups", tag = "stats",
     params(("id" = Uuid, Path, description = "Card UUID"), VersionQuery),
     responses((status = 200, body = CardMatchups,
-        description = "For each card of the opposing decks (not this card) with 10 games or more: games, and wins of \
+        description = "For each card of the opposing decks (not this card) with 1 game or more: games, and wins of \
             the deck with this card. strong: winRate above 0.5, sorted by the Wilson lower bound of the wins; weak: \
             winRate below 0.5, sorted by the Wilson lower bound of the losses; then games descending and card. At \
             most 5 each."),
@@ -68,7 +66,7 @@ pub async fn card_matchups(
 #[utoipa::path(get, path = "/api/decks/{id}/matchups", tag = "decks",
     params(("id" = i64, Path, description = "Deck ID"), VersionQuery),
     responses((status = 200, body = CardMatchups,
-        description = "For each card of the opposing decks (not a card of this deck) with 10 games or more: games, and \
+        description = "For each card of the opposing decks (not a card of this deck) with 1 game or more: games, and \
             wins of the deck key of this deck. The same order and limits as the card matchups. A draft is visible only \
             to its author and is not cached."),
         (status = 400, body = ErrorBody), (status = 404, body = ErrorBody)))]
@@ -99,7 +97,7 @@ async fn matchups(s: &AppState, version: Option<String>, mine: &str, cards: &[Uu
              JOIN deck_results o ON o.game_uid = r.game_uid AND o.deck_key <> r.deck_key
              CROSS JOIN LATERAL unnest(o.deck_key) AS c (card)
              WHERE ($1::text IS NULL OR r.app_version = $1) AND {mine} AND c.card <> ALL($2)
-             GROUP BY c.card HAVING count(*) >= $3
+             GROUP BY c.card
          ),
          t AS (
              SELECT card, games, wins, win_rate(games, wins) AS win_rate, win_rate(games, wins) > 0.5 AS strong
@@ -114,7 +112,6 @@ async fn matchups(s: &AppState, version: Option<String>, mine: &str, cards: &[Uu
     )))
     .bind(&version)
     .bind(cards)
-    .bind(MIN_GAMES)
     .fetch_all(&s.db)
     .await?;
     let (strong, weak): (Vec<Row>, Vec<Row>) = rows.into_iter().partition(|r| r.strong);

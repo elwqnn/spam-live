@@ -10,7 +10,6 @@
 		catalog
 	}: { data: Schemas['Duo'][]; stats: Schemas['CardStats'][]; catalog: CardMap } = $props();
 
-	const MIN_GAMES = 20;
 	const number = new Intl.NumberFormat(getLocale());
 	const points = new Intl.NumberFormat(getLocale(), {
 		minimumFractionDigits: 1,
@@ -42,7 +41,7 @@
 		<h2 id="duos-title" class="font-heading text-2xl font-normal tracking-tight">
 			{m.duos_title()}
 		</h2>
-		<p class="text-sm text-muted-foreground">{m.duos_text({ min: MIN_GAMES })}</p>
+		<p class="text-sm text-muted-foreground">{m.duos_text()}</p>
 	</div>
 	{#if data.length}
 		<div>
@@ -120,8 +119,6 @@
 			</ol>
 		</div>
 	{:else}
-		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">
-			{m.duos_none({ min: MIN_GAMES })}
-		</p>
+		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.no_stats()}</p>
 	{/if}
 </section>

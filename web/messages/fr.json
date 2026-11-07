@@ -429,7 +429,7 @@
 	"privacy_store_app_presence": "L'application de bureau informe le serveur quand elle s'ouvre, toutes les 10 minutes pendant qu'elle tourne, et quand elle se ferme, avec son numéro de version.",
 	"privacy_store_upload_source": "Nous enregistrons si un envoi de matchs vient du site ou de l'application de bureau.",
 	"pace_title": "Durée des parties",
-	"pace_text": "La durée des matchs en tours, et les cartes dont les decks gagnent nettement plus souvent les matchs courts ou les matchs longs.",
+	"pace_text": "La durée des matchs en tours, et les cartes dont les decks gagnent plus souvent les matchs courts ou les matchs longs.",
 	"pace_turns": "Tours",
 	"pace_matches": "Matchs",
 	"pace_turns_n": [
@@ -476,7 +476,7 @@
 	],
 	"pace_short_rate": "Courtes",
 	"pace_long_rate": "Longues",
-	"pace_few": "Aucune carte n'a encore de différence nette.",
+	"pace_few": "Aucune carte pour l'instant.",
 	"history_title": "La méta dans le temps",
 	"history_text": "La part de jeu et le taux de victoire de chaque élément pendant la dernière semaine complète, l'évolution par rapport à la semaine précédente, et au plus les 12 dernières semaines complètes. La part de jeu est la part des emplacements de carte occupés par l'élément.",
 	"history_share": "Part de jeu",
@@ -499,25 +499,15 @@
 		}
 	],
 	"metamap_title": "Paysage de la méta",
-	"metamap_text": "Chaque point est une carte : à quelle fréquence les decks la jouent, et à quelle fréquence ces decks gagnent. Seules les cartes avec au moins {min} parties.",
+	"metamap_text": "Chaque point est une carte : à quelle fréquence les decks la jouent, et à quelle fréquence ces decks gagnent. Une carte avec peu de parties peut avoir un taux de victoire extrême.",
 	"metamap_label": "Graphique des cartes : taux de jeu de gauche à droite, taux de victoire de bas en haut.",
 	"metamap_list": "Les mêmes valeurs sont dans la liste des cartes.",
-	"metamap_hidden": [
-		{
-			"declarations": ["input count", "input min", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} carte avec moins de {min} parties n'apparaît pas sur le graphique.",
-				"countPlural=*": "{count} cartes avec moins de {min} parties n'apparaissent pas sur le graphique."
-			}
-		}
-	],
 	"metamap_picks": "Piliers de la méta",
 	"metamap_underplayed": "Sous-estimées",
 	"metamap_overplayed": "Surjouées",
 	"metamap_weak": "Rares et faibles",
 	"counters_title": "Que jouer contre ces cartes",
-	"counters_text": "Choisissez de 1 à 4 cartes. La liste montre les cartes qui gagnent le plus souvent contre les decks qui les contiennent toutes. Une carte doit avoir {min} parties.",
+	"counters_text": "Choisissez de 1 à 4 cartes. La liste montre les cartes qui gagnent le plus souvent contre les decks qui les contiennent toutes.",
 	"counters_remove": "Retirer {name}",
 	"counters_empty": "Choisissez 1 carte ou plus pour voir ce qui les bat.",
 	"counters_games": [
@@ -530,10 +520,9 @@
 			}
 		}
 	],
-	"counters_none": "Aucune carte n'a encore {min} parties contre elles.",
+	"counters_none": "Aucune partie contre ces cartes pour l'instant.",
 	"duos_title": "Meilleurs duos",
-	"duos_text": "2 cartes dans le même deck, quelles que soient les 2 autres cartes, avec au moins {min} parties dans au moins 2 decks différents. Le classement utilise un score fiable (la borne basse de l'intervalle de Wilson), comme pour les decks. La valeur en couleur compare le duo au taux de victoire moyen de ses 2 cartes.",
-	"duos_none": "Aucun duo n'a encore {min} parties dans 2 decks différents.",
+	"duos_text": "2 cartes dans le même deck, quelles que soient les 2 autres cartes. Le classement utilise un score fiable (la borne basse de l'intervalle de Wilson), comme pour les decks. La valeur en couleur compare le duo au taux de victoire moyen de ses 2 cartes.",
 	"counters_add": "Ajouter une carte",
 	"counters_picker": "Choisir une carte",
 	"counters_search": "Chercher une carte",
@@ -550,7 +539,7 @@
 	"pace_short_split_all": "Au plus la médiane de chaque version",
 	"pace_long_split_all": "Plus que la médiane de chaque version",
 	"pace_info_label": "Comment est-ce calculé ?",
-	"pace_info": "La limite est la médiane du nombre de tours de chaque version. La valeur est le taux de victoire des decks avec la carte dans chaque groupe. Une carte doit avoir {min} parties dans chaque groupe. Une carte apparaît seulement si son écart dépasse sa marge d'erreur à 99,9 %. Cette marge est stricte, car beaucoup de cartes sont testées en même temps : avec une marge à 95 %, environ 7 cartes apparaîtraient par hasard. Les 4 cartes d'un deck populaire partagent les mêmes parties, donc des cartes d'un même deck peuvent apparaître ensemble.",
+	"pace_info": "La limite est la médiane du nombre de tours de chaque version. La valeur est le taux de victoire des decks avec la carte dans chaque groupe. Le classement utilise le taux de victoire ajusté, qui se rapproche de 50 % avec peu de parties : une carte avec peu de parties arrive donc plus bas. Les 4 cartes d'un deck populaire partagent les mêmes parties, donc des cartes d'un même deck peuvent apparaître ensemble.",
 	"pace_curve": "Taux de victoire par 3 tours",
 	"history_element": "Élément",
 	"history_caption": "Part de jeu et taux de victoire de chaque élément pendant la dernière semaine complète, avec l'évolution par rapport à la semaine précédente",
@@ -559,9 +548,9 @@
 	"strong_against": "Fort contre",
 	"weak_against": "Faible contre",
 	"card_matchups_title": "Affrontements",
-	"card_matchups_none": "Pas assez de parties",
-	"card_matchups_text": "Taux de victoire de cette carte contre chaque carte adverse, {min} parties ou plus, dans la version choisie.",
-	"deck_matchups_text": "Taux de victoire de ce deck contre chaque carte adverse, {min} parties ou plus, dans la version {version}.",
+	"card_matchups_none": "Aucune carte pour l'instant.",
+	"card_matchups_text": "Taux de victoire de cette carte contre chaque carte adverse, dans la version choisie.",
+	"deck_matchups_text": "Taux de victoire de ce deck contre chaque carte adverse, dans la version {version}.",
 	"stats_tabs": "Sections des statistiques",
 	"stats_tab_meta": "Méta",
 	"stats_tab_tiers": "Tier list",
@@ -570,9 +559,7 @@
 	"stats_tab_length": "Durée des parties",
 	"stats_tab_trends": "Évolution",
 	"tiers_title": "Tier list",
-	"tiers_text": "Les tiers comparent le taux de victoire ajusté des cartes. Avec peu de parties, il se rapproche de 50 %. Une carte doit avoir {min} parties.",
-	"tiers_none": "Aucune carte n'a encore {min} parties dans cette version.",
-	"tiers_unranked": "Pas assez de parties",
+	"tiers_text": "Les tiers comparent le taux de victoire ajusté des cartes. Avec peu de parties, il se rapproche de 50 %.",
 	"tier_label": "Tier {tier}",
 	"tiers_banner": "Les cartes de S à D, selon le taux de victoire ajusté de la dernière version.",
 	"tiers_banner_link": "Voir la tier list"

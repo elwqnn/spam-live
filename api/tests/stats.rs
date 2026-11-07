@@ -184,8 +184,8 @@ async fn card_stats(pool: PgPool) {
         a(2),
         a(3),
         a(4),
-        card(k(9), 3, 2, Some(2.0 / 3.0), t, None),
-        card(k(10), 3, 2, Some(2.0 / 3.0), t, None),
+        card(k(9), 3, 2, Some(2.0 / 3.0), t, Some("B")),
+        card(k(10), 3, 2, Some(2.0 / 3.0), t, Some("B")),
     ]);
     assert_eq!(res.body, expected);
     assert_eq!(send(&app, get("/api/stats/cards?version=1.29", "")).await.body, expected);
@@ -193,10 +193,10 @@ async fn card_stats(pool: PgPool) {
     let all = send(&app, get("/api/stats/cards?version=all", "")).await.body;
     let find = |id: Uuid| all.as_array().unwrap().iter().find(|c| c["card"] == json!(id)).unwrap().clone();
     assert_eq!(find(k(1)), card(k(1), 27, 16, Some(16.0 / 27.0), 50.0, Some("A")));
-    assert_eq!(find(k(9)), card(k(9), 5, 4, Some(0.8), 50.0, None));
+    assert_eq!(find(k(9)), card(k(9), 5, 4, Some(0.8), 50.0, Some("A")));
     assert_eq!(all.as_array().unwrap().len(), 10);
     let old = send(&app, get("/api/stats/cards?version=1.27.0", "")).await.body;
-    assert_eq!(old[0], card(k(1), 4, 2, Some(0.5), 4.0, None));
+    assert_eq!(old[0], card(k(1), 4, 2, Some(0.5), 4.0, Some("B")));
     assert_eq!(old.as_array().unwrap().len(), 7);
 }
 
@@ -231,9 +231,13 @@ fn tier_cuts_at_the_limits() {
 }
 
 #[test]
-fn tier_needs_5_ranked_cards() {
-    let rows = [(40, 35), (40, 20), (40, 5), (40, 10), (10, 1)];
-    assert_eq!(tiers(&rows), [Some(Tier::B), Some(Tier::B), Some(Tier::B), Some(Tier::B), None]);
+fn tier_with_few_cards_and_games() {
+    use Tier::*;
+    assert_eq!(tiers(&[(1, 1)]), [Some(B)]);
+    assert_eq!(tiers(&[(1, 1), (1, 0)]), [Some(A), Some(C)]);
+    let rows = [(1, 1), (34, 20), (34, 18), (34, 17), (34, 16), (34, 14)];
+    assert_eq!(tiers(&rows), [Some(B), Some(S), Some(B), Some(B), Some(C), Some(D)]);
+    assert_eq!(ranked(&rows)[0].adjusted_win_rate, Some(16.0 / 31.0));
 }
 
 #[test]
@@ -242,18 +246,10 @@ fn tier_without_spread() {
 }
 
 #[test]
-fn tier_needs_20_games() {
-    use Tier::*;
-    let rows = [(19, 19), (20, 0), (34, 20), (34, 18), (34, 17), (34, 16), (34, 14)];
-    assert_eq!(tiers(&rows), [None, Some(D), Some(A), Some(A), Some(B), Some(B), Some(B)]);
-    assert_eq!(ranked(&rows)[0].adjusted_win_rate, Some(34.0 / 49.0));
-}
-
-#[test]
 fn adjusted_win_rate_without_games() {
     let cards = ranked(&[(0, 0), (10, 5)]);
     assert_eq!(cards.iter().map(|c| c.adjusted_win_rate).collect::<Vec<_>>(), [None, Some(0.5)]);
-    assert_eq!(cards.iter().map(|c| c.tier).collect::<Vec<_>>(), [None, None]);
+    assert_eq!(cards.iter().map(|c| c.tier).collect::<Vec<_>>(), [None, Some(Tier::B)]);
 }
 
 #[sqlx::test]
@@ -458,13 +454,11 @@ fn approx(v: Value) -> Value {
 }
 
 fn pace(id: u32, short: (i64, i64), long: (i64, i64), curve: &[(i32, i64, i64)]) -> Value {
-    let (n1, n2) = (short.0 as f64, long.0 as f64);
-    let (p1, p2) = (short.1 as f64 / n1, long.1 as f64 / n2);
+    let (p1, p2) = (short.1 as f64 / short.0 as f64, long.1 as f64 / long.0 as f64);
     let curve: Vec<Value> = curve.iter().map(|&(s, g, w)| json!({ "start": s, "games": g, "wins": w })).collect();
     json!({
         "card": k(id), "shortGames": short.0, "shortWins": short.1, "shortWinRate": p1,
-        "longGames": long.0, "longWins": long.1, "longWinRate": p2,
-        "gap": p1 - p2, "margin": 3.29 * (p1 * (1.0 - p1) / n1 + p2 * (1.0 - p2) / n2).sqrt(), "curve": curve
+        "longGames": long.0, "longWins": long.1, "longWinRate": p2, "gap": p1 - p2, "curve": curve
     })
 }
 
@@ -487,10 +481,10 @@ async fn pace_stats(pool: PgPool) {
     games(n, at(14, &w, &long_foe, 0), 6, 14).await;
     games(n, at(8, &l, &short_foe, 0), 4, 16).await;
     games(n, at(14, &l, &long_foe, 0), 16, 4).await;
-    games(n, at(8, &noise, &short_foe, 0), 52, 48).await;
-    games(n, at(14, &noise, &long_foe, 0), 48, 52).await;
-    games(n, at(8, &few, &short_foe, 0), 19, 0).await;
-    games(n, at(14, &few, &long_foe, 0), 0, 20).await;
+    games(n, at(8, &noise, &short_foe, 0), 50, 50).await;
+    games(n, at(14, &noise, &long_foe, 0), 50, 50).await;
+    games(n, at(8, &few, &short_foe, 0), 1, 0).await;
+    games(n, at(14, &few, &long_foe, 0), 1, 1).await;
     games(n, at(8, &w2, &short_foe, 0), 18, 2).await;
     games(n, at(14, &w2, &long_foe, 0), 6, 14).await;
     games(n, at(8, &f1, &f2, 0), 2, 0).await;
@@ -504,19 +498,29 @@ async fn pace_stats(pool: PgPool) {
     let body = res.body;
     assert_eq!(
         body["turns"],
-        json!([{ "turns": 7, "matches": 10 }, { "turns": 8, "matches": 171 }, { "turns": 14, "matches": 180 }])
+        json!([{ "turns": 7, "matches": 10 }, { "turns": 8, "matches": 153 }, { "turns": 14, "matches": 162 }])
     );
     assert_eq!(body["median"], 8);
     let w_card = |id| pace(id, (20, 16), (20, 6), &[(7, 20, 16), (13, 20, 6)]);
     let l_card = |id| pace(id, (20, 4), (20, 16), &[(7, 20, 4), (13, 20, 16)]);
     let w2_card = |id| pace(id, (20, 18), (20, 6), &[(7, 20, 18), (13, 20, 6)]);
-    let short = json!([w2_card(17), w2_card(18), w2_card(19), w2_card(20), w_card(1), w_card(2), w_card(3), w_card(4)]);
+    let few_card = |id| pace(id, (1, 1), (2, 1), &[(7, 1, 1), (13, 2, 1)]);
+    let short = json!([
+        w2_card(17),
+        w2_card(18),
+        w2_card(19),
+        w2_card(20),
+        w_card(1),
+        w_card(2),
+        w_card(3),
+        w_card(4),
+        few_card(13),
+        few_card(14)
+    ]);
     let long = json!([l_card(5), l_card(6), l_card(7), l_card(8)]);
     assert_eq!(approx(body["short"].clone()), approx(short));
     assert_eq!(approx(body["long"].clone()), approx(long.clone()));
-    assert!((body["short"][0]["margin"].as_f64().unwrap() - 0.40294).abs() < 1e-4);
-    assert!((body["short"][4]["margin"].as_f64().unwrap() - 0.44748).abs() < 1e-4);
-    assert!((body["long"][0]["margin"].as_f64().unwrap() - 0.41616).abs() < 1e-4);
+    assert_eq!(approx(body["short"][4]["gap"].clone()), approx(body["short"][8]["gap"].clone()));
     assert_eq!(send(&app, get("/api/stats/pace?version=1.29", "")).await.body, body);
 
     let old = send(&app, get("/api/stats/pace?version=1.27.0", "")).await.body;
@@ -688,16 +692,22 @@ async fn duo_stats(pool: PgPool) {
     let res = send(&app, get("/api/stats/duos", "")).await;
     assert_eq!(res.status, StatusCode::OK);
     assert_eq!(res.headers["cache-control"], "public, max-age=300");
-    let expected = json!([duo(1, 2, 30, 22), duo(5, 6, 20, 4)]);
-    assert_eq!(rounded(res.body), rounded(expected.clone()));
-    assert_eq!(rounded(send(&app, get("/api/stats/duos?version=1.29", "")).await.body), rounded(expected));
+    let body = res.body;
+    assert_eq!(body.as_array().unwrap().len(), 24);
+    let one_deck = [(1, 13), (1, 14), (2, 13), (2, 14), (13, 14)].map(|(a, b)| duo(a, b, 10, 10));
+    let top = json!([&one_deck[..], &[duo(1, 2, 30, 22)]].concat());
+    assert_eq!(rounded(json!(body.as_array().unwrap()[..6])), rounded(top));
+    assert_eq!(rounded(body[23].clone()), rounded(duo(5, 7, 10, 4)));
+    assert_eq!(send(&app, get("/api/stats/duos?version=1.29", "")).await.body, body);
 
     let old = send(&app, get("/api/stats/duos?version=1.27.0", "")).await.body;
-    assert_eq!(rounded(old), rounded(json!([duo(5, 6, 20, 20), duo(9, 10, 20, 0)])));
+    assert_eq!(old.as_array().unwrap().len(), 22);
+    assert_eq!(rounded(old[0].clone()), rounded(duo(5, 6, 20, 20)));
+    assert_eq!(rounded(old[11].clone()), rounded(duo(9, 10, 20, 0)));
     let all = send(&app, get("/api/stats/duos?version=all", "")).await.body;
-    assert_eq!(rounded(json!(all.as_array().unwrap()[..2])), rounded(json!([duo(1, 2, 30, 22), duo(5, 6, 40, 24)])));
-    assert_eq!((&all[2]["cards"], &all[2]["games"], &all[2]["wins"]), (&json!([k(9), k(10)]), &json!(39), &json!(9)));
-    assert_eq!(all.as_array().unwrap().len(), 3);
+    assert_eq!(all.as_array().unwrap().len(), 24);
+    assert_eq!(rounded(all[5].clone()), rounded(duo(1, 2, 30, 22)));
+    assert_eq!(rounded(all[11].clone()), rounded(duo(5, 6, 40, 24)));
     assert_eq!(send(&app, get("/api/stats/duos?version=latest", "")).await.status, StatusCode::BAD_REQUEST);
 }
 
@@ -733,11 +743,12 @@ async fn counter_stats(pool: PgPool) {
     let b_cards = |g, w| (5..9).map(|i| counter(i, g, w)).collect::<Vec<_>>();
     let c_cards = |g, w| (9..12).map(|i| counter(i, g, w)).collect::<Vec<_>>();
     let a_cards = |g, w| (2..5).map(|i| counter(i, g, w)).collect::<Vec<_>>();
-    let cards = [b_cards(15, 11), c_cards(10, 7), a_cards(10, 3)].concat();
+    let d_cards = (14..18).map(|i| counter(i, 9, 9)).collect::<Vec<_>>();
+    let cards = [d_cards.clone(), b_cards(15, 11), c_cards(10, 7), a_cards(10, 3)].concat();
     assert_eq!(rounded(res.body), rounded(json!({ "games": 44, "cards": cards })));
 
     let both = send(&app, q(&two)).await.body;
-    let cards = [c_cards(10, 7), b_cards(10, 6)].concat();
+    let cards = [d_cards, c_cards(10, 7), b_cards(10, 6)].concat();
     assert_eq!(rounded(both), rounded(json!({ "games": 29, "cards": cards })));
     let reversed = send(&app, q(&format!("against={},{}&version=1.29", k(2), k(1)))).await.body;
     assert_eq!(reversed["games"], 29);
@@ -759,6 +770,26 @@ async fn counter_stats(pool: PgPool) {
     ] {
         assert_eq!(send(&app, q(&bad)).await.status, StatusCode::BAD_REQUEST, "{bad}");
     }
+}
+
+#[sqlx::test]
+async fn one_game_is_listed(pool: PgPool) {
+    let app = app(pool.clone());
+    let (a, b) = (vec![k(1), k(2), k(3), k(4)], vec![k(5), k(6), k(7), k(8)]);
+    add(&pool, &mut 0, m(&a, &b, Some(0)), 1).await;
+
+    let duos = send(&app, get("/api/stats/duos", "")).await.body;
+    assert_eq!(duos.as_array().unwrap().len(), 12);
+    assert_eq!(rounded(duos[0].clone()), rounded(duo(1, 2, 1, 1)));
+    assert_eq!(rounded(duos[11].clone()), rounded(duo(7, 8, 1, 0)));
+
+    let counters = send(&app, get(&format!("/api/stats/counters?against={}", k(1)), "")).await.body;
+    let cards: Vec<Value> = (5..9).map(|i| counter(i, 1, 0)).collect();
+    assert_eq!(rounded(counters), rounded(json!({ "games": 1, "cards": cards })));
+
+    let stats = send(&app, get("/api/stats/cards", "")).await.body;
+    let tiers: Vec<&Value> = stats.as_array().unwrap().iter().map(|c| &c["tier"]).collect();
+    assert_eq!(tiers, [&json!("A"); 4].into_iter().chain([&json!("C"); 4]).collect::<Vec<_>>());
 }
 
 #[sqlx::test]

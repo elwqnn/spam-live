@@ -22,14 +22,13 @@
 		games: number;
 	};
 
-	const MIN_GAMES = 20;
 	const MAX_ZOOM = 8;
 	const TIP = 208;
 	const number = new Intl.NumberFormat(getLocale());
 
 	const dots: Dot[] = $derived(
 		data
-			.filter((s) => s.games >= MIN_GAMES && s.winRate != null)
+			.filter((s) => s.winRate != null)
 			.map((s) => {
 				const card = catalog.get(s.card);
 				return {
@@ -42,7 +41,6 @@
 				};
 			})
 	);
-	const hidden = $derived(data.length - dots.length);
 	const config = $derived(
 		Object.fromEntries(
 			Object.keys(ELEMENTS).map((key) => [
@@ -124,7 +122,7 @@
 		<h2 id="metamap-title" class="font-heading text-2xl font-normal tracking-tight">
 			{m.metamap_title()}
 		</h2>
-		<p class="text-sm text-muted-foreground">{m.metamap_text({ min: MIN_GAMES })}</p>
+		<p class="text-sm text-muted-foreground">{m.metamap_text()}</p>
 	</div>
 	{#if dots.length}
 		<ElementLegend />
@@ -258,7 +256,6 @@
 				<span class="{corner} bottom-13 left-14">{m.metamap_weak()}</span>
 			</div>
 			<figcaption class="text-sm text-muted-foreground">
-				{#if hidden}{m.metamap_hidden({ count: hidden, min: MIN_GAMES })}{/if}
 				<a href={href('/cards')} class="sr-only focus-visible:not-sr-only focus-visible:underline"
 					>{m.metamap_list()}</a
 				>

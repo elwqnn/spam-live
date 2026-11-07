@@ -429,7 +429,7 @@
 	"privacy_store_app_presence": "The desktop app tells the server when it opens, every 10 minutes while it runs, and when it closes, with its version number.",
 	"privacy_store_upload_source": "We record if a match upload came from the website or from the desktop app.",
 	"pace_title": "Game length",
-	"pace_text": "The length of the matches in turns, and the cards whose decks win clearly more often in short or in long matches.",
+	"pace_text": "The length of the matches in turns, and the cards whose decks win more often in short or in long matches.",
 	"pace_turns": "Turns",
 	"pace_matches": "Matches",
 	"pace_turns_n": [
@@ -476,7 +476,7 @@
 	],
 	"pace_short_rate": "Short",
 	"pace_long_rate": "Long",
-	"pace_few": "No card has a clear difference yet.",
+	"pace_few": "No card yet.",
 	"history_title": "Meta over time",
 	"history_text": "The play share and the win rate of each element in the last full week, the change against the week before, and up to the last 12 full weeks. The play share is the part of the card slots with the element.",
 	"history_share": "Play share",
@@ -499,25 +499,15 @@
 		}
 	],
 	"metamap_title": "Meta map",
-	"metamap_text": "Each dot is a card: how often decks play it, and how often these decks win. Only cards with at least {min} games.",
+	"metamap_text": "Each dot is a card: how often decks play it, and how often these decks win. A card with few games can have an extreme win rate.",
 	"metamap_label": "Chart of the cards: play rate from left to right, win rate from bottom to top.",
 	"metamap_list": "The same values are in the card list.",
-	"metamap_hidden": [
-		{
-			"declarations": ["input count", "input min", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} card with fewer than {min} games is not on the map.",
-				"countPlural=*": "{count} cards with fewer than {min} games are not on the map."
-			}
-		}
-	],
 	"metamap_picks": "Meta picks",
 	"metamap_underplayed": "Underplayed",
 	"metamap_overplayed": "Overplayed",
 	"metamap_weak": "Rare and weak",
 	"counters_title": "What beats these cards",
-	"counters_text": "Choose 1 to 4 cards. The list shows the cards that win most often against decks with all of them. A card needs {min} games.",
+	"counters_text": "Choose 1 to 4 cards. The list shows the cards that win most often against decks with all of them.",
 	"counters_remove": "Remove {name}",
 	"counters_empty": "Choose 1 or more cards to see what beats them.",
 	"counters_games": [
@@ -530,10 +520,9 @@
 			}
 		}
 	],
-	"counters_none": "No card has {min} games against them yet.",
+	"counters_none": "No game against these cards yet.",
 	"duos_title": "Best duos",
-	"duos_text": "2 cards in the same deck, whatever the 2 other cards are, with at least {min} games in at least 2 different decks. The order uses a reliable score (the lower bound of the Wilson interval), as for decks. The colored value compares the duo with the mean win rate of its 2 cards.",
-	"duos_none": "No duo has {min} games in 2 different decks yet.",
+	"duos_text": "2 cards in the same deck, whatever the 2 other cards are. The order uses a reliable score (the lower bound of the Wilson interval), as for decks. The colored value compares the duo with the mean win rate of its 2 cards.",
 	"counters_add": "Add a card",
 	"counters_picker": "Choose a card",
 	"counters_search": "Search a card",
@@ -550,7 +539,7 @@
 	"pace_short_split_all": "At most the median of each version",
 	"pace_long_split_all": "More than the median of each version",
 	"pace_info_label": "How is this computed?",
-	"pace_info": "The split is the median turn count of each version. The value is the win rate of the decks with the card in each part. A card needs {min} games in each part. A card shows only when its gap is larger than its 99.9 % margin of error. This margin is strict because many cards are tested at once: with a 95 % margin, about 7 cards would show by chance. The 4 cards of a popular deck share the same games, so cards of 1 deck can show together.",
+	"pace_info": "The split is the median turn count of each version. The value is the win rate of the decks with the card in each part. The order uses the adjusted win rate, which moves toward 50 % with few games, so a card with few games comes lower. The 4 cards of a popular deck share the same games, so cards of 1 deck can show together.",
 	"pace_curve": "Win rate by 3 turns",
 	"history_element": "Element",
 	"history_caption": "Play share and win rate of each element in the last full week, with the change against the week before",
@@ -559,9 +548,9 @@
 	"strong_against": "Strong against",
 	"weak_against": "Weak against",
 	"card_matchups_title": "Matchups",
-	"card_matchups_none": "Not enough games",
-	"card_matchups_text": "Win rate of this card against each opposing card, {min} games or more, in the selected version.",
-	"deck_matchups_text": "Win rate of this deck against each opposing card, {min} games or more, in version {version}.",
+	"card_matchups_none": "No card yet.",
+	"card_matchups_text": "Win rate of this card against each opposing card, in the selected version.",
+	"deck_matchups_text": "Win rate of this deck against each opposing card, in version {version}.",
 	"stats_tabs": "Stats sections",
 	"stats_tab_meta": "Meta",
 	"stats_tab_tiers": "Tier list",
@@ -570,9 +559,7 @@
 	"stats_tab_length": "Game length",
 	"stats_tab_trends": "Over time",
 	"tiers_title": "Tier list",
-	"tiers_text": "Tiers compare the adjusted win rate of the cards. Few games move it toward 50 %. A card needs {min} games.",
-	"tiers_none": "No card has {min} games in this version yet.",
-	"tiers_unranked": "Not enough games",
+	"tiers_text": "Tiers compare the adjusted win rate of the cards. Few games move it toward 50 %.",
 	"tier_label": "Tier {tier}",
 	"tiers_banner": "The cards from S to D, by adjusted win rate in the latest version.",
 	"tiers_banner_link": "See the tier list"

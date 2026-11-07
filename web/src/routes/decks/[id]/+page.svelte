@@ -26,7 +26,6 @@
 
 	let { data, form }: PageProps = $props();
 
-	const MIN_GAMES = 10;
 	const deck = $derived(data.deck);
 	const me = $derived(data.me);
 	const author = $derived(me?.id === deck.authorId);
@@ -175,7 +174,7 @@
 		<MatchupList title={m.weak_against()} rows={data.matchups.weak} {catalog} />
 	</div>
 	<p class="text-xs text-muted-foreground">
-		{m.deck_matchups_text({ min: MIN_GAMES, version: deck.stats.version })}
+		{m.deck_matchups_text({ version: deck.stats.version })}
 	</p>
 </section>
 

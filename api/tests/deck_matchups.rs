@@ -75,7 +75,7 @@ async fn deck_matchups(pool: PgPool) {
     assert_eq!(res.headers["cache-control"], "public, max-age=300");
     let top = [81, 82, 83].map(|c| item(k(c), 21, 21));
     let weak = [item(k(21), 10, 0), item(k(84), 30, 5), item(k(85), 30, 5), item(k(86), 30, 5)];
-    let strong = [&top[..], &[item(k(11), 12, 12)]].concat();
+    let strong = [&top[..], &[item(k(11), 12, 12), item(k(12), 9, 9)]].concat();
     let latest = json!({ "strong": strong, "weak": weak });
     assert_eq!(res.body, latest);
     assert_eq!(send(&app, get(&url(deck, "?version=1.29"), "")).await.body, latest);

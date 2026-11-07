@@ -38,15 +38,14 @@ export function sparkPath(
 const round = (n: number) => Math.round(n * 100) / 100;
 
 export function curveRates(
-	curve: { start: number; games: number; wins: number }[],
-	minGames: number
+	curve: { start: number; games: number; wins: number }[]
 ): (number | null)[] {
 	if (!curve.length) return [];
 	const first = Math.min(...curve.map((g) => g.start));
 	const last = Math.max(...curve.map((g) => g.start));
 	return Array.from({ length: (last - first) / 3 + 1 }, (_, i) => {
 		const group = curve.find((g) => g.start === first + i * 3);
-		return group && group.games >= minGames ? group.wins / group.games : null;
+		return group?.games ? group.wins / group.games : null;
 	});
 }
 
