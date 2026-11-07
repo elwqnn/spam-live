@@ -5,6 +5,7 @@
 	import CardBadge from './CardBadge.svelte';
 	import CardBadgeStack from './CardBadgeStack.svelte';
 	import Change from './Change.svelte';
+	import TierBadge from './TierBadge.svelte';
 	import WinRate from './WinRate.svelte';
 
 	let {
@@ -48,6 +49,7 @@
 			<CardBadge type="rarity" value={card.rarity} display="compact" />
 			<CardBadge type="hp" value={card.hp} />
 			<CardBadge type="income" value={card.goldIncome} />
+			{#if stats?.tier}<TierBadge tier={stats.tier} />{/if}
 		</CardBadgeStack>
 		{#if details}<div class="relative">{@render details()}</div>{/if}
 	</div>

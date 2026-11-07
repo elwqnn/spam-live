@@ -883,6 +883,8 @@ export interface components {
             shortWins: number;
         };
         CardStats: {
+            /** Format: double */
+            adjustedWinRate?: number | null;
             /** Format: uuid */
             card: string;
             /** Format: int64 */
@@ -891,6 +893,7 @@ export interface components {
             playRate: number;
             /** Format: double */
             playRateChange?: number | null;
+            tier?: components["schemas"]["Tier"] | null;
             /** Format: double */
             winRate?: number | null;
             /** Format: double */
@@ -1354,6 +1357,8 @@ export interface components {
             id: string;
             name: string;
         };
+        /** @enum {string} */
+        Tier: "S" | "A" | "B" | "C" | "D";
         /** @enum {string} */
         Trend: "week" | "version";
         TurnBucket: {
@@ -3153,7 +3158,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description playRate = deck results with the card / all deck results. winRate is null at 0 games. winRateChange and playRateChange = period A - period B, as fractions. trend week (default): A is the last 7 days and B is the 7 days before, on the match end time, in the selected version. trend version: A is the selected version and B is the catalog version before it. The changes are null when A or B has 0 games, and in version mode for all, for the oldest version and for a version that is not in the catalog. */
+            /** @description playRate = deck results with the card / all deck results. winRate is null at 0 games. winRateChange and playRateChange = period A - period B, as fractions. trend week (default): A is the last 7 days and B is the 7 days before, on the match end time, in the selected version. trend version: A is the selected version and B is the catalog version before it. The changes are null when A or B has 0 games, and in version mode for all, for the oldest version and for a version that is not in the catalog. adjustedWinRate = (wins + 15) / (games + 30), null at 0 games. tier: S to D from the z-score of adjustedWinRate over the cards with 20 games or more, null for the other cards. */
             200: {
                 headers: {
                     [name: string]: unknown;

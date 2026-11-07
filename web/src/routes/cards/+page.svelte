@@ -1,17 +1,23 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { fold, queryHref } from '#lib';
+	import { HugeiconsIcon } from '@hugeicons/svelte';
+	import { ArrowRight02Icon } from '@hugeicons/core-free-icons';
+	import { fold, href, queryHref } from '#lib';
 	import { ELEMENTS, RARITIES } from '#lib/components/CardBadge.svelte';
 	import CardList from '#lib/components/CardList.svelte';
+	import { cardPreview } from '#lib/components/CardPreview.svelte';
 	import FilterChips from '#lib/components/FilterChips.svelte';
 	import FloatingElements from '#lib/components/FloatingElements.svelte';
+	import TierBadge from '#lib/components/TierBadge.svelte';
+	import { buttonVariants } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { selection, type Filter } from '#lib/filter.js';
 	import TitleRow from '#lib/components/TitleRow.svelte';
 	import TrendMenu from '#lib/components/TrendMenu.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
+	import { TIERS, tierCards } from '#lib/tier.js';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -20,8 +26,11 @@
 	const q = $derived(query.get('q') ?? '');
 	const elements = $derived(selection(query.get('element')));
 	const rarities = $derived(selection(query.get('rarity')).map((r) => `rarity-${r}`));
+	const tiers = $derived(selection(query.get('tier')));
 	const sort = $derived(query.get('sort') ?? 'order');
 	const stats = $derived(new Map(data.stats.map((s) => [s.card, s])));
+	const catalog = $derived(new Map(data.cards.map((c) => [c.id, c])));
+	const top = $derived(tierCards(data.stats, 'S').flatMap((s) => catalog.get(s.card) ?? []));
 
 	const cards = $derived.by(() => {
 		const needle = fold(q.trim());
@@ -29,6 +38,7 @@
 			(c) =>
 				(!elements.length || elements.includes(c.element)) &&
 				(!rarities.length || rarities.includes(c.rarity)) &&
+				(!tiers.length || tiers.includes(stats.get(c.id)?.tier ?? '')) &&
 				(!needle || fold(c.name ?? c.id).includes(needle))
 		);
 		if (sort === 'name')
@@ -65,6 +75,16 @@
 					icon: `/art/ui/card_rarity_${value}.webp`
 				};
 			})
+		},
+		{
+			id: 'tier',
+			label: m.filter_tier(),
+			multiple: true,
+			options: TIERS.map((value) => ({
+				value,
+				label: value,
+				count: data.cards.filter((c) => stats.get(c.id)?.tier === value).length
+			}))
 		}
 	]);
 
@@ -102,6 +122,47 @@
 	/>
 	<FloatingElements />
 </TitleRow>
+
+<section
+	aria-labelledby="tiers-banner"
+	class="flex flex-wrap items-center gap-x-8 gap-y-3 px-(--gutter) py-4 hatch"
+>
+	<div class="grid gap-0.5">
+		<h2 id="tiers-banner" class="font-heading text-xl font-normal tracking-tight">
+			{m.tiers_title()}
+		</h2>
+		<p class="text-sm text-muted-foreground">{m.tiers_banner()}</p>
+	</div>
+	{#if top.length}
+		<div class="flex items-start gap-2">
+			<TierBadge tier="S" class="h-10 min-w-10 font-heading text-xl font-normal" />
+			<ul class="flex flex-wrap gap-2">
+				{#each top as card (card.id)}
+					<li>
+						<a
+							class="block rounded-xs focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+							href={href(`/cards/${card.id}`)}
+							{@attach cardPreview(card)}
+							><img
+								src="/art/avatar/{card.id}.webp"
+								alt={card.name ?? card.id}
+								loading="lazy"
+								decoding="async"
+								class="el-{card.element} size-10 rounded-xs border-2 border-(--el) bg-(--el) transition-colors hover:border-foreground"
+							/></a
+						>
+					</li>
+				{/each}
+			</ul>
+		</div>
+	{/if}
+	<a
+		class={[buttonVariants({ variant: 'outline', size: 'sm' }), 'ml-auto']}
+		href={href('/stats?tab=tiers')}
+		>{m.tiers_banner_link()}
+		<HugeiconsIcon icon={ArrowRight02Icon} aria-hidden="true" /></a
+	>
+</section>
 
 <CardList {cards} {stats} {filters}>
 	{#snippet actions()}

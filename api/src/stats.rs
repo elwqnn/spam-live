@@ -99,6 +99,47 @@ pub struct CardStats {
     pub play_rate: f64,
     pub win_rate_change: Option<f64>,
     pub play_rate_change: Option<f64>,
+    #[sqlx(skip)]
+    pub adjusted_win_rate: Option<f64>,
+    #[sqlx(skip)]
+    pub tier: Option<Tier>,
+}
+
+#[derive(Serialize, ToSchema, Clone, Copy, PartialEq, Debug)]
+pub enum Tier {
+    S,
+    A,
+    B,
+    C,
+    D,
+}
+
+const TIER_K: f64 = 30.0;
+const TIER_MIN_GAMES: i64 = 20;
+const TIER_MIN_CARDS: usize = 5;
+const TIER_CUTS: (f64, f64) = (1.5, 0.5);
+
+pub fn rank(cards: &mut [CardStats]) {
+    for c in cards.iter_mut() {
+        c.adjusted_win_rate = (c.games > 0).then(|| (c.wins as f64 + TIER_K * 0.5) / (c.games as f64 + TIER_K));
+    }
+    let ranked = |c: &CardStats| c.adjusted_win_rate.filter(|_| c.games >= TIER_MIN_GAMES);
+    let adj: Vec<f64> = cards.iter().filter_map(ranked).collect();
+    let n = adj.len() as f64;
+    let mu = adj.iter().sum::<f64>() / n;
+    let sigma = (adj.iter().map(|x| (x - mu).powi(2)).sum::<f64>() / n).sqrt();
+    let flat = adj.len() < TIER_MIN_CARDS || adj.iter().all(|&x| x == adj[0]);
+    let (s, a) = TIER_CUTS;
+    for c in cards.iter_mut() {
+        c.tier = ranked(c).map(|x| match (x - mu) / sigma {
+            _ if flat => Tier::B,
+            z if z >= s => Tier::S,
+            z if z >= a => Tier::A,
+            z if z > -a => Tier::B,
+            z if z > -s => Tier::C,
+            _ => Tier::D,
+        });
+    }
 }
 
 #[utoipa::path(get, path = "/api/stats/decks", tag = "stats", params(DeckStatsQuery),
@@ -133,13 +174,15 @@ pub async fn deck_stats(State(s): State<AppState>, Query(q): Query<DeckStatsQuer
             winRateChange and playRateChange = period A - period B, as fractions. trend week (default): A is the last \
             7 days and B is the 7 days before, on the match end time, in the selected version. trend version: A is the \
             selected version and B is the catalog version before it. The changes are null when A or B has 0 games, \
-            and in version mode for all, for the oldest version and for a version that is not in the catalog."),
+            and in version mode for all, for the oldest version and for a version that is not in the catalog. \
+            adjustedWinRate = (wins + 15) / (games + 30), null at 0 games. tier: S to D from the z-score of \
+            adjustedWinRate over the cards with 20 games or more, null for the other cards."),
         (status = 400, body = ErrorBody)))]
 pub async fn card_stats(State(s): State<AppState>, Query(q): Query<CardStatsQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
     let week = matches!(q.trend.unwrap_or_default(), Trend::Week);
     let previous = if week { None } else { version.as_deref().and_then(|v| s.catalog.previous(v)) };
-    let rows: Vec<CardStats> = sqlx::query_as(
+    let mut rows: Vec<CardStats> = sqlx::query_as(
         "WITH r AS (
              SELECT deck_key, win, $1::text IS NULL OR app_version = $1 AS cur,
                  CASE WHEN NOT $3 THEN CASE app_version WHEN $1 THEN 1 WHEN $2 THEN 2 END
@@ -166,6 +209,7 @@ pub async fn card_stats(State(s): State<AppState>, Query(q): Query<CardStatsQuer
     .bind(week)
     .fetch_all(&s.db)
     .await?;
+    rank(&mut rows);
     Ok(public(rows))
 }
 

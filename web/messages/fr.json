@@ -29,6 +29,7 @@
 	"search": "Rechercher par nom",
 	"filter_element": "Élément",
 	"filter_rarity": "Rareté",
+	"filter_tier": "Tier",
 	"all_elements": "Tous les éléments",
 	"all_rarities": "Toutes les raretés",
 	"sort": "Tri",
@@ -555,8 +556,16 @@
 	"card_matchups_text": "Taux de victoire de cette carte contre chaque carte adverse, {min} parties ou plus, dans la version choisie.",
 	"stats_tabs": "Sections des statistiques",
 	"stats_tab_meta": "Méta",
+	"stats_tab_tiers": "Tier list",
 	"stats_tab_counters": "Contres",
 	"stats_tab_duos": "Duos",
 	"stats_tab_length": "Durée des parties",
-	"stats_tab_trends": "Évolution"
+	"stats_tab_trends": "Évolution",
+	"tiers_title": "Tier list",
+	"tiers_text": "Les tiers comparent le taux de victoire ajusté des cartes. Avec peu de parties, il se rapproche de 50 %. Une carte doit avoir {min} parties.",
+	"tiers_none": "Aucune carte n'a encore {min} parties dans cette version.",
+	"tiers_unranked": "Pas assez de parties",
+	"tier_label": "Tier {tier}",
+	"tiers_banner": "Les cartes de S à D, selon le taux de victoire ajusté de la dernière version.",
+	"tiers_banner_link": "Voir la tier list"
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { ArrowLeft02Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
 	import { entryName, href, percent, winRateColor, type CardDetail, type Schemas } from '#lib';
@@ -10,6 +11,7 @@
 	import Change from './Change.svelte';
 	import DeckTile from './DeckTile.svelte';
 	import Description from './Description.svelte';
+	import TierBadge from './TierBadge.svelte';
 	import TitleRow from './TitleRow.svelte';
 	import ToxIcon from './ToxIcon.svelte';
 	import TrendMenu from './TrendMenu.svelte';
@@ -35,6 +37,10 @@
 
 	const MIN_GAMES = 10;
 	const resistances = $derived(Object.entries(card.resistances));
+	const version = $derived(page.url.searchParams.get('version'));
+	const tierHref = $derived(
+		href(`/stats?tab=tiers${version ? `&version=${encodeURIComponent(version)}` : ''}`)
+	);
 </script>
 
 {#snippet stat(label: string, value: string | number, change?: number | null, color = false)}
@@ -153,7 +159,15 @@
 
 			<section class="grid gap-3">
 				<div class="flex flex-wrap items-center justify-between gap-2">
-					{@render heading(m.stats())}
+					<div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+						{@render heading(m.stats())}
+						{#if stats?.tier}
+							<a
+								class="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+								href={tierHref}><TierBadge tier={stats.tier} /> {m.tiers_title()}</a
+							>
+						{/if}
+					</div>
 					<div class="flex flex-wrap items-center gap-2">
 						<TrendMenu />
 						<VersionSelect {versions} />

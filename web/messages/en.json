@@ -29,6 +29,7 @@
 	"search": "Search by name",
 	"filter_element": "Element",
 	"filter_rarity": "Rarity",
+	"filter_tier": "Tier",
 	"all_elements": "All elements",
 	"all_rarities": "All rarities",
 	"sort": "Sort",
@@ -555,8 +556,16 @@
 	"card_matchups_text": "Win rate of this card against each opposing card, {min} games or more, in the selected version.",
 	"stats_tabs": "Stats sections",
 	"stats_tab_meta": "Meta",
+	"stats_tab_tiers": "Tier list",
 	"stats_tab_counters": "Counters",
 	"stats_tab_duos": "Duos",
 	"stats_tab_length": "Game length",
-	"stats_tab_trends": "Over time"
+	"stats_tab_trends": "Over time",
+	"tiers_title": "Tier list",
+	"tiers_text": "Tiers compare the adjusted win rate of the cards. Few games move it toward 50 %. A card needs {min} games.",
+	"tiers_none": "No card has {min} games in this version yet.",
+	"tiers_unranked": "Not enough games",
+	"tier_label": "Tier {tier}",
+	"tiers_banner": "The cards from S to D, by adjusted win rate in the latest version.",
+	"tiers_banner_link": "See the tier list"
 }

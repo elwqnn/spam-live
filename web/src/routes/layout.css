@@ -287,9 +287,13 @@
 	@apply px-(--gutter) py-8;
 }
 
+@utility hatch {
+	background: repeating-linear-gradient(-45deg, var(--border) 0 1px, transparent 1px 7px);
+}
+
 @utility band {
 	height: 0.875rem;
-	background: repeating-linear-gradient(-45deg, var(--border) 0 1px, transparent 1px 7px);
+	@apply hatch;
 }
 
 @utility section-head {

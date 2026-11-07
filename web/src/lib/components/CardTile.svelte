@@ -3,6 +3,7 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import CardArt from './CardArt.svelte';
 	import Change from './Change.svelte';
+	import TierBadge from './TierBadge.svelte';
 
 	let {
 		card,
@@ -11,7 +12,7 @@
 		card: Schemas['CardBase'];
 		stats?: Pick<
 			Schemas['CardStats'],
-			'games' | 'playRate' | 'winRate' | 'winRateChange' | 'playRateChange'
+			'games' | 'playRate' | 'winRate' | 'winRateChange' | 'playRateChange' | 'tier'
 		>;
 	} = $props();
 
@@ -35,7 +36,10 @@
 			class="flex flex-col gap-1 border-t px-3 py-2.5 tabular-nums in-[.stats-off]:hidden sm:px-4 sm:py-3"
 		>
 			<span class="flex items-baseline justify-between gap-3">
-				<span class="min-w-0 truncate text-sm font-medium" aria-hidden="true">{name}</span>
+				<span class="flex min-w-0 items-baseline gap-2">
+					{#if stats.tier}<TierBadge tier={stats.tier} />{/if}
+					<span class="min-w-0 truncate text-sm font-medium" aria-hidden="true">{name}</span>
+				</span>
 				<span
 					class="shrink-0 text-[17px] leading-none font-medium"
 					style:color={winRateColor(stats.winRate)}

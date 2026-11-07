@@ -12,6 +12,7 @@
 	import MetaMap from './MetaMap.svelte';
 	import Overview from './Overview.svelte';
 	import Pace from './Pace.svelte';
+	import Tiers from './Tiers.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -19,6 +20,7 @@
 	const catalog = $derived(new Map(data.cards.map((c) => [c.id, c])));
 	const tabs = [
 		['meta', m.stats_tab_meta],
+		['tiers', m.stats_tab_tiers],
 		['counters', m.stats_tab_counters],
 		['duos', m.stats_tab_duos],
 		['length', m.stats_tab_length],
@@ -62,6 +64,8 @@
 {#if data.tab === 'meta' && data.overview}
 	<Overview data={data.overview} />
 	<MetaMap data={data.stats} {catalog} />
+{:else if data.tab === 'tiers'}
+	<Tiers data={data.stats} {catalog} />
 {:else if data.tab === 'counters'}
 	<Counters data={data.counters} against={data.against} cards={data.cards} {catalog} />
 {:else if data.tab === 'duos'}

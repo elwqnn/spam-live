@@ -1,6 +1,7 @@
 mod common;
 
 use api::catalog::Catalog;
+use api::stats::{CardStats, Tier, rank};
 use axum::http::StatusCode;
 use common::*;
 use serde_json::{Value, json};
@@ -118,10 +119,11 @@ fn row(cards: &[Uuid], games: i64, wins: i64, win_rate: Option<f64>) -> Value {
     json!({ "cards": cards, "games": games, "wins": wins, "winRate": win_rate, "winScore": wilson(games, wins) })
 }
 
-fn card(id: Uuid, games: i64, wins: i64, win_rate: Option<f64>, total: f64) -> Value {
+fn card(id: Uuid, games: i64, wins: i64, win_rate: Option<f64>, total: f64, tier: Option<&str>) -> Value {
     json!({
         "card": id, "games": games, "wins": wins, "winRate": win_rate, "playRate": games as f64 / total,
-        "winRateChange": null, "playRateChange": null
+        "winRateChange": null, "playRateChange": null,
+        "adjustedWinRate": (wins as f64 + 15.0) / (games as f64 + 30.0), "tier": tier
     })
 }
 
@@ -171,31 +173,87 @@ async fn card_stats(pool: PgPool) {
     assert_eq!(res.status, StatusCode::OK);
     assert_eq!(res.headers["cache-control"], "public, max-age=300");
     let t = 46.0;
-    let b = |n| card(k(n), 23, 8, Some(8.0 / 23.0), t);
-    let a = |n| card(k(n), 20, 12, Some(0.6), t);
+    let b = |n| card(k(n), 23, 8, Some(8.0 / 23.0), t, Some("C"));
+    let a = |n| card(k(n), 20, 12, Some(0.6), t, Some("A"));
     let expected = json!([
-        card(k(5), 26, 10, Some(10.0 / 26.0), t),
-        card(k(1), 23, 14, Some(14.0 / 23.0), t),
+        card(k(5), 26, 10, Some(10.0 / 26.0), t, Some("C")),
+        card(k(1), 23, 14, Some(14.0 / 23.0), t, Some("A")),
         b(6),
         b(7),
         b(8),
         a(2),
         a(3),
         a(4),
-        card(k(9), 3, 2, Some(2.0 / 3.0), t),
-        card(k(10), 3, 2, Some(2.0 / 3.0), t),
+        card(k(9), 3, 2, Some(2.0 / 3.0), t, None),
+        card(k(10), 3, 2, Some(2.0 / 3.0), t, None),
     ]);
     assert_eq!(res.body, expected);
     assert_eq!(send(&app, get("/api/stats/cards?version=1.29", "")).await.body, expected);
 
     let all = send(&app, get("/api/stats/cards?version=all", "")).await.body;
     let find = |id: Uuid| all.as_array().unwrap().iter().find(|c| c["card"] == json!(id)).unwrap().clone();
-    assert_eq!(find(k(1)), card(k(1), 27, 16, Some(16.0 / 27.0), 50.0));
-    assert_eq!(find(k(9)), card(k(9), 5, 4, Some(0.8), 50.0));
+    assert_eq!(find(k(1)), card(k(1), 27, 16, Some(16.0 / 27.0), 50.0, Some("A")));
+    assert_eq!(find(k(9)), card(k(9), 5, 4, Some(0.8), 50.0, None));
     assert_eq!(all.as_array().unwrap().len(), 10);
     let old = send(&app, get("/api/stats/cards?version=1.27.0", "")).await.body;
-    assert_eq!(old[0], card(k(1), 4, 2, Some(0.5), 4.0));
+    assert_eq!(old[0], card(k(1), 4, 2, Some(0.5), 4.0, None));
     assert_eq!(old.as_array().unwrap().len(), 7);
+}
+
+fn ranked(rows: &[(i64, i64)]) -> Vec<CardStats> {
+    let mut cards: Vec<CardStats> = rows
+        .iter()
+        .map(|&(games, wins)| CardStats {
+            card: Uuid::nil(),
+            games,
+            wins,
+            win_rate: None,
+            play_rate: 0.0,
+            win_rate_change: None,
+            play_rate_change: None,
+            adjusted_win_rate: None,
+            tier: None,
+        })
+        .collect();
+    rank(&mut cards);
+    cards
+}
+
+fn tiers(rows: &[(i64, i64)]) -> Vec<Option<Tier>> {
+    ranked(rows).iter().map(|c| c.tier).collect()
+}
+
+#[test]
+fn tier_cuts_at_the_limits() {
+    use Tier::*;
+    let rows = [(34, 20), (34, 18), (34, 17), (34, 16), (34, 14)];
+    assert_eq!(tiers(&rows), [Some(S), Some(A), Some(B), Some(C), Some(D)]);
+}
+
+#[test]
+fn tier_needs_5_ranked_cards() {
+    let rows = [(40, 35), (40, 20), (40, 5), (40, 10), (10, 1)];
+    assert_eq!(tiers(&rows), [Some(Tier::B), Some(Tier::B), Some(Tier::B), Some(Tier::B), None]);
+}
+
+#[test]
+fn tier_without_spread() {
+    assert_eq!(tiers(&[(20, 3); 6]), [Some(Tier::B); 6]);
+}
+
+#[test]
+fn tier_needs_20_games() {
+    use Tier::*;
+    let rows = [(19, 19), (20, 0), (34, 20), (34, 18), (34, 17), (34, 16), (34, 14)];
+    assert_eq!(tiers(&rows), [None, Some(D), Some(A), Some(A), Some(B), Some(B), Some(B)]);
+    assert_eq!(ranked(&rows)[0].adjusted_win_rate, Some(34.0 / 49.0));
+}
+
+#[test]
+fn adjusted_win_rate_without_games() {
+    let cards = ranked(&[(0, 0), (10, 5)]);
+    assert_eq!(cards.iter().map(|c| c.adjusted_win_rate).collect::<Vec<_>>(), [None, Some(0.5)]);
+    assert_eq!(cards.iter().map(|c| c.tier).collect::<Vec<_>>(), [None, None]);
 }
 
 #[sqlx::test]
