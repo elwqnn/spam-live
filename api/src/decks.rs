@@ -665,15 +665,19 @@ pub async fn put_vote(
     if public_deck_author(&s.db, id).await? == user.id {
         return Err(forbidden("you cannot vote for your own deck"));
     }
-    sqlx::query(
+    let changed = sqlx::query(
         "INSERT INTO votes (deck_id, user_id, value) VALUES ($1, $2, $3)
-         ON CONFLICT (deck_id, user_id) DO UPDATE SET value = EXCLUDED.value",
+         ON CONFLICT (deck_id, user_id) DO UPDATE SET value = EXCLUDED.value WHERE votes.value <> EXCLUDED.value",
     )
     .bind(id)
     .bind(user.id)
     .bind(input.value)
     .execute(&s.db)
-    .await?;
+    .await?
+    .rows_affected();
+    if changed == 1 {
+        s.live.votes(&s.db, id).await;
+    }
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -685,7 +689,15 @@ pub async fn delete_vote(
     Path(id): Path<i64>,
 ) -> Result<StatusCode, ApiError> {
     public_deck_author(&s.db, id).await?;
-    sqlx::query("DELETE FROM votes WHERE deck_id = $1 AND user_id = $2").bind(id).bind(user.id).execute(&s.db).await?;
+    let changed = sqlx::query("DELETE FROM votes WHERE deck_id = $1 AND user_id = $2")
+        .bind(id)
+        .bind(user.id)
+        .execute(&s.db)
+        .await?
+        .rows_affected();
+    if changed == 1 {
+        s.live.votes(&s.db, id).await;
+    }
     Ok(StatusCode::NO_CONTENT)
 }
 

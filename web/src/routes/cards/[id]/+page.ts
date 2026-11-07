@@ -2,7 +2,8 @@ import { api, ok, type Schemas } from '#lib';
 import { getLocale } from '#lib/paraglide/runtime.js';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ fetch, url, params, untrack }) => {
+export const load: PageLoad = async ({ fetch, url, params, untrack, depends }) => {
+	depends('app:decks');
 	const client = api(
 		fetch,
 		untrack(() => url.origin)

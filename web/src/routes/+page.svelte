@@ -10,6 +10,7 @@
 	import DesktopCta from '#lib/components/DesktopCta.svelte';
 	import ShaderBackground from '#lib/components/ShaderBackground.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
+	import { live } from '#lib/live.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { promote } from '#lib/promote.js';
 	import type { PageProps } from './$types';
@@ -43,7 +44,6 @@
 	};
 
 	let recent = $derived(data.recent);
-	let source: EventSource | undefined;
 	let timer: ReturnType<typeof setTimeout> | undefined;
 	let latest = 0;
 
@@ -63,41 +63,23 @@
 		if (pinned && row) row.scrollLeft = 0;
 	}
 
-	function close() {
+	function onvisibilitychange() {
+		if (document.visibilityState === 'visible') return;
 		latest++;
 		clearTimeout(timer);
-		source?.close();
-		source = undefined;
-	}
-
-	function connect() {
-		close();
-		if (document.visibilityState !== 'visible') return;
-		let opened = false;
-		source = new EventSource('/api/decks/events');
-		source.addEventListener('decks', () => {
-			clearTimeout(timer);
-			timer = setTimeout(refresh, 500);
-		});
-		source.addEventListener('open', () => {
-			if (opened) refresh();
-			opened = true;
-		});
-		source.addEventListener('error', () => {
-			if (source?.readyState !== EventSource.CLOSED) return;
-			clearTimeout(timer);
-			timer = setTimeout(onvisibilitychange, 5000);
-		});
-	}
-
-	function onvisibilitychange() {
-		connect();
-		if (source) refresh();
 	}
 
 	onMount(() => {
-		connect();
-		return close;
+		const stop = live((sync) => {
+			clearTimeout(timer);
+			if (sync) refresh();
+			else timer = setTimeout(refresh, 500);
+		});
+		return () => {
+			stop();
+			latest++;
+			clearTimeout(timer);
+		};
 	});
 
 	function page(direction: number) {

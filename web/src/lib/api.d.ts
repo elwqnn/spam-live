@@ -2094,7 +2094,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Server-Sent Events. The first frame sets retry to 5000 ms. Each event has the name decks. Its data is the ID of a deck that came into the public decks, left them, or changed while public, or 0 after missed events or an account deletion. Fetch the list again on each event. Not cached. */
+            /** @description Server-Sent Events. The first frame sets retry to 5000 ms. An event named decks has the ID of a deck that came into the public decks, left them, or changed while public, or 0 after missed events or an account deletion. Fetch the list again on each decks event. An event named votes comes after each vote change on a public deck. Its data is JSON {"id":1,"upvotes":3,"downvotes":1}: the deck ID and its new vote counts. Not cached. */
             200: {
                 headers: {
                     [name: string]: unknown;

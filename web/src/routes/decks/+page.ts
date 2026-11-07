@@ -7,7 +7,8 @@ const MAX_OFFSET = 10_000;
 const SORTS = ['votes', 'recent', 'winrate'] as const;
 type Query = Record<string, string | null>;
 
-export const load: PageLoad = async ({ fetch, url, parent, untrack }) => {
+export const load: PageLoad = async ({ fetch, url, parent, untrack, depends }) => {
+	depends('app:decks');
 	const client = api(
 		fetch,
 		untrack(() => url.origin)

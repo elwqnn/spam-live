@@ -5,7 +5,8 @@ import type { PageLoad } from './$types';
 
 const PAGE_SIZE = 24;
 
-export const load: PageLoad = async ({ fetch, url, parent }) => {
+export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
+	depends('app:decks');
 	const { me } = await parent();
 	if (!me) redirect(303, loginHref(url));
 	const client = api(fetch, url.origin);

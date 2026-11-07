@@ -2,7 +2,7 @@ mod common;
 
 use std::{sync::Arc, time::Duration};
 
-use api::live::Live;
+use api::live::{CAPACITY, Live};
 use axum::{
     Router,
     body::BodyDataStream,
@@ -37,6 +37,14 @@ async fn read(body: &mut BodyDataStream, n: usize) -> Vec<String> {
 
 fn signals(ids: &[i64]) -> Vec<String> {
     ids.iter().map(|id| format!("event: decks\ndata: {id}")).collect()
+}
+
+fn votes(id: i64, up: i64, down: i64) -> String {
+    format!("event: votes\ndata: {{\"id\":{id},\"upvotes\":{up},\"downvotes\":{down}}}")
+}
+
+async fn status(app: &Router, cookie: &str, method: &str, uri: String, body: Option<serde_json::Value>) -> StatusCode {
+    send(app, req(method, &uri, cookie, body)).await.status
 }
 
 async fn create(app: &Router, cookie: &str) -> i64 {
@@ -82,8 +90,76 @@ async fn public_deck_changes_send_signals(pool: PgPool) {
     let resolve = json!({ "action": "delete" });
     call(&app, &admin, "POST", format!("/api/admin/reports/{}/resolve", reports[0]["id"]), Some(resolve)).await;
 
-    let expected = signals(&[first, first, first, second, second, third, third]);
+    let mut expected = signals(&[first, first, first, second, second, third]);
+    expected.push(votes(third, 1, 0));
+    expected.extend(signals(&[third]));
     assert_eq!(read(&mut events, expected.len()).await, expected);
+}
+
+#[sqlx::test]
+async fn votes_send_signals(pool: PgPool) {
+    let app = app(pool.clone());
+    let (_, a) = user(&pool, "76561190000000001").await;
+    let (_, b) = user(&pool, "76561190000000002").await;
+    let (_, c) = user(&pool, "76561190000000003").await;
+    let deck = create(&app, &a).await;
+    call(&app, &a, "POST", format!("/api/decks/{deck}/publish"), None).await;
+    let draft = create(&app, &a).await;
+    let mut events = open(&app).await;
+    let vote = format!("/api/decks/{deck}/vote");
+
+    call(&app, &b, "PUT", vote.clone(), Some(json!({ "value": 1 }))).await;
+    call(&app, &c, "PUT", vote.clone(), Some(json!({ "value": -1 }))).await;
+    call(&app, &b, "PUT", vote.clone(), Some(json!({ "value": -1 }))).await;
+    call(&app, &b, "PUT", vote.clone(), Some(json!({ "value": -1 }))).await;
+    call(&app, &b, "DELETE", vote.clone(), None).await;
+    call(&app, &b, "DELETE", vote.clone(), None).await;
+    assert_eq!(status(&app, &a, "PUT", vote.clone(), Some(json!({ "value": 1 }))).await, StatusCode::FORBIDDEN);
+    assert_eq!(status(&app, &b, "PUT", vote.clone(), Some(json!({ "value": 5 }))).await, StatusCode::BAD_REQUEST);
+    let draft_vote = format!("/api/decks/{draft}/vote");
+    assert_eq!(status(&app, &b, "PUT", draft_vote.clone(), Some(json!({ "value": 1 }))).await, StatusCode::NOT_FOUND);
+    assert_eq!(status(&app, &b, "DELETE", draft_vote, None).await, StatusCode::NOT_FOUND);
+    call(&app, &a, "DELETE", vote, None).await;
+    call(&app, &a, "POST", format!("/api/decks/{draft}/publish"), None).await;
+
+    let mut expected = vec![votes(deck, 1, 0), votes(deck, 1, 1), votes(deck, 0, 2), votes(deck, 0, 1)];
+    expected.extend(signals(&[draft]));
+    assert_eq!(read(&mut events, expected.len()).await, expected);
+}
+
+#[sqlx::test]
+async fn concurrent_votes_send_counts_in_order(pool: PgPool) {
+    let app = app(pool.clone());
+    let (_, a) = user(&pool, "76561190000000001").await;
+    let deck = create(&app, &a).await;
+    call(&app, &a, "POST", format!("/api/decks/{deck}/publish"), None).await;
+    let mut voters = Vec::new();
+    for n in 100..120 {
+        voters.push(user(&pool, &format!("7656119000000{n:04}")).await.1);
+    }
+    let mut events = open(&app).await;
+
+    let mut tasks = tokio::task::JoinSet::new();
+    for cookie in voters {
+        let app = app.clone();
+        tasks.spawn(async move {
+            call(&app, &cookie, "PUT", format!("/api/decks/{deck}/vote"), Some(json!({ "value": 1 }))).await
+        });
+    }
+    tasks.join_all().await;
+
+    let ups: Vec<i64> = read(&mut events, 20)
+        .await
+        .iter()
+        .map(|e| {
+            let data: serde_json::Value =
+                serde_json::from_str(e.strip_prefix("event: votes\ndata: ").unwrap()).unwrap();
+            assert_eq!(data["id"], deck);
+            data["upvotes"].as_i64().unwrap()
+        })
+        .collect();
+    assert!(ups.is_sorted(), "{ups:?}");
+    assert_eq!(ups.last(), Some(&20));
 }
 
 #[sqlx::test]
@@ -135,13 +211,14 @@ async fn lag_and_close(pool: PgPool) {
     let app = api::router(state);
     let mut events = open(&app).await;
 
-    for id in 1..=20 {
+    let total = CAPACITY as i64 + 4;
+    for id in 1..=total {
         live.notify(id);
     }
     live.close();
 
     let mut expected = signals(&[0]);
-    expected.extend(signals(&(5..=20).collect::<Vec<_>>()));
+    expected.extend(signals(&(5..=total).collect::<Vec<_>>()));
     assert_eq!(read(&mut events, expected.len()).await, expected);
     assert!(timeout(Duration::from_secs(5), events.next()).await.unwrap().is_none());
 }

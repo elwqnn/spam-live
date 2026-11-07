@@ -3,7 +3,9 @@
 	import { page } from '$app/state';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { ArrowDownBigIcon, ArrowUpBigIcon } from '@hugeicons/core-free-icons';
+	import { onMount } from 'svelte';
 	import { href, loginHref, type Schemas } from '#lib';
+	import { live, votes } from '#lib/live.js';
 	import { m } from '#lib/paraglide/messages.js';
 
 	let {
@@ -25,7 +27,18 @@
 	let up = $derived(deck.upvotes);
 	let down = $derived(deck.downvotes);
 	let pending = false;
+	let server: unknown;
 	let pop = $state(0);
+
+	onMount(() => live());
+
+	$effect(() => {
+		const counts = votes.get(deck.id);
+		server = [deck.upvotes, deck.downvotes, counts];
+		if (!counts) return;
+		up = counts.upvotes;
+		down = counts.downvotes;
+	});
 
 	const move = (side: number, by: number) => {
 		if (side === 1) up += by;
@@ -36,7 +49,7 @@
 		if (pending) return cancel();
 		pending = true;
 		const next = Number((submitter as HTMLButtonElement | null)?.value);
-		const was = { mine, up, down };
+		const was = { mine, up, down, server };
 		move(mine, -1);
 		move(next, 1);
 		mine = next;
@@ -45,9 +58,10 @@
 			pending = false;
 			if (result.type !== 'success') {
 				mine = was.mine;
+				pop = 0;
+				if (server !== was.server) return;
 				up = was.up;
 				down = was.down;
-				pop = 0;
 			}
 		};
 	};
