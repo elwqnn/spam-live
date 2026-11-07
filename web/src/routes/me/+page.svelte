@@ -41,15 +41,18 @@
 {/snippet}
 
 <TitleRow class="flex flex-wrap items-center gap-4 row">
-	{#if me.avatarUrl}<img src={me.avatarUrl} alt="" class="size-16 rounded-full" />{/if}
+	{#if me.avatarUrl}<img src={me.avatarUrl} alt="" class="size-16 rounded-full" data-private />{/if}
 	<div class="grid min-w-0 flex-1 gap-1">
-		<h1 class="font-heading text-3xl font-normal tracking-tight wrap-anywhere sm:text-4xl">
+		<h1
+			class="font-heading text-3xl font-normal tracking-tight wrap-anywhere sm:text-4xl"
+			data-private
+		>
 			{me.displayName}
 		</h1>
 		<p class="text-sm text-muted-foreground">
 			{m.me_spam_account()}:
 			{#if me.spamAccountId}
-				<code class="text-xs break-all text-foreground">{me.spamAccountId}</code>
+				<code class="text-xs break-all text-foreground" data-private>{me.spamAccountId}</code>
 			{:else}
 				{m.me_not_linked()}
 			{/if}

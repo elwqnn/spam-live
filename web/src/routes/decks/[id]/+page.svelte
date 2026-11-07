@@ -243,7 +243,7 @@
 								<span class="text-xs text-muted-foreground">{m.edited()}</span>
 							{/if}
 						</div>
-						<p class="text-sm leading-6 wrap-anywhere whitespace-pre-line">{c.body}</p>
+						<p class="text-sm leading-6 wrap-anywhere whitespace-pre-line" data-private>{c.body}</p>
 						{#if me?.id === c.authorId}
 							<div class="flex flex-wrap items-start gap-2">
 								<details class="open:basis-full">
@@ -259,7 +259,7 @@
 										<input type="hidden" name="id" value={c.id} />
 										<label class="grid gap-1.5 text-sm">
 											<span class="font-medium">{m.your_comment()}</span>
-											<Textarea name="body" required value={c.body} />
+											<Textarea name="body" required value={c.body} data-private />
 										</label>
 										<Button type="submit" size="sm" class="justify-self-start">{m.save()}</Button>
 									</form>
@@ -290,7 +290,7 @@
 				class="grid gap-2 border-t row"
 			>
 				<label for="comment-body" class="text-sm font-medium">{m.add_comment()}</label>
-				<Textarea id="comment-body" name="body" required rows={3} />
+				<Textarea id="comment-body" name="body" required rows={3} data-private />
 				{@render alert('comment')}
 				<Button type="submit" class="justify-self-start">{m.post_comment()}</Button>
 			</form>

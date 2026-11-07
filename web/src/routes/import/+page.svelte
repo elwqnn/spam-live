@@ -179,7 +179,9 @@
 		<section class="rows text-sm" aria-live="polite">
 			{#each uploads as upload (upload.accountId)}
 				<div class="grid gap-2 row">
-					<h2 class="font-medium wrap-anywhere">{m.import_account({ id: upload.accountId })}</h2>
+					<h2 class="font-medium wrap-anywhere" data-private>
+						{m.import_account({ id: upload.accountId })}
+					</h2>
 					{#if upload.error}
 						<p role="alert" class="text-destructive">{upload.error}</p>
 					{:else if upload.data}
