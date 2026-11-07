@@ -4,6 +4,7 @@ pub mod auth;
 pub mod card_matchups;
 pub mod catalog;
 pub mod decks;
+pub mod feedback;
 pub mod live;
 pub mod matches;
 pub mod release;
@@ -28,6 +29,9 @@ pub struct Config {
     pub steam_api_key: Option<String>,
     pub steam_openid_url: String,
     pub github_release_url: String,
+    pub github_api_url: String,
+    pub github_feedback_repo: String,
+    pub github_feedback_token: Option<String>,
     pub desktop_min_version: String,
     pub max_pending_device_codes: i64,
 }
@@ -155,6 +159,10 @@ pub fn public<T: Serialize>(body: T) -> Response {
         analytics::presence,
         analytics::desktop_presence,
         analytics::admin_analytics,
+        feedback::create,
+        feedback::image,
+        feedback::list,
+        feedback::delete_image,
     ),
     components(schemas(decks::DeckSort, stats::StatsSort, stats::Trend, analytics::AnalyticsRange))
 )]
@@ -177,6 +185,7 @@ pub fn router(state: AppState) -> Router {
         .merge(card_matchups::routes())
         .merge(admin::routes())
         .merge(analytics::routes())
+        .merge(feedback::routes())
         .with_state(state)
 }
 

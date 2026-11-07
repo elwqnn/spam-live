@@ -18,6 +18,7 @@
 	type="button"
 	popovertarget={id}
 	aria-label={m.account_menu()}
+	data-private
 	class="cursor-pointer rounded-full transition-colors outline-none hover:ring-2 hover:ring-foreground/25 focus-visible:ring-2 focus-visible:ring-ring"
 	style:anchor-name="--{id}"
 >
@@ -40,7 +41,7 @@
 >
 	<div class="px-2 py-1.5">
 		<p class="eyebrow text-muted-foreground">{m.signed_in_as()}</p>
-		<p class="truncate text-sm font-semibold">{me.displayName}</p>
+		<p class="truncate text-sm font-semibold" data-private>{me.displayName}</p>
 	</div>
 	<div class="mt-1 border-t pt-1">
 		<a class={item} href={href('/me')} onclick={close}>{m.me_title()}</a>

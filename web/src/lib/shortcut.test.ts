@@ -39,6 +39,10 @@ describe('shortcut', () => {
 		expect(shortcut(press('/'), false, true)).toBe('search');
 		expect(shortcut(press('?', { shiftKey: true }), false, true)).toBe('help');
 		expect(shortcut(press('d'), false, true)).toBe('download');
+		expect(shortcut(press('f'), false, true)).toBe('feedback');
+		expect(shortcut(press('F', { shiftKey: true }), false, true)).toBeNull();
+		expect(shortcut(press('f', { ctrlKey: true }), false, true)).toBeNull();
+		expect(shortcut(press('f', { metaKey: true }), true, true)).toBeNull();
 		expect(shortcut(press('g'), false, true)).toBeNull();
 		expect(shortcut(press('x'), false, true)).toBeNull();
 		expect(shortcut(press('c'), false, true)).toBeNull();
@@ -55,7 +59,7 @@ describe('shortcut', () => {
 	});
 
 	it('keeps only Ctrl+K when single keys are off', () => {
-		for (const key of ['/', '?', 'd']) expect(shortcut(press(key), false, false)).toBeNull();
+		for (const key of ['/', '?', 'd', 'f']) expect(shortcut(press(key), false, false)).toBeNull();
 		expect(shortcut(press('k', { ctrlKey: true }), false, false)).toBe('palette');
 		expect(shortcut(press('k', { metaKey: true }), true, false)).toBe('palette');
 	});
@@ -67,7 +71,7 @@ describe('shortcut', () => {
 			{ tagName: 'SELECT' },
 			{ tagName: 'DIV', isContentEditable: true }
 		]) {
-			for (const key of ['/', '?', 'd'])
+			for (const key of ['/', '?', 'd', 'f'])
 				expect(shortcut(press(key, { target }), false, true)).toBeNull();
 		}
 		expect(shortcut(press('d', { target: null }), false, true)).toBe('download');

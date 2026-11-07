@@ -21,6 +21,13 @@ export const actions: Actions = {
 		});
 		return result('resolve', res);
 	},
+	deleteImage: async ({ fetch, url, request }) => {
+		const id = Number((await request.formData()).get('id'));
+		const res = await api(fetch, url.origin).DELETE('/api/admin/feedback/{id}/image', {
+			params: { path: { id } }
+		});
+		return result('deleteImage', res);
+	},
 	ban: (event) => user(event, 'ban'),
 	unban: (event) => user(event, 'unban'),
 	unlink: (event) => user(event, 'unlink')

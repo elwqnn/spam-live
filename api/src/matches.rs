@@ -390,11 +390,11 @@ pub(crate) async fn store(
     Ok(Status::New)
 }
 
-fn multipart_error(e: axum::extract::multipart::MultipartError) -> ApiError {
+pub(crate) fn multipart_error(e: axum::extract::multipart::MultipartError) -> ApiError {
     ApiError::new(e.status(), e.body_text())
 }
 
-async fn read_field(field: &mut Field<'_>, max: usize) -> Result<Option<Vec<u8>>, ApiError> {
+pub(crate) async fn read_field(field: &mut Field<'_>, max: usize) -> Result<Option<Vec<u8>>, ApiError> {
     let mut buf = Vec::new();
     let mut too_large = false;
     while let Some(chunk) = field.chunk().await.map_err(multipart_error)? {

@@ -25,6 +25,7 @@ services:
       PUBLIC_URL: ${SITE_URL:?}
       STEAM_API_KEY: ${STEAM_API_KEY:?}
       DESKTOP_MIN_VERSION: ${DESKTOP_MIN_VERSION:-0.0.0}
+      GITHUB_FEEDBACK_TOKEN: ${GITHUB_FEEDBACK_TOKEN:-}
     healthcheck:
       <<: *healthcheck
       test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/api/desktop/min-version"]

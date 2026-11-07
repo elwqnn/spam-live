@@ -3,17 +3,20 @@
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { ArrowDown02Icon, ArrowUp02Icon, Search01Icon } from '@hugeicons/core-free-icons';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { api, entryName, glossaryAnchor, href, type Card, type Schemas } from '#lib';
 	import { highlight, search } from '#lib/search.js';
 	import { shortcut } from '#lib/shortcut.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { m } from '#lib/paraglide/messages.js';
-	import { getLocale } from '#lib/paraglide/runtime.js';
+	import { getLocale, locales, localizeHref, type Locale } from '#lib/paraglide/runtime.js';
 	import CardBadge, { ELEMENTS, RARITIES } from './CardBadge.svelte';
 	import CardBadgeStack from './CardBadgeStack.svelte';
 	import ToxIcon from './ToxIcon.svelte';
 
-	let { mac }: { mac: boolean } = $props();
+	let { mac, onfeedback }: { mac: boolean; onfeedback: () => void } = $props();
+
+	const LANGUAGES: Record<Locale, string> = { en: 'English', fr: 'Français' };
 
 	const TYPES = [
 		['keyword', 'keywords', m.glossary_keyword],
@@ -34,7 +37,10 @@
 	type Option = {
 		key: string;
 		label: string;
-		go: string;
+		go?: string;
+		run?: () => void;
+		hint?: string;
+		names?: string;
 		card?: Card;
 		entry?: Entry;
 		element?: string;
@@ -118,8 +124,42 @@
 		};
 	});
 
+	const actions = $derived.by((): Option[] => {
+		const locale = locales.find((l) => l !== getLocale()) ?? locales[0];
+		const language = { language: LANGUAGES[locale] };
+		const names = (name: (options: { locale: Locale }) => string) =>
+			locales.map((l) => name({ locale: l })).join(' · ');
+		return [
+			{
+				key: 'action-download',
+				label: m.palette_download(),
+				names: names((o) => m.palette_download({}, o)),
+				go: '/download',
+				hint: 'D'
+			},
+			{
+				key: 'action-feedback',
+				label: m.feedback_title(),
+				names: names((o) => m.feedback_title({}, o)),
+				run: onfeedback,
+				hint: 'F'
+			},
+			{
+				key: 'action-language',
+				label: m.palette_language(language),
+				names: names((o) => m.palette_language(language, o)),
+				run: () => location.assign(localizeHref(page.url.pathname + page.url.search, { locale }))
+			}
+		];
+	});
+
 	const groups = $derived(
 		[
+			{
+				id: 'actions',
+				label: m.palette_actions(),
+				options: q ? search(actions, q, (a) => a.names ?? a.label) : actions
+			},
 			{
 				id: 'cards',
 				label: m.nav_cards(),
@@ -181,9 +221,10 @@
 	);
 
 	function run(option: Option | undefined) {
-		if (!option) return;
-		dialog?.close();
-		goto(href(option.go));
+		if (!option || !dialog) return;
+		if (option.run) dialog.addEventListener('close', option.run, { once: true });
+		dialog.close();
+		if (option.go) goto(href(option.go));
 	}
 
 	async function move(step: number) {
@@ -325,6 +366,13 @@
 									'max-w-[40%] shrink-0 truncate text-xs text-muted-foreground',
 									group.id === 'decks' && 'max-sm:hidden'
 								]}>{option.detail}</span
+							>
+						{/if}
+						{#if option.hint}
+							<kbd
+								aria-hidden="true"
+								class="shrink-0 in-[.keys-off]:hidden max-sm:hidden pointer-coarse:hidden"
+								>{option.hint}</kbd
 							>
 						{/if}
 					</button>

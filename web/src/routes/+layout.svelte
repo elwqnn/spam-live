@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { Download04Icon } from '@hugeicons/core-free-icons';
+	import { Download04Icon, Message01Icon } from '@hugeicons/core-free-icons';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { api, href, loginHref, type Schemas } from '#lib';
@@ -10,6 +10,8 @@
 	import CommandPalette from '#lib/components/CommandPalette.svelte';
 	import Dialog from '#lib/components/Dialog.svelte';
 	import Switch from '#lib/components/Switch.svelte';
+	import Tooltip from '#lib/components/Tooltip.svelte';
+	import FeedbackDialog from '#lib/components/feedback/FeedbackDialog.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale, locales, localizeHref } from '#lib/paraglide/runtime.js';
@@ -39,6 +41,7 @@
 	let mac = $state(false);
 	let single = $state(true);
 	let palette = $state<ReturnType<typeof CommandPalette>>();
+	let feedback = $state<ReturnType<typeof FeedbackDialog>>();
 	let head = $state(0);
 	let presence = $state<Schemas['Online']>();
 	let presenceId = '';
@@ -104,6 +107,7 @@
 		else if (action === 'palette' || action === 'search') palette?.open();
 		else if (action === 'help')
 			document.querySelector<HTMLDialogElement>('#shortcuts')?.showModal();
+		else if (action === 'feedback') feedback?.open();
 		else goto(download);
 	}
 </script>
@@ -136,7 +140,21 @@
 			{/each}
 		</nav>
 		<div class="ml-auto flex min-w-0 flex-wrap items-center gap-3">
-			<CommandPalette bind:this={palette} {mac} />
+			<CommandPalette bind:this={palette} {mac} onfeedback={() => feedback?.open()} />
+			<Tooltip content={m.feedback_title()}>
+				{#snippet children(tip)}
+					<Button
+						variant="ghost"
+						size="icon-sm"
+						class="text-muted-foreground"
+						aria-label={m.feedback_title()}
+						aria-haspopup="dialog"
+						aria-keyshortcuts={single ? 'f' : undefined}
+						onclick={() => feedback?.open()}
+						{...tip}><HugeiconsIcon icon={Message01Icon} /></Button
+					>
+				{/snippet}
+			</Tooltip>
 			{#if data.me}
 				<AccountMenu me={data.me} {logout} />
 			{:else}
@@ -201,6 +219,8 @@
 		<dd>{m.shortcut_search()}</dd>
 		<dt><kbd>D</kbd></dt>
 		<dd>{m.import_app_download()}</dd>
+		<dt><kbd>F</kbd></dt>
+		<dd>{m.feedback_title()}</dd>
 		<dt><kbd>?</kbd></dt>
 		<dd>{m.shortcut_help()}</dd>
 	</dl>
@@ -216,5 +236,6 @@
 		<Button variant="ghost" size="sm" commandfor="shortcuts" command="close">{m.close()}</Button>
 	</div>
 </Dialog>
+<FeedbackDialog bind:this={feedback} me={data.me} />
 <CardPreview />
 <div class="grain fixed inset-0 z-50 opacity-(--grain) mix-blend-overlay" aria-hidden="true"></div>

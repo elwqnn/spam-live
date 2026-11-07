@@ -4,7 +4,7 @@ import { RANGES } from '#lib/analytics.js';
 import { getLocale } from '#lib/paraglide/runtime.js';
 import type { PageLoad } from './$types';
 
-const TABS = ['reports', 'users', 'matches', 'cards', 'analytics'] as const;
+const TABS = ['reports', 'users', 'matches', 'cards', 'analytics', 'feedback'] as const;
 
 export const load: PageLoad = async ({ fetch, url, parent }) => {
 	const { me } = await parent();
@@ -12,7 +12,7 @@ export const load: PageLoad = async ({ fetch, url, parent }) => {
 	const client = api(fetch, url.origin);
 	const tab = TABS.find((t) => t === url.searchParams.get('tab')) ?? 'reports';
 	const range = RANGES.find((r) => r === url.searchParams.get('range')) ?? '7d';
-	const [reports, disputed, unknown, cards, analytics] = await Promise.all([
+	const [reports, disputed, unknown, cards, analytics, feedback] = await Promise.all([
 		tab === 'reports'
 			? client.GET('/api/admin/reports', { params: { query: { status: 'open' } } }).then(ok)
 			: [],
@@ -23,7 +23,8 @@ export const load: PageLoad = async ({ fetch, url, parent }) => {
 			: [],
 		tab === 'analytics'
 			? client.GET('/api/admin/analytics', { params: { query: { range } } }).then(ok)
-			: null
+			: null,
+		tab === 'feedback' ? client.GET('/api/admin/feedback').then(ok) : []
 	]);
-	return { tab, reports, disputed, unknown, cards, analytics, range };
+	return { tab, reports, disputed, unknown, cards, analytics, range, feedback };
 };

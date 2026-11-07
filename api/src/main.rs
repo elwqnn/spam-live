@@ -46,6 +46,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let github_release_url = env("GITHUB_RELEASE_URL")
         .unwrap_or_else(|| "https://api.github.com/repos/elwqnn/spam-live/releases/latest".into());
     reqwest::Url::parse(&github_release_url).map_err(|e| format!("GITHUB_RELEASE_URL is invalid: {e}"))?;
+    let github_api_url =
+        env("GITHUB_API_URL").unwrap_or_else(|| "https://api.github.com".into()).trim_end_matches('/').to_string();
+    reqwest::Url::parse(&github_api_url).map_err(|e| format!("GITHUB_API_URL is invalid: {e}"))?;
+    let github_feedback_repo = env("GITHUB_FEEDBACK_REPO").unwrap_or_else(|| "elwqnn/spam-live".into());
+    let repo_part = |p: &str| !p.is_empty() && p.bytes().all(|b| b.is_ascii_alphanumeric() || b"-_.".contains(&b));
+    if !github_feedback_repo.split_once('/').is_some_and(|(owner, name)| repo_part(owner) && repo_part(name)) {
+        return Err("GITHUB_FEEDBACK_REPO must be owner/name".into());
+    }
     let desktop_min_version = env("DESKTOP_MIN_VERSION").unwrap_or_else(|| "0.0.0".into());
     catalog::parse_version(&desktop_min_version).ok_or("DESKTOP_MIN_VERSION is invalid")?;
     let catalog_dir = PathBuf::from(env("CATALOG_DIR").unwrap_or_else(|| "catalog".into()));
@@ -60,6 +68,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         steam_api_key: env("STEAM_API_KEY"),
         steam_openid_url,
         github_release_url,
+        github_api_url,
+        github_feedback_repo,
+        github_feedback_token: env("GITHUB_FEEDBACK_TOKEN"),
         desktop_min_version,
         max_pending_device_codes: 1000,
     };
@@ -73,6 +84,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Err(e) = api::cleanup(&cleanup_db).await {
                 tracing::error!(error = %e, "cleanup failed");
             }
+        }
+    });
+
+    let feedback_state = state.clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(Duration::from_secs(3600));
+        loop {
+            interval.tick().await;
+            api::feedback::retry_pending(&feedback_state).await;
         }
     });
 

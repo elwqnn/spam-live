@@ -12,7 +12,8 @@
 		m.privacy_store_devices,
 		m.privacy_store_presence,
 		m.privacy_store_app_presence,
-		m.privacy_store_upload_source
+		m.privacy_store_upload_source,
+		m.privacy_store_feedback
 	];
 	const notStored = [
 		m.privacy_not_store_opponent,

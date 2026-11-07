@@ -4,7 +4,8 @@ WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY . .
-RUN bun run build
+ARG SITE_VERSION=dev
+RUN VITE_SITE_VERSION=$SITE_VERSION bun run build
 
 FROM node:26-slim
 WORKDIR /app

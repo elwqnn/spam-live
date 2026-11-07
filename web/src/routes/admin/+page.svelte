@@ -22,8 +22,10 @@
 		['users', m.admin_users],
 		['matches', m.admin_matches],
 		['cards', m.admin_cards],
-		['analytics', m.admin_analytics]
+		['analytics', m.admin_analytics],
+		['feedback', m.admin_feedback]
 	] as const;
+	const kinds = { bug: m.feedback_bug, idea: m.feedback_idea, other: m.feedback_other };
 	const link = (active: boolean) =>
 		buttonVariants({ variant: active ? 'secondary' : 'ghost', size: 'sm' });
 </script>
@@ -62,16 +64,20 @@
 							{r.targetType === 'deck' ? m.admin_deck() : m.admin_comment()}
 						</Badge>
 						{#if r.targetType === 'deck'}
-							<a class="font-medium wrap-anywhere hover:underline" href={href(`/decks/${r.deckId}`)}
-								>{r.targetText}</a
+							<a
+								class="font-medium wrap-anywhere hover:underline"
+								href={href(`/decks/${r.deckId}`)}
+								data-private>{r.targetText}</a
 							>
 						{:else}
 							<a class="hover:underline" href={href(`/decks/${r.deckId}`)}>{m.admin_open_deck()}</a>
 						{/if}
-						<span class="text-muted-foreground">{m.admin_author({ id: r.targetAuthorId })}</span>
+						<span class="text-muted-foreground" data-private
+							>{m.admin_author({ id: r.targetAuthorId })}</span
+						>
 					</div>
 					{#if r.targetType === 'comment'}
-						<blockquote class="border-l-2 pl-3 wrap-anywhere whitespace-pre-line">
+						<blockquote class="border-l-2 pl-3 wrap-anywhere whitespace-pre-line" data-private>
 							{r.targetText}
 						</blockquote>
 					{/if}
@@ -80,7 +86,8 @@
 						{r.reason}
 					</p>
 					<p class="text-muted-foreground">
-						{m.admin_reported_by({ name: r.reporterName })} · <Time iso={r.createdAt} />
+						<span data-private>{m.admin_reported_by({ name: r.reporterName })}</span> ·
+						<Time iso={r.createdAt} />
 					</p>
 					<div class="flex flex-wrap gap-2">
 						<form
@@ -175,7 +182,9 @@
 										? m.result_draw()
 										: m.seat_n({ n: d.winnerSeat })}</span
 								>
-								<span class="wrap-anywhere">{m.admin_uploaders()}: {d.uploaderIds.join(', ')}</span>
+								<span class="wrap-anywhere" data-private
+									>{m.admin_uploaders()}: {d.uploaderIds.join(', ')}</span
+								>
 							</p>
 						</div>
 						<dl class="grid gap-3">
@@ -194,6 +203,38 @@
 		</div>
 	{:else}
 		<p class="row text-sm text-muted-foreground">{m.admin_no_disputed()}</p>
+	{/if}
+{:else if data.tab === 'feedback'}
+	{#if data.feedback.length}
+		<ul class="divide-y">
+			{#each data.feedback as f (f.id)}
+				<li class="grid gap-2 px-(--gutter) py-4 text-sm">
+					<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+						<Badge variant="outline">{kinds[f.kind]()}</Badge>
+						<Time iso={f.createdAt} class="text-muted-foreground" />
+						{#if f.issueUrl}
+							<a class="hover:underline" href={f.issueUrl} rel="external"
+								>{m.admin_issue({ number: f.issueNumber ?? '' })}</a
+							>
+						{:else if f.issueNumber != null}
+							<span>{m.admin_issue({ number: f.issueNumber })}</span>
+						{:else}
+							<span class="text-muted-foreground">{m.admin_pending()}</span>
+						{/if}
+					</div>
+					<p class="line-clamp-3 wrap-anywhere whitespace-pre-line">{f.body}</p>
+					{#if f.imageId}
+						<form method="POST" action={formAction(page.url, 'deleteImage')} use:enhance>
+							<input type="hidden" name="id" value={f.id} />
+							<Button type="submit" size="sm" variant="destructive">{m.admin_delete_image()}</Button
+							>
+						</form>
+					{/if}
+				</li>
+			{/each}
+		</ul>
+	{:else}
+		<p class="row text-sm text-muted-foreground">{m.admin_no_feedback()}</p>
 	{/if}
 {:else if data.tab === 'analytics' && data.analytics}
 	<Analytics data={data.analytics} range={data.range} />

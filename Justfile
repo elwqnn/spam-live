@@ -104,7 +104,7 @@ test *args: db
 images:
     @test -d web/static/art/card -a -d web/static/art/thumb -a -d web/static/art/avatar -a -f web/static/art/ui/card_mask.webp -a -d web/static/art/tox || { echo "web/static/art/ is missing or incomplete: run just art first" >&2; exit 1; }
     docker build -f api/Dockerfile -t {{image}}-api:latest .
-    docker build -t {{image}}-web:latest web
+    docker build --build-arg SITE_VERSION=$(git rev-parse --short HEAD) -t {{image}}-web:latest web
 
 [group('release')]
 [doc('Build and push the images with the tags latest and the commit SHA.')]

@@ -1,10 +1,11 @@
 const KEYS = new Map<string, Shortcut>([
 	['/', 'search'],
 	['?', 'help'],
-	['d', 'download']
+	['d', 'download'],
+	['f', 'feedback']
 ]);
 
-export type Shortcut = 'palette' | 'search' | 'help' | 'download';
+export type Shortcut = 'palette' | 'search' | 'help' | 'download' | 'feedback';
 
 export type Press = {
 	key: string;
