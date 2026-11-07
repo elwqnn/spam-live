@@ -9,7 +9,7 @@
 
 	let { data }: { data: Schemas['HistoryStats'] } = $props();
 
-	const WEEKS = 8;
+	const WEEKS = 12;
 	const day = new Intl.DateTimeFormat(getLocale(), {
 		day: 'numeric',
 		month: 'short',
@@ -39,16 +39,17 @@
 				);
 				const share = items.map((w, i) => (totals[i] ? (w?.games ?? 0) / totals[i] : null));
 				const rate = items.map((w) => w?.winRate ?? null);
-				const now = items[WEEKS - 1];
-				const before = items[WEEKS - 2];
+				const at = recent.length - 1;
+				const now = items[at];
+				const before = items[at - 1];
 				return {
 					key,
 					share,
 					rate,
 					ticks,
-					current: now ? share[WEEKS - 1] : null,
+					current: now ? share[at] : null,
 					winRate: now?.winRate ?? null,
-					shareChange: now && totals[WEEKS - 2] ? share[WEEKS - 1]! - share[WEEKS - 2]! : null,
+					shareChange: now && totals[at - 1] ? share[at]! - share[at - 1]! : null,
 					rateChange: now && before ? now.winRate - before.winRate : null
 				};
 			})
@@ -73,7 +74,6 @@
 			{m.history_title()}
 		</h2>
 		<p class="text-sm text-muted-foreground">{m.history_text()}</p>
-		<p class="mt-1 eyebrow text-muted-foreground">{m.history_note()}</p>
 	</div>
 	{#if !span}
 		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.history_few()}</p>
@@ -118,8 +118,9 @@
 										values={row.share}
 										range={spanRange(row.share, 0.02)}
 										ticks={row.ticks}
-										width={96}
-										height={24}
+										width={160}
+										height={32}
+										class="h-6 w-24 lg:h-8 lg:w-40"
 										color="var(--el-{row.key})"
 									/>
 								</div>
@@ -140,8 +141,9 @@
 										range={spanRange(row.rate, 0.04)}
 										mid={0.5}
 										ticks={row.ticks}
-										width={96}
-										height={24}
+										width={160}
+										height={32}
+										class="h-6 w-24 lg:h-8 lg:w-40"
 										color="var(--el-{row.key})"
 									/>
 								</div>

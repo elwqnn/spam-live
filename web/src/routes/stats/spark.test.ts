@@ -60,6 +60,20 @@ describe('fullWeeks', () => {
 		});
 	});
 
+	it('starts at the first full week with data when there are fewer weeks than the maximum', () => {
+		const weeks = ['2026-10-05', '2026-10-19', '2026-10-26', '2026-11-02'];
+		expect(fullWeeks(weeks, now, 12)).toEqual({
+			last: '2026-10-26',
+			before: '2026-10-19',
+			recent: ['2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26']
+		});
+	});
+
+	it('keeps the last weeks up to the maximum', () => {
+		const weeks = ['2026-09-07', '2026-09-14', '2026-09-21', '2026-09-28', '2026-10-05'];
+		expect(fullWeeks(weeks, now, 3)?.recent).toEqual(['2026-09-21', '2026-09-28', '2026-10-05']);
+	});
+
 	it('needs 2 full weeks', () => {
 		expect(fullWeeks(['2026-10-26', '2026-11-02'], now, 8)).toBeNull();
 		expect(fullWeeks([], now, 8)).toBeNull();

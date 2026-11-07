@@ -64,7 +64,7 @@
 	"all_cards": "Toutes les cartes",
 	"card_zoom": "Voir l'illustration de {name}",
 	"stats_title": "Statistiques",
-	"stats_intro": "La méta de chaque version : les cartes les plus jouées, leurs résultats les unes contre les autres et ensemble, et la durée des matchs. Seuls les matchs classés entre joueurs comptent ; les matchs miroirs et les matchs contestés ne comptent pas.",
+	"stats_intro": "La méta de chaque version, à partir des matchs classés entre joueurs. Les matchs miroirs et les matchs contestés ne comptent pas.",
 	"card": "Carte",
 	"no_stats": "Aucun match pour cette version.",
 	"error_not_found": "Page introuvable",
@@ -470,8 +470,7 @@
 	"pace_long_rate": "Longues",
 	"pace_few": "Aucune carte n'a encore de différence nette.",
 	"history_title": "La méta dans le temps",
-	"history_text": "La part de jeu et le taux de victoire de chaque élément pendant la dernière semaine complète, l'évolution par rapport à la semaine précédente, et les 8 dernières semaines complètes. La part de jeu est la part des emplacements de carte occupés par l'élément.",
-	"history_note": "Toutes les versions. Le filtre de version ne s'applique pas à cette section.",
+	"history_text": "La part de jeu et le taux de victoire de chaque élément pendant la dernière semaine complète, l'évolution par rapport à la semaine précédente, et au plus les 12 dernières semaines complètes. La part de jeu est la part des emplacements de carte occupés par l'élément.",
 	"history_share": "Part de jeu",
 	"history_few": "Pas encore assez de semaines.",
 	"overview_title": "Vue d'ensemble",
@@ -553,5 +552,11 @@
 	"weak_against": "Faible contre",
 	"card_matchups_title": "Affrontements",
 	"card_matchups_none": "Pas assez de parties",
-	"card_matchups_text": "Taux de victoire de cette carte contre chaque carte adverse, {min} parties ou plus, dans la version choisie."
+	"card_matchups_text": "Taux de victoire de cette carte contre chaque carte adverse, {min} parties ou plus, dans la version choisie.",
+	"stats_tabs": "Sections des statistiques",
+	"stats_tab_meta": "Méta",
+	"stats_tab_counters": "Contres",
+	"stats_tab_duos": "Duos",
+	"stats_tab_length": "Durée des parties",
+	"stats_tab_trends": "Évolution"
 }

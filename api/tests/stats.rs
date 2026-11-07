@@ -452,7 +452,7 @@ async fn pace_stats(pool: PgPool) {
     let w_card = |id| pace(id, (20, 16), (20, 6), &[(7, 20, 16), (13, 20, 6)]);
     let l_card = |id| pace(id, (20, 4), (20, 16), &[(7, 20, 4), (13, 20, 16)]);
     let w2_card = |id| pace(id, (20, 18), (20, 6), &[(7, 20, 18), (13, 20, 6)]);
-    let short = json!([w2_card(17), w2_card(18), w2_card(19), w2_card(20), w_card(1)]);
+    let short = json!([w2_card(17), w2_card(18), w2_card(19), w2_card(20), w_card(1), w_card(2), w_card(3), w_card(4)]);
     let long = json!([l_card(5), l_card(6), l_card(7), l_card(8)]);
     assert_eq!(approx(body["short"].clone()), approx(short));
     assert_eq!(approx(body["long"].clone()), approx(long.clone()));
@@ -472,7 +472,18 @@ async fn pace_stats(pool: PgPool) {
     assert_eq!(all["turns"].as_array().unwrap().len(), 5);
     assert_eq!(
         approx(all["short"].clone()),
-        approx(json!([v_card(25), v_card(26), v_card(27), v_card(28), w2_card(17)]))
+        approx(json!([
+            v_card(25),
+            v_card(26),
+            v_card(27),
+            v_card(28),
+            w2_card(17),
+            w2_card(18),
+            w2_card(19),
+            w2_card(20),
+            w_card(1),
+            w_card(2)
+        ]))
     );
     assert_eq!(approx(all["long"].clone()), approx(long));
     assert_eq!(send(&app, get("/api/stats/pace?version=latest", "")).await.status, StatusCode::BAD_REQUEST);
@@ -690,4 +701,38 @@ async fn counter_stats(pool: PgPool) {
     ] {
         assert_eq!(send(&app, q(&bad)).await.status, StatusCode::BAD_REQUEST, "{bad}");
     }
+}
+
+#[sqlx::test]
+async fn list_limits(pool: PgPool) {
+    let app = app(pool.clone());
+    let pool8: Vec<u32> = (1..=8).collect();
+    let mut decks = Vec::new();
+    for a in 0..8 {
+        for b in a + 1..8 {
+            for c in b + 1..8 {
+                for d in c + 1..8 {
+                    decks.push([pool8[a], pool8[b], pool8[c], pool8[d]].map(k).to_vec());
+                }
+            }
+        }
+    }
+    assert_eq!(decks.len(), 70);
+    let n = &mut 0;
+    for i in 0..35 {
+        add(&pool, n, m(&decks[i], &decks[69 - i], Some(0)), 2).await;
+    }
+    let duos = send(&app, get("/api/stats/duos", "")).await.body;
+    let duos = duos.as_array().unwrap();
+    assert_eq!(duos.len(), 24);
+    assert!(duos.iter().all(|d| d["games"] == 30));
+
+    let target: Vec<Uuid> = (201..205).map(k).collect();
+    for f in 0..7 {
+        let foe: Vec<Uuid> = (301 + f * 4..305 + f * 4).map(k).collect();
+        add(&pool, n, m(&target, &foe, Some(1)), 10).await;
+    }
+    let counters = send(&app, get(&format!("/api/stats/counters?against={}", k(201)), "")).await.body;
+    assert_eq!(counters["games"], 70);
+    assert_eq!(counters["cards"].as_array().unwrap().len(), 24);
 }

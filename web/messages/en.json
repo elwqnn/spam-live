@@ -64,7 +64,7 @@
 	"all_cards": "All cards",
 	"card_zoom": "View the artwork of {name}",
 	"stats_title": "Stats",
-	"stats_intro": "The meta of each version: the most played cards, how they do against each other and with each other, and the length of the matches. Only ranked matches between players count; mirror matches and disputed matches do not.",
+	"stats_intro": "The meta of each version, from ranked matches between players. Mirror matches and disputed matches do not count.",
 	"card": "Card",
 	"no_stats": "No match for this version.",
 	"error_not_found": "Page not found",
@@ -470,8 +470,7 @@
 	"pace_long_rate": "Long",
 	"pace_few": "No card has a clear difference yet.",
 	"history_title": "Meta over time",
-	"history_text": "The play share and the win rate of each element in the last full week, the change against the week before, and the last 8 full weeks. The play share is the part of the card slots with the element.",
-	"history_note": "All versions. The version filter does not apply to this section.",
+	"history_text": "The play share and the win rate of each element in the last full week, the change against the week before, and up to the last 12 full weeks. The play share is the part of the card slots with the element.",
 	"history_share": "Play share",
 	"history_few": "Not enough weeks yet.",
 	"overview_title": "Overview",
@@ -553,5 +552,11 @@
 	"weak_against": "Weak against",
 	"card_matchups_title": "Matchups",
 	"card_matchups_none": "Not enough games",
-	"card_matchups_text": "Win rate of this card against each opposing card, {min} games or more, in the selected version."
+	"card_matchups_text": "Win rate of this card against each opposing card, {min} games or more, in the selected version.",
+	"stats_tabs": "Stats sections",
+	"stats_tab_meta": "Meta",
+	"stats_tab_counters": "Counters",
+	"stats_tab_duos": "Duos",
+	"stats_tab_length": "Game length",
+	"stats_tab_trends": "Over time"
 }

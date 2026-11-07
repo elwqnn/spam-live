@@ -29,6 +29,7 @@
 	{width}
 	{height}
 	viewBox="0 0 {width} {height}"
+	preserveAspectRatio="none"
 	class={['shrink-0 overflow-visible', className]}
 	aria-hidden="true"
 >
@@ -39,12 +40,20 @@
 			y1={y(mid)}
 			y2={y(mid)}
 			class="stroke-muted-foreground/60"
+			vector-effect="non-scaling-stroke"
 			stroke-width="1"
 			stroke-dasharray="2 2"
 		/>
 	{/if}
 	{#each ticks as tick (tick)}
-		<line x1={x(tick)} x2={x(tick)} y1="0" y2={height} class="stroke-muted-foreground/50" />
+		<line
+			x1={x(tick)}
+			x2={x(tick)}
+			y1="0"
+			y2={height}
+			class="stroke-muted-foreground/50"
+			vector-effect="non-scaling-stroke"
+		/>
 	{/each}
 	<path
 		d={sparkPath(values, range, width, height)}
@@ -53,5 +62,6 @@
 		stroke-width="1.5"
 		stroke-linecap="round"
 		stroke-linejoin="round"
+		vector-effect="non-scaling-stroke"
 	/>
 </svg>

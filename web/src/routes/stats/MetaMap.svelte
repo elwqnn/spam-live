@@ -84,7 +84,7 @@
 	let active = $state.raw<Dot | null>(null);
 	let tipHeight = $state(0);
 	const zoomed = $derived(scale > 1.001);
-	const size = $derived(scale >= 4 ? 32 : 22);
+	const size = $derived(scale >= 4 ? 32 : 26);
 	const transform = $derived({
 		mode: 'domain' as const,
 		scaleExtent: [1, MAX_ZOOM] as [number, number],
@@ -129,7 +129,11 @@
 	{#if dots.length}
 		<ElementLegend />
 		<figure class="grid gap-3 px-(--gutter) py-4">
-			<div role="group" aria-label={m.metamap_label()} class="relative h-80 sm:h-96">
+			<div
+				role="group"
+				aria-label={m.metamap_label()}
+				class="relative h-96 sm:h-[34rem] lg:h-[40rem]"
+			>
 				<span class="absolute top-0 left-0 flex h-8 items-center text-xs text-muted-foreground"
 					>{m.win_rate()}</span
 				>

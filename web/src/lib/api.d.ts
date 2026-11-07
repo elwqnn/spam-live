@@ -3228,7 +3228,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Targets: the deck results whose deck has all the against cards. games: the count of targets. cards: each card of the opposing deck that is not in against, with 10 games or more. wins: the games that the opposing deck won. Sorted by winScore, winRate and games, descending, then card. At most 12. */
+            /** @description Targets: the deck results whose deck has all the against cards. games: the count of targets. cards: each card of the opposing deck that is not in against, with 10 games or more. wins: the games that the opposing deck won. Sorted by winScore, winRate and games, descending, then card. At most 24. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3292,7 +3292,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Pairs of 2 different cards in the same deck result (cards sorted), with 20 games or more in 2 different decks or more. Sorted by winScore, winRate and games, descending, then the cards. At most 12. */
+            /** @description Pairs of 2 different cards in the same deck result (cards sorted), with 20 games or more in 2 different decks or more. Sorted by winScore, winRate and games, descending, then the cards. At most 24. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3374,7 +3374,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description turns: the match count for each turn count. median: the median turn count of the version (percentile_disc 0.5), null for all and when there is no match. A match is short when its turn count is at most the median of its own version, else long. short and long: at most 5 cards with 20 games or more in each part whose gap (shortWinRate - longWinRate) is larger than its 99.9 % margin of error (z = 3.29, strict because about 150 cards are tested at once); short has a positive gap, long a negative gap, both sorted by |gap| - margin descending, then card. curve: the games and wins of the card by group of 3 turns (start = t - (t - 1) % 3). */
+            /** @description turns: the match count for each turn count. median: the median turn count of the version (percentile_disc 0.5), null for all and when there is no match. A match is short when its turn count is at most the median of its own version, else long. short and long: at most 10 cards with 20 games or more in each part whose gap (shortWinRate - longWinRate) is larger than its 99.9 % margin of error (z = 3.29, strict because about 150 cards are tested at once); short has a positive gap, long a negative gap, both sorted by |gap| - margin descending, then card. curve: the games and wins of the card by group of 3 turns (start = t - (t - 1) % 3). */
             200: {
                 headers: {
                     [name: string]: unknown;

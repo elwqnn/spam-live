@@ -63,8 +63,10 @@ export function fullWeeks(weeks: string[], now: Date, count: number) {
 	if (full.length < 2) return null;
 	const last = full[full.length - 1];
 	const end = new Date(`${last}T00:00:00Z`).getTime();
-	const recent = Array.from({ length: count }, (_, i) =>
-		isoDay(new Date(end - (count - 1 - i) * 7 * DAY))
+	const first = new Date(`${full[0]}T00:00:00Z`).getTime();
+	const length = Math.min(count, Math.round((end - first) / (7 * DAY)) + 1);
+	const recent = Array.from({ length }, (_, i) =>
+		isoDay(new Date(end - (length - 1 - i) * 7 * DAY))
 	);
-	return { last, before: recent[count - 2], recent };
+	return { last, before: recent[length - 2], recent };
 }

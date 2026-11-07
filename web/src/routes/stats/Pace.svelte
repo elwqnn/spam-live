@@ -75,7 +75,7 @@
 		<p class="px-(--gutter) pb-8 text-sm text-muted-foreground">{m.no_stats()}</p>
 	{:else}
 		<figure class="grid gap-3 px-(--gutter) pt-2 pb-4" bind:clientWidth={width}>
-			<Chart.Container {config} class="aspect-auto h-52 w-full">
+			<Chart.Container {config} class="aspect-auto h-52 w-full sm:h-64">
 				<BarChart data={rows} x="turns" {series} bandPadding={0.2} {padding} props={chartProps}>
 					{#snippet tooltip()}
 						<Chart.Tooltip labelFormatter={(v: number) => m.pace_turns_n({ count: v })} />

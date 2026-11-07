@@ -236,7 +236,7 @@ pub struct Duo {
 #[utoipa::path(get, path = "/api/stats/duos", tag = "stats", params(VersionQuery),
     responses((status = 200, body = Vec<Duo>,
         description = "Pairs of 2 different cards in the same deck result (cards sorted), with 20 games or more in \
-            2 different decks or more. Sorted by winScore, winRate and games, descending, then the cards. At most 12."),
+            2 different decks or more. Sorted by winScore, winRate and games, descending, then the cards. At most 24."),
         (status = 400, body = ErrorBody)))]
 pub async fn duos(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
@@ -249,7 +249,7 @@ pub async fn duos(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> R
          CROSS JOIN LATERAL unnest(r.deck_key) AS b (card)
          WHERE ($1::text IS NULL OR r.app_version = $1) AND a.card < b.card
          GROUP BY a.card, b.card HAVING count(*) >= 20 AND count(DISTINCT r.deck_key) >= 2
-         ORDER BY win_score DESC, win_rate DESC, games DESC, a.card, b.card LIMIT 12",
+         ORDER BY win_score DESC, win_rate DESC, games DESC, a.card, b.card LIMIT 24",
     )
     .bind(&version)
     .fetch_all(&s.db)
@@ -298,7 +298,7 @@ fn against(v: Option<&str>) -> Result<Vec<Uuid>, ApiError> {
     responses((status = 200, body = Counters,
         description = "Targets: the deck results whose deck has all the against cards. games: the count of targets. \
             cards: each card of the opposing deck that is not in against, with 10 games or more. wins: the games that \
-            the opposing deck won. Sorted by winScore, winRate and games, descending, then card. At most 12."),
+            the opposing deck won. Sorted by winScore, winRate and games, descending, then card. At most 24."),
         (status = 400, body = ErrorBody)))]
 pub async fn counters(State(s): State<AppState>, Query(q): Query<CountersQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
@@ -319,7 +319,7 @@ pub async fn counters(State(s): State<AppState>, Query(q): Query<CountersQuery>)
          CROSS JOIN LATERAL unnest(o.deck_key) AS c (card)
          WHERE ($1::text IS NULL OR r.app_version = $1) AND r.deck_key @> $2 AND NOT c.card = ANY($2)
          GROUP BY c.card HAVING count(*) >= 10
-         ORDER BY win_score DESC, win_rate DESC, games DESC, c.card LIMIT 12",
+         ORDER BY win_score DESC, win_rate DESC, games DESC, c.card LIMIT 24",
     )
     .bind(&version)
     .bind(&against)
@@ -383,7 +383,7 @@ struct CardGroup {
 
 const PACE_GAMES: i64 = 20;
 const PACE_Z: f64 = 3.29;
-const PACE_LIST: usize = 5;
+const PACE_LIST: usize = 10;
 
 fn pace_lists(rows: Vec<PaceRow>) -> (Vec<CardPace>, Vec<CardPace>) {
     let mut cards: Vec<CardPace> = rows
@@ -422,7 +422,7 @@ const PACE_MATCHES: &str = "SELECT DISTINCT r.game_uid, r.app_version, m.turn_co
     responses((status = 200, body = PaceStats,
         description = "turns: the match count for each turn count. median: the median turn count of the version \
             (percentile_disc 0.5), null for all and when there is no match. A match is short when its turn count is \
-            at most the median of its own version, else long. short and long: at most 5 cards with 20 games or more \
+            at most the median of its own version, else long. short and long: at most 10 cards with 20 games or more \
             in each part whose gap (shortWinRate - longWinRate) is larger than its 99.9 % margin of error (z = 3.29, strict \
             because about 150 cards are tested at once); short has a \
             positive gap, long a negative gap, both sorted by |gap| - margin descending, then card. curve: the games \
