@@ -1,8 +1,11 @@
+import type { IconSvgElement } from '@hugeicons/svelte';
+
 export type FilterOption = {
 	value: string;
 	label: string;
 	count?: number;
 	icon?: string;
+	hugeicon?: IconSvgElement;
 	reset?: Record<string, null>;
 };
 

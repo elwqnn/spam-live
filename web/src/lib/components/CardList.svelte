@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
 	import { page } from '$app/state';
+	import { GridViewIcon, ListViewIcon } from '@hugeicons/core-free-icons';
 	import type { Schemas } from '#lib';
 	import type { Filter } from '#lib/filter.js';
 	import { m } from '#lib/paraglide/messages.js';
@@ -35,8 +36,8 @@
 		label: m.view(),
 		default: 'grid',
 		options: [
-			{ value: 'grid', label: m.view_grid() },
-			{ value: 'rows', label: m.view_rows() }
+			{ value: 'grid', label: m.view_grid(), hugeicon: GridViewIcon },
+			{ value: 'rows', label: m.view_rows(), hugeicon: ListViewIcon }
 		]
 	});
 	const empty = { games: 0, playRate: 0, winRate: null };

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ClassValue } from 'svelte/elements';
 	import { page } from '$app/state';
+	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { queryHref } from '#lib';
 	import { buttonVariants } from '#lib/components/ui/button/index.js';
 	import { selection, target, type Filter } from '#lib/filter.js';
@@ -52,6 +53,7 @@
 				class={chip(on)}
 				href={link(target(filter, current, option.value), option.reset)}
 				aria-current={on ? 'true' : undefined}
+				title={option.hugeicon ? option.label : undefined}
 				data-sveltekit-reset="false"
 			>
 				{#if option.icon}
@@ -63,7 +65,12 @@
 						class="-ml-1 h-5 w-auto max-w-none shrink-0"
 					/>
 				{/if}
-				{option.label}
+				{#if option.hugeicon}
+					<HugeiconsIcon icon={option.hugeicon} aria-hidden="true" class="size-4" />
+					<span class="sr-only">{option.label}</span>
+				{:else}
+					{option.label}
+				{/if}
 				{#if option.count != null}
 					<span class="text-muted-foreground tabular-nums">{option.count}</span>
 				{/if}
