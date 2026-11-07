@@ -551,6 +551,7 @@
 	"history_compare": "Week of {last} against week of {before}",
 	"strong_against": "Strong against",
 	"weak_against": "Weak against",
+	"card_matchups_title": "Matchups",
 	"card_matchups_none": "Not enough games",
 	"card_matchups_text": "Win rate of this card against each opposing card, {min} games or more, in the selected version."
 }

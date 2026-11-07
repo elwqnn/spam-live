@@ -105,14 +105,14 @@
 {/snippet}
 
 <article class="rows">
-	<TitleRow class="grid gap-6 row sm:grid-cols-[18rem_minmax(0,1fr)] sm:items-start md:gap-10">
-		<div class="grid w-full max-w-72 gap-3 sm:sticky sm:top-8">
+	<TitleRow class="grid gap-6 row sm:grid-cols-[18rem_minmax(0,1fr)] md:gap-10">
+		<div class="grid w-full max-w-72 content-start gap-3">
 			<CardZoom {card} />
 			{#if card.artist}
 				<ArtistCredit artist={card.artist} />
 			{/if}
 		</div>
-		<div class="grid min-w-0 content-start gap-6">
+		<div class="grid min-w-0 content-start gap-6 sm:content-between">
 			<div class="grid gap-3">
 				<a
 					class="eyebrow text-muted-foreground transition-colors hover:text-foreground"
@@ -151,6 +151,61 @@
 				</div>
 			</div>
 
+			<section class="grid gap-3">
+				<div class="flex flex-wrap items-center justify-between gap-2">
+					{@render heading(m.stats())}
+					<div class="flex flex-wrap items-center gap-2">
+						<TrendMenu />
+						<VersionSelect {versions} />
+					</div>
+				</div>
+				<div class="border bg-card">
+					<dl class="cells grid grid-cols-3">
+						{@render stat(m.play_rate(), percent(stats?.playRate), stats?.playRateChange)}
+						{@render stat(m.games(), stats?.games ?? 0)}
+						{@render stat(m.win_rate(), percent(stats?.winRate), stats?.winRateChange, true)}
+					</dl>
+				</div>
+			</section>
+		</div>
+	</TitleRow>
+
+	{#if decks.length}
+		<section>
+			<div class="flex flex-wrap items-end justify-between gap-2 section-head">
+				{@render heading(m.decks_with_card())}
+				<a
+					class="eyebrow text-muted-foreground transition-colors hover:text-foreground"
+					href={href(`/decks?card=${card.id}`)}
+					>{m.decks_with_card_all()}
+					<HugeiconsIcon
+						icon={ArrowRight02Icon}
+						aria-hidden="true"
+						class="inline size-[1em] align-[-0.125em]"
+					/></a
+				>
+			</div>
+			<div>
+				<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
+					{#each decks as deck (deck.id)}
+						<DeckTile {deck} {catalog} />
+					{/each}
+				</ul>
+			</div>
+		</section>
+	{/if}
+
+	<section class="grid gap-3 row">
+		{@render heading(m.card_matchups_title())}
+		<div class="grid gap-3 lg:grid-cols-2 lg:gap-6">
+			{@render matchupList(m.strong_against(), matchups.strong)}
+			{@render matchupList(m.weak_against(), matchups.weak)}
+		</div>
+		<p class="text-xs text-muted-foreground">{m.card_matchups_text({ min: MIN_GAMES })}</p>
+	</section>
+
+	<section class="grid gap-6 row lg:grid-cols-2">
+		<div class="grid content-start gap-6">
 			<section class="grid gap-2">
 				{@render label(m.abilities())}
 				<ul class="divide-y border bg-card text-sm">
@@ -184,69 +239,20 @@
 					</ul>
 				</section>
 			{/if}
-
-			<section class="grid gap-2">
-				{@render label(m.talents())}
-				<div class="border bg-card text-sm">
-					<ul class="cells grid lg:grid-cols-3">
-						{#each card.talents as talent (talent.id)}
-							<li class="grid content-start gap-1.5 p-3">
-								{@render name(entryName(talent))}
-								<Description text={talent.description} entry={talent} {keywords} />
-							</li>
-						{/each}
-					</ul>
-				</div>
-			</section>
-
-			<section class="@container grid gap-3">
-				<div class="flex flex-wrap items-center justify-between gap-2">
-					{@render heading(m.stats())}
-					<div class="flex flex-wrap items-center gap-2">
-						<TrendMenu />
-						<VersionSelect {versions} />
-					</div>
-				</div>
-				<div class="border bg-card">
-					<dl class="cells grid grid-cols-3">
-						{@render stat(m.play_rate(), percent(stats?.playRate), stats?.playRateChange)}
-						{@render stat(m.games(), stats?.games ?? 0)}
-						{@render stat(m.win_rate(), percent(stats?.winRate), stats?.winRateChange, true)}
-					</dl>
-				</div>
-				<div class="grid gap-3 @lg:grid-cols-2">
-					{@render matchupList(m.strong_against(), matchups.strong)}
-					{@render matchupList(m.weak_against(), matchups.weak)}
-				</div>
-				<p class="text-xs text-muted-foreground">{m.card_matchups_text({ min: MIN_GAMES })}</p>
-			</section>
 		</div>
-	</TitleRow>
 
-	{#if decks.length}
-		<section>
-			<div class="flex flex-wrap items-end justify-between gap-2 section-head">
-				{@render heading(m.decks_with_card())}
-				<a
-					class="eyebrow text-muted-foreground transition-colors hover:text-foreground"
-					href={href(`/decks?card=${card.id}`)}
-					>{m.decks_with_card_all()}
-					<HugeiconsIcon
-						icon={ArrowRight02Icon}
-						aria-hidden="true"
-						class="inline size-[1em] align-[-0.125em]"
-					/></a
-				>
-			</div>
-			<div>
-				<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
-					{#each decks as deck (deck.id)}
-						<DeckTile {deck} {catalog} />
-					{/each}
-				</ul>
-			</div>
+		<section class="grid content-start gap-2">
+			{@render label(m.talents())}
+			<ul class="divide-y border bg-card text-sm">
+				{#each card.talents as talent (talent.id)}
+					<li class="grid gap-1.5 px-3 py-2.5">
+						{@render name(entryName(talent))}
+						<Description text={talent.description} entry={talent} {keywords} />
+					</li>
+				{/each}
+			</ul>
 		</section>
-	{/if}
+	</section>
 
 	{#if card.description}
 		<section class="grid gap-2 row">

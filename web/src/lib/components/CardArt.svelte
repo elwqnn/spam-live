@@ -5,11 +5,13 @@
 	let {
 		card,
 		interactive = false,
+		artwork = false,
 		tilt = 1,
 		class: className
 	}: {
 		card: Schemas['CardBase'];
 		interactive?: boolean;
+		artwork?: boolean;
 		tilt?: number;
 		class?: string;
 	} = $props();
@@ -28,7 +30,7 @@
 </script>
 
 <div
-	class={['px-[8%] pt-[6%] pb-[7%]', className]}
+	class={[!artwork && 'px-[8%] pt-[6%] pb-[7%]', className]}
 	role="presentation"
 	onpointermove={interactive ? move : undefined}
 	onpointerleave={interactive ? () => (over = false) : undefined}
@@ -42,18 +44,35 @@
 			? `perspective(800px) rotateX(${(0.5 - y) * 16 * tilt}deg) rotateY(${(x - 0.5) * 16 * tilt}deg)`
 			: undefined}
 	>
-		<GameCard {card}>
-			{#if interactive}
-				<div
-					class={[
-						'absolute inset-0 bg-[radial-gradient(circle_at_var(--x)_var(--y),rgb(255_255_255/.6),transparent_55%)] mix-blend-soft-light duration-300 motion-safe:transition-opacity',
-						over ? 'opacity-100' : 'opacity-0'
-					]}
-					style:--x="{x * 100}%"
-					style:--y="{y * 100}%"
-					aria-hidden="true"
-				></div>
-			{/if}
-		</GameCard>
+		{#if artwork}
+			<div class="relative">
+				<img
+					src="/art/card/{card.id}.webp"
+					alt={card.name ?? card.id}
+					width="716"
+					height="1024"
+					loading="lazy"
+					decoding="async"
+					class="block w-full"
+				/>
+				{@render shine()}
+			</div>
+		{:else}
+			<GameCard {card}>{@render shine()}</GameCard>
+		{/if}
 	</div>
 </div>
+
+{#snippet shine()}
+	{#if interactive}
+		<div
+			class={[
+				'absolute inset-0 bg-[radial-gradient(circle_at_var(--x)_var(--y),rgb(255_255_255/.6),transparent_55%)] mix-blend-soft-light duration-300 motion-safe:transition-opacity',
+				over ? 'opacity-100' : 'opacity-0'
+			]}
+			style:--x="{x * 100}%"
+			style:--y="{y * 100}%"
+			aria-hidden="true"
+		></div>
+	{/if}
+{/snippet}

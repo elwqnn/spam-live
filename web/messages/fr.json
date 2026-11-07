@@ -551,6 +551,7 @@
 	"history_compare": "Semaine du {last} par rapport à la semaine du {before}",
 	"strong_against": "Fort contre",
 	"weak_against": "Faible contre",
+	"card_matchups_title": "Affrontements",
 	"card_matchups_none": "Pas assez de parties",
 	"card_matchups_text": "Taux de victoire de cette carte contre chaque carte adverse, {min} parties ou plus, dans la version choisie."
 }

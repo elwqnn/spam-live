@@ -7,6 +7,8 @@
 	let { card }: { card: Schemas['CardBase'] } = $props();
 
 	const name = $derived(card.name ?? card.id);
+	let width = $state(0);
+	let closed = $state(0);
 </script>
 
 <button
@@ -22,21 +24,21 @@
 	id="card-zoom"
 	aria-label={name}
 	closedby="any"
+	onclose={() => closed++}
 	class="lightbox m-auto max-h-none max-w-none overflow-visible bg-transparent text-foreground backdrop:bg-black/82 motion-safe:backdrop:animate-in motion-safe:backdrop:fade-in"
 >
 	<div
 		class="grain fixed inset-0 opacity-[.01] motion-safe:animate-in motion-safe:fade-in"
 		aria-hidden="true"
 	></div>
-	<img
-		src="/art/card/{card.id}.webp"
-		alt={name}
-		width="716"
-		height="1024"
-		loading="lazy"
-		decoding="async"
-		class="relative block h-auto w-full motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:fade-in"
-	/>
+	<div
+		class="relative motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:fade-in"
+		bind:clientWidth={width}
+	>
+		{#key closed}
+			<CardArt {card} interactive artwork tilt={Math.min(1, (340 / width) ** 2)} />
+		{/key}
+	</div>
 	<Button
 		variant="outline"
 		size="sm"
