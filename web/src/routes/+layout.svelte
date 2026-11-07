@@ -156,6 +156,8 @@
 			{@render children()}
 		</main>
 
+		<div class="band" aria-hidden="true"></div>
+
 		<footer class="flex flex-wrap items-center gap-x-5 gap-y-3 px-(--gutter) py-6">
 			{#if presence}
 				<p class="basis-full text-[13px] text-muted-foreground tabular-nums">

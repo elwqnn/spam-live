@@ -111,7 +111,8 @@
 	{/each}
 </nav>
 
-{#each matches as g (g.key)}
+{#each matches as g, i (g.key)}
+	{#if i}<div class="band" aria-hidden="true"></div>{/if}
 	<section id={g.key}>
 		<div
 			aria-hidden="true"
