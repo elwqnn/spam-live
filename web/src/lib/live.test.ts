@@ -55,19 +55,26 @@ describe('live', () => {
 		expect(last().readyState).toBe(Source.CLOSED);
 	});
 
-	it('keeps vote counts until a gap', async () => {
-		const { live, votes } = await import('./live');
-		live();
+	it('keeps vote and comment counts until a gap', async () => {
+		const { live, votes, comments } = await import('./live');
+		const stop = live();
 		last().send('open');
 		last().send('votes', '{"id":3,"upvotes":2,"downvotes":1}');
+		last().send('comments', '{"id":3,"comments":4}');
 		expect(votes.get(3)).toEqual({ id: 3, upvotes: 2, downvotes: 1 });
+		expect(comments.get(3)).toEqual({ id: 3, comments: 4 });
 		last().send('decks', '7');
-		expect(votes.size).toBe(1);
+		expect([votes.size, comments.size]).toEqual([1, 1]);
 		last().send('decks', '0');
-		expect(votes.size).toBe(0);
+		expect([votes.size, comments.size]).toEqual([0, 0]);
 		last().send('votes', '{"id":3,"upvotes":2,"downvotes":1}');
+		last().send('comments', '{"id":3,"comments":4}');
 		last().send('open');
-		expect(votes.size).toBe(0);
+		expect([votes.size, comments.size]).toEqual([0, 0]);
+		last().send('comments', '{"id":3,"comments":5}');
+		stop();
+		vi.runAllTimers();
+		expect(comments.size).toBe(0);
 	});
 
 	it('reloads the deck data once after gaps', async () => {

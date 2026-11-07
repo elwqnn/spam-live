@@ -144,6 +144,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         stats::pace,
         stats::history,
         card_matchups::card_matchups,
+        card_matchups::deck_matchups,
         admin::reports,
         admin::resolve,
         admin::ban,

@@ -43,6 +43,10 @@ fn votes(id: i64, up: i64, down: i64) -> String {
     format!("event: votes\ndata: {{\"id\":{id},\"upvotes\":{up},\"downvotes\":{down}}}")
 }
 
+fn comments(id: i64, n: i64) -> String {
+    format!("event: comments\ndata: {{\"id\":{id},\"comments\":{n}}}")
+}
+
 async fn status(app: &Router, cookie: &str, method: &str, uri: String, body: Option<serde_json::Value>) -> StatusCode {
     send(app, req(method, &uri, cookie, body)).await.status
 }
@@ -91,7 +95,7 @@ async fn public_deck_changes_send_signals(pool: PgPool) {
     call(&app, &admin, "POST", format!("/api/admin/reports/{}/resolve", reports[0]["id"]), Some(resolve)).await;
 
     let mut expected = signals(&[first, first, first, second, second, third]);
-    expected.push(votes(third, 1, 0));
+    expected.extend([votes(third, 1, 0), comments(third, 1)]);
     expected.extend(signals(&[third]));
     assert_eq!(read(&mut events, expected.len()).await, expected);
 }
@@ -124,6 +128,46 @@ async fn votes_send_signals(pool: PgPool) {
 
     let mut expected = vec![votes(deck, 1, 0), votes(deck, 1, 1), votes(deck, 0, 2), votes(deck, 0, 1)];
     expected.extend(signals(&[draft]));
+    assert_eq!(read(&mut events, expected.len()).await, expected);
+}
+
+#[sqlx::test]
+async fn comments_send_signals(pool: PgPool) {
+    let app = app(pool.clone());
+    let (_, a) = user(&pool, "76561190000000001").await;
+    let (_, b) = user(&pool, "76561190000000002").await;
+    let (_, admin) = admin(&pool, "76561190000000009").await;
+    let deck = create(&app, &a).await;
+    call(&app, &a, "POST", format!("/api/decks/{deck}/publish"), None).await;
+    let draft = create(&app, &a).await;
+    let mut events = open(&app).await;
+    let post = format!("/api/decks/{deck}/comments");
+    let comment = async |cookie: &str| {
+        let res = send(&app, req("POST", &post, cookie, Some(json!({ "body": "hi" })))).await;
+        assert_eq!(res.status, StatusCode::CREATED, "{}", res.body);
+        res.body["id"].as_i64().unwrap()
+    };
+
+    let first = comment(&b).await;
+    let second = comment(&a).await;
+    let third = comment(&b).await;
+    assert_eq!(status(&app, &b, "POST", post.clone(), Some(json!({ "body": " " }))).await, StatusCode::BAD_REQUEST);
+    let draft_post = format!("/api/decks/{draft}/comments");
+    assert_eq!(status(&app, &b, "POST", draft_post, Some(json!({ "body": "hi" }))).await, StatusCode::NOT_FOUND);
+    assert_eq!(status(&app, &a, "DELETE", format!("/api/comments/{first}"), None).await, StatusCode::FORBIDDEN);
+    call(&app, &b, "PATCH", format!("/api/comments/{first}"), Some(json!({ "body": "edited" }))).await;
+    call(&app, &b, "DELETE", format!("/api/comments/{first}"), None).await;
+    let report = json!({ "targetType": "comment", "targetId": second, "reason": "bad" });
+    call(&app, &b, "POST", "/api/reports".into(), Some(report)).await;
+    let reports = send(&app, get("/api/admin/reports", &admin)).await.body;
+    let resolve = format!("/api/admin/reports/{}/resolve", reports[0]["id"]);
+    call(&app, &admin, "POST", resolve, Some(json!({ "action": "delete" }))).await;
+    call(&app, &a, "POST", format!("/api/decks/{deck}/unpublish"), None).await;
+    call(&app, &b, "DELETE", format!("/api/comments/{third}"), None).await;
+    call(&app, &a, "POST", format!("/api/decks/{draft}/publish"), None).await;
+
+    let mut expected: Vec<_> = [1, 2, 3, 2, 1].map(|n| comments(deck, n)).into();
+    expected.extend(signals(&[deck, draft]));
     assert_eq!(read(&mut events, expected.len()).await, expected);
 }
 

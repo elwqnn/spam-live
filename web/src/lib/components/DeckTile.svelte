@@ -5,6 +5,7 @@
 	import type { Reason } from '#lib/promote.js';
 	import Author from './Author.svelte';
 	import DeckCards from './DeckCards.svelte';
+	import DeckComments from './DeckComments.svelte';
 	import DeckVotes from './DeckVotes.svelte';
 	import LiveLines from './LiveLines.svelte';
 	import Time from './Time.svelte';
@@ -24,7 +25,7 @@
 
 <li
 	class={[
-		'flex flex-col gap-3 px-(--gutter) py-4 transition-colors [contain-intrinsic-size:auto_205px] [content-visibility:auto] sm:py-5',
+		'flex min-w-0 flex-col gap-3 px-(--gutter) py-4 transition-colors [contain-intrinsic-size:auto_205px] [content-visibility:auto] sm:py-5',
 		reasons.length ? 'relative isolate bg-card' : 'hover:bg-row',
 		large && 'lg:col-span-2 lg:row-span-2 lg:[contain-intrinsic-size:auto_480px]'
 	]}
@@ -35,14 +36,16 @@
 	<div class="flex items-start gap-3">
 		<div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
 			<a
-				class="text-[15px] font-medium wrap-anywhere hover:underline"
-				href={href(`/decks/${deck.id}`)}>{deck.name}</a
+				class="truncate text-[15px] font-medium hover:underline"
+				href={href(`/decks/${deck.id}`)}
+				title={deck.name}>{deck.name}</a
 			>
 			{#if deck.status === 'draft'}<Badge variant="secondary">{m.draft()}</Badge>{/if}
 			<span class="flex min-w-0 text-sm text-muted-foreground">
 				<Author name={deck.authorName} avatar={deck.authorAvatar} />
 			</span>
 		</div>
+		<DeckComments {deck} />
 		<DeckVotes {deck} />
 	</div>
 	<DeckCards cards={deck.cards} {catalog} {large} />

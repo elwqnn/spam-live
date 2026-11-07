@@ -533,6 +533,9 @@ async fn comments(pool: PgPool) {
     assert_eq!(send(&app, req("DELETE", &comment_uri, &b, None)).await.status, StatusCode::NO_CONTENT);
     assert_eq!(send(&app, req("DELETE", &comment_uri, &b, None)).await.status, StatusCode::NOT_FOUND);
     assert_eq!(send(&app, get(&uri, "")).await.body.as_array().unwrap().len(), 2);
+    let decks = send(&app, get("/api/decks", "")).await.body;
+    assert_eq!((decks[0]["id"].as_i64(), decks[0]["comments"].clone()), (Some(deck), json!(2)));
+    assert_eq!(send(&app, get(&format!("/api/decks/{deck}"), "")).await.body["comments"], 2);
 }
 
 #[sqlx::test]

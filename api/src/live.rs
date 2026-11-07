@@ -30,13 +30,14 @@ pub const CAPACITY: usize = 256;
 enum Signal {
     Deck(i64),
     Votes { id: i64, upvotes: i64, downvotes: i64 },
+    Comments { id: i64, comments: i64 },
 }
 
 pub struct Live {
     tx: Mutex<Option<broadcast::Sender<Signal>>>,
     open: AtomicUsize,
     max: usize,
-    votes: tokio::sync::Mutex<()>,
+    counts: tokio::sync::Mutex<()>,
 }
 
 impl Default for Live {
@@ -59,7 +60,7 @@ impl Live {
             tx: Mutex::new(Some(broadcast::channel(CAPACITY).0)),
             open: AtomicUsize::new(0),
             max,
-            votes: tokio::sync::Mutex::new(()),
+            counts: tokio::sync::Mutex::new(()),
         }
     }
 
@@ -78,7 +79,7 @@ impl Live {
     }
 
     pub async fn votes(&self, db: &PgPool, id: i64) {
-        let _order = self.votes.lock().await;
+        let _order = self.counts.lock().await;
         let counts = sqlx::query_as(
             "SELECT count(*) FILTER (WHERE value = 1), count(*) FILTER (WHERE value = -1) FROM votes WHERE deck_id = $1",
         )
@@ -87,6 +88,20 @@ impl Live {
         .await;
         if let Ok((upvotes, downvotes)) = counts {
             self.send(Signal::Votes { id, upvotes, downvotes });
+        }
+    }
+
+    pub async fn comments(&self, db: &PgPool, id: i64) {
+        let _order = self.counts.lock().await;
+        let count = sqlx::query_scalar(
+            "SELECT (SELECT count(*) FROM comments c WHERE c.deck_id = d.id) FROM decks d
+             WHERE d.id = $1 AND d.status = 'public'",
+        )
+        .bind(id)
+        .fetch_optional(db)
+        .await;
+        if let Ok(Some(comments)) = count {
+            self.send(Signal::Comments { id, comments });
         }
     }
 
@@ -108,7 +123,9 @@ impl Live {
                 of a deck that came into the public decks, left them, or changed while public, \
                 or 0 after missed events or an account deletion. Fetch the list again on each decks event. \
                 An event named votes comes after each vote change on a public deck. Its data is JSON \
-                {\"id\":1,\"upvotes\":3,\"downvotes\":1}: the deck ID and its new vote counts. Not cached."),
+                {\"id\":1,\"upvotes\":3,\"downvotes\":1}: the deck ID and its new vote counts. \
+                An event named comments comes after each comment create or delete on a public deck. Its data is JSON \
+                {\"id\":1,\"comments\":3}: the deck ID and its new comment count. Not cached."),
         (status = 503, body = ErrorBody, description = "Too many open streams")))]
 pub async fn deck_events(State(s): State<AppState>) -> Result<Response, ApiError> {
     let (rx, slot) =
@@ -120,6 +137,9 @@ pub async fn deck_events(State(s): State<AppState>) -> Result<Response, ApiError
             Ok(Signal::Votes { id, upvotes, downvotes }) => Event::default()
                 .event("votes")
                 .data(format!(r#"{{"id":{id},"upvotes":{upvotes},"downvotes":{downvotes}}}"#)),
+            Ok(Signal::Comments { id, comments }) => {
+                Event::default().event("comments").data(format!(r#"{{"id":{id},"comments":{comments}}}"#))
+            }
             Err(RecvError::Lagged(_)) => Event::default().event("decks").data("0"),
             Err(RecvError::Closed) => return None,
         };

@@ -2,8 +2,10 @@ import { invalidate } from '$app/navigation';
 import { SvelteMap } from 'svelte/reactivity';
 
 export type Votes = { id: number; upvotes: number; downvotes: number };
+export type Comments = { id: number; comments: number };
 
 export const votes = new SvelteMap<number, Votes>();
+export const comments = new SvelteMap<number, Comments>();
 
 const listeners = new Set<(sync: boolean) => void>();
 let users = 0;
@@ -14,6 +16,7 @@ let reload: ReturnType<typeof setTimeout> | undefined;
 
 function stale() {
 	votes.clear();
+	comments.clear();
 	clearTimeout(reload);
 	reload = setTimeout(() => invalidate('app:decks'), 500);
 }
@@ -29,6 +32,7 @@ function close() {
 	source?.close();
 	source = undefined;
 	votes.clear();
+	comments.clear();
 }
 
 function connect() {
@@ -43,6 +47,10 @@ function connect() {
 	events.addEventListener('votes', (event) => {
 		const counts: Votes = JSON.parse(event.data);
 		votes.set(counts.id, counts);
+	});
+	events.addEventListener('comments', (event) => {
+		const count: Comments = JSON.parse(event.data);
+		comments.set(count.id, count);
 	});
 	events.addEventListener('open', () => {
 		if (opened) emit(true);

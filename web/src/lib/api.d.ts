@@ -356,6 +356,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/decks/{id}/matchups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["deck_matchups"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/decks/{id}/publish": {
         parameters: {
             query?: never;
@@ -968,6 +984,8 @@ export interface components {
             authorId: number;
             authorName: string;
             cards: string[];
+            /** Format: int64 */
+            comments: number;
             /** Format: date-time */
             createdAt: string;
             /** Format: int64 */
@@ -2099,7 +2117,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Server-Sent Events. The first frame sets retry to 5000 ms. An event named decks has the ID of a deck that came into the public decks, left them, or changed while public, or 0 after missed events or an account deletion. Fetch the list again on each decks event. An event named votes comes after each vote change on a public deck. Its data is JSON {"id":1,"upvotes":3,"downvotes":1}: the deck ID and its new vote counts. Not cached. */
+            /** @description Server-Sent Events. The first frame sets retry to 5000 ms. An event named decks has the ID of a deck that came into the public decks, left them, or changed while public, or 0 after missed events or an account deletion. Fetch the list again on each decks event. An event named votes comes after each vote change on a public deck. Its data is JSON {"id":1,"upvotes":3,"downvotes":1}: the deck ID and its new vote counts. An event named comments comes after each comment create or delete on a public deck. Its data is JSON {"id":1,"comments":3}: the deck ID and its new comment count. Not cached. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2413,6 +2431,48 @@ export interface operations {
                 };
             };
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    deck_matchups: {
+        parameters: {
+            query?: {
+                /** @example all */
+                version?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Deck ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description For each card of the opposing decks (not a card of this deck) with 10 games or more: games, and wins of the deck key of this deck. The same order and limits as the card matchups. A draft is visible only to its author and is not cached. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardMatchups"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

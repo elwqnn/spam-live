@@ -103,17 +103,26 @@ pub async fn resolve(
             .fetch_optional(&s.db)
             .await?
             .ok_or_else(|| not_found("open report not found"))?;
-    let deleted = target.0.filter(|_| matches!(body.action, ResolveAction::Delete));
-    let query = match (body.action, target) {
+    match (body.action, target) {
         (ResolveAction::Dismiss, _) => {
-            sqlx::query("UPDATE reports SET status = 'dismissed', resolved_at = now() WHERE id = $1").bind(id)
+            sqlx::query("UPDATE reports SET status = 'dismissed', resolved_at = now() WHERE id = $1")
+                .bind(id)
+                .execute(&s.db)
+                .await?;
         }
-        (ResolveAction::Delete, (Some(deck), _)) => sqlx::query("DELETE FROM decks WHERE id = $1").bind(deck),
-        (ResolveAction::Delete, (_, comment)) => sqlx::query("DELETE FROM comments WHERE id = $1").bind(comment),
-    };
-    query.execute(&s.db).await?;
-    if let Some(deck) = deleted {
-        s.live.notify(deck);
+        (ResolveAction::Delete, (Some(deck), _)) => {
+            sqlx::query("DELETE FROM decks WHERE id = $1").bind(deck).execute(&s.db).await?;
+            s.live.notify(deck);
+        }
+        (ResolveAction::Delete, (_, comment)) => {
+            let deck: Option<i64> = sqlx::query_scalar("DELETE FROM comments WHERE id = $1 RETURNING deck_id")
+                .bind(comment)
+                .fetch_optional(&s.db)
+                .await?;
+            if let Some(deck) = deck {
+                s.live.comments(&s.db, deck).await;
+            }
+        }
     }
     Ok(StatusCode::NO_CONTENT)
 }

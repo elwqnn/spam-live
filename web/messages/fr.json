@@ -119,10 +119,18 @@
 	"talent": "Talent",
 	"talent_n": "Talent {n}",
 	"guide": "Guide",
-	"live_stats": "Statistiques en direct",
-	"live_stats_text": "Matchs classés avec ces 4 cartes, tous talents confondus.",
 	"wins": "Victoires",
 	"comments": "Commentaires",
+	"comments_count": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} commentaire",
+				"countPlural=*": "{count} commentaires"
+			}
+		}
+	],
 	"edited": "(modifié)",
 	"your_comment": "Votre commentaire",
 	"save": "Enregistrer",
@@ -305,7 +313,6 @@
 	"view_rows": "Lignes",
 	"decks_with_card": "Decks avec cette carte",
 	"decks_with_card_all": "Tous les decks avec cette carte",
-	"deck_summary": "Résumé du deck",
 	"total_hp": "PV totaux",
 	"total_income": "Spamton total",
 	"nav_glossary": "Glossaire",
@@ -554,6 +561,7 @@
 	"card_matchups_title": "Affrontements",
 	"card_matchups_none": "Pas assez de parties",
 	"card_matchups_text": "Taux de victoire de cette carte contre chaque carte adverse, {min} parties ou plus, dans la version choisie.",
+	"deck_matchups_text": "Taux de victoire de ce deck contre chaque carte adverse, {min} parties ou plus, dans la version {version}.",
 	"stats_tabs": "Sections des statistiques",
 	"stats_tab_meta": "Méta",
 	"stats_tab_tiers": "Tier list",

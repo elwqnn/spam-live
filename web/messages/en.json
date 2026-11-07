@@ -119,10 +119,18 @@
 	"talent": "Talent",
 	"talent_n": "Talent {n}",
 	"guide": "Guide",
-	"live_stats": "Live stats",
-	"live_stats_text": "Ranked matches with these 4 cards, all talents together.",
 	"wins": "Wins",
 	"comments": "Comments",
+	"comments_count": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} comment",
+				"countPlural=*": "{count} comments"
+			}
+		}
+	],
 	"edited": "(edited)",
 	"your_comment": "Your comment",
 	"save": "Save",
@@ -305,7 +313,6 @@
 	"view_rows": "Rows",
 	"decks_with_card": "Decks with this card",
 	"decks_with_card_all": "All decks with this card",
-	"deck_summary": "Deck summary",
 	"total_hp": "Total HP",
 	"total_income": "Total Spamton",
 	"nav_glossary": "Glossary",
@@ -554,6 +561,7 @@
 	"card_matchups_title": "Matchups",
 	"card_matchups_none": "Not enough games",
 	"card_matchups_text": "Win rate of this card against each opposing card, {min} games or more, in the selected version.",
+	"deck_matchups_text": "Win rate of this deck against each opposing card, {min} games or more, in version {version}.",
 	"stats_tabs": "Stats sections",
 	"stats_tab_meta": "Meta",
 	"stats_tab_tiers": "Tier list",

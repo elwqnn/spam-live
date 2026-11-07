@@ -29,7 +29,8 @@ const MAX_OFFSET: i64 = 10_000;
 
 const DECK_COLUMNS: &str = "d.id, d.author_id, u.display_name AS author_name, u.avatar_url AS author_avatar, d.name,
     d.cards, d.talents, d.status, d.app_version, d.game_deck_id,
-    vc.upvotes, vc.downvotes, d.created_at, d.updated_at, d.published_at";
+    vc.upvotes, vc.downvotes, (SELECT count(*) FROM comments c WHERE c.deck_id = d.id) AS comments,
+    d.created_at, d.updated_at, d.published_at";
 const DECK_FROM: &str = "FROM decks d JOIN users u ON u.id = d.author_id
     LEFT JOIN LATERAL (SELECT count(*) FILTER (WHERE v.value = 1) AS upvotes,
         count(*) FILTER (WHERE v.value = -1) AS downvotes FROM votes v WHERE v.deck_id = d.id) vc ON true";
@@ -108,6 +109,7 @@ pub struct Deck {
     pub game_deck_id: Option<String>,
     pub upvotes: i64,
     pub downvotes: i64,
+    pub comments: i64,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub published_at: Option<DateTime<Utc>>,
@@ -756,6 +758,7 @@ pub async fn create_comment(
             .bind(body)
             .fetch_one(&s.db)
             .await?;
+    s.live.comments(&s.db, id).await;
     Ok((StatusCode::CREATED, Json(comment(&s.db, comment_id).await?)))
 }
 
@@ -801,7 +804,13 @@ pub async fn delete_comment(
     Path(id): Path<i64>,
 ) -> Result<StatusCode, ApiError> {
     own_comment(&s.db, id, &user, false).await?;
-    sqlx::query("DELETE FROM comments WHERE id = $1").bind(id).execute(&s.db).await?;
+    let deck: Option<i64> = sqlx::query_scalar("DELETE FROM comments WHERE id = $1 RETURNING deck_id")
+        .bind(id)
+        .fetch_optional(&s.db)
+        .await?;
+    if let Some(deck) = deck {
+        s.live.comments(&s.db, deck).await;
+    }
     Ok(StatusCode::NO_CONTENT)
 }
 
