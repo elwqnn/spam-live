@@ -1,6 +1,7 @@
 pub mod admin;
 pub mod analytics;
 pub mod auth;
+pub mod card_matchups;
 pub mod catalog;
 pub mod decks;
 pub mod live;
@@ -144,6 +145,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         stats::pace,
         stats::turns,
         stats::history,
+        card_matchups::card_matchups,
         admin::reports,
         admin::resolve,
         admin::ban,
@@ -173,6 +175,7 @@ pub fn router(state: AppState) -> Router {
         .merge(decks::routes())
         .merge(live::routes())
         .merge(stats::routes())
+        .merge(card_matchups::routes())
         .merge(admin::routes())
         .merge(analytics::routes())
         .with_state(state)

@@ -19,6 +19,7 @@
 	stats={data.stats}
 	versions={data.versions}
 	decks={data.decks}
+	matchups={data.matchups}
 	{catalog}
 	keywords={data.keywords}
 />

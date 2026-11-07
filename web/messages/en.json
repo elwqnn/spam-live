@@ -62,7 +62,7 @@
 	"all_versions": "All versions",
 	"base_value": "base value",
 	"all_cards": "All cards",
-	"card_zoom": "View {name} large",
+	"card_zoom": "View the artwork of {name}",
 	"stats_title": "Stats",
 	"stats_intro": "The meta of each version: the most played cards, how they do against each other and with each other, and the length of the matches. Only ranked matches between players count; mirror matches and disputed matches do not.",
 	"card": "Card",
@@ -558,5 +558,9 @@
 	"counters_none": "No card has {min} games against them yet.",
 	"duos_title": "Best duos",
 	"duos_text": "2 cards in the same deck, whatever the 2 other cards are, with at least {min} games in at least 2 different decks. The order uses a reliable score (the lower bound of the Wilson interval), as for decks.",
-	"duos_none": "No duo has {min} games in 2 different decks yet."
+	"duos_none": "No duo has {min} games in 2 different decks yet.",
+	"strong_against": "Strong against",
+	"weak_against": "Weak against",
+	"card_matchups_none": "Not enough games",
+	"card_matchups_text": "Win rate of this card against each opposing card, {min} games or more, in the selected version."
 }

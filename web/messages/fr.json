@@ -62,7 +62,7 @@
 	"all_versions": "Toutes les versions",
 	"base_value": "valeur de base",
 	"all_cards": "Toutes les cartes",
-	"card_zoom": "Voir {name} en grand",
+	"card_zoom": "Voir l'illustration de {name}",
 	"stats_title": "Statistiques",
 	"stats_intro": "La méta de chaque version : les cartes les plus jouées, leurs résultats les unes contre les autres et ensemble, et la durée des matchs. Seuls les matchs classés entre joueurs comptent ; les matchs miroirs et les matchs contestés ne comptent pas.",
 	"card": "Carte",
@@ -558,5 +558,9 @@
 	"counters_none": "Aucune carte n'a encore {min} parties contre elles.",
 	"duos_title": "Meilleurs duos",
 	"duos_text": "2 cartes dans le même deck, quelles que soient les 2 autres cartes, avec au moins {min} parties dans au moins 2 decks différents. Le classement utilise un score fiable (la borne basse de l'intervalle de Wilson), comme pour les decks.",
-	"duos_none": "Aucun duo n'a encore {min} parties dans 2 decks différents."
+	"duos_none": "Aucun duo n'a encore {min} parties dans 2 decks différents.",
+	"strong_against": "Fort contre",
+	"weak_against": "Faible contre",
+	"card_matchups_none": "Pas assez de parties",
+	"card_matchups_text": "Taux de victoire de cette carte contre chaque carte adverse, {min} parties ou plus, dans la version choisie."
 }

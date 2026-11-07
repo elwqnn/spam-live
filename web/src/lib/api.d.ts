@@ -660,6 +660,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/stats/cards/{id}/matchups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["card_matchups"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/stats/counters": {
         parameters: {
             query?: never;
@@ -862,6 +878,20 @@ export interface components {
         CardFace: {
             abilities: components["schemas"]["FaceAbility"][];
             tox: components["schemas"]["FaceTox"][];
+        };
+        CardMatchup: {
+            /** Format: uuid */
+            card: string;
+            /** Format: int64 */
+            games: number;
+            /** Format: double */
+            winRate?: number | null;
+            /** Format: int64 */
+            wins: number;
+        };
+        CardMatchups: {
+            strong: components["schemas"]["CardMatchup"][];
+            weak: components["schemas"]["CardMatchup"][];
         };
         CardPace: {
             /** Format: uuid */
@@ -3183,6 +3213,48 @@ export interface operations {
                 };
             };
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    card_matchups: {
+        parameters: {
+            query?: {
+                /** @example all */
+                version?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Card UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description For each card of the opposing decks (not this card) with 10 games or more: games, and wins of the deck with this card. strong: winRate above 0.5, sorted by the Wilson lower bound of the wins; weak: winRate below 0.5, sorted by the Wilson lower bound of the losses; then games descending and card. At most 5 each. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardMatchups"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
