@@ -3,16 +3,16 @@
 	import { ArrowLeft01Icon, ArrowRight01Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
 	import { onMount, tick } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
-	import { api, href } from '#lib';
-	import Arrow from '#lib/components/Arrow.svelte';
-	import DeckKeyTile from '#lib/components/DeckKeyTile.svelte';
-	import DeckTile from '#lib/components/DeckTile.svelte';
+	import { client, href, writes } from '#lib';
+	import Arrow from '@spam-live/ui/components/Arrow.svelte';
+	import DeckKeyTile from '@spam-live/ui/components/DeckKeyTile.svelte';
+	import DeckTile from '@spam-live/ui/components/DeckTile.svelte';
 	import DesktopCta from '#lib/components/DesktopCta.svelte';
-	import ShaderBackground from '#lib/components/ShaderBackground.svelte';
-	import { Button } from '#lib/components/ui/button/index.js';
-	import { live } from '#lib/live.js';
+	import ShaderBackground from '@spam-live/ui/components/ShaderBackground.svelte';
+	import { Button } from '@spam-live/ui/components/ui/button/index.js';
+	import { live } from '@spam-live/ui/live.js';
 	import { m } from '#lib/paraglide/messages.js';
-	import { promote } from '#lib/promote.js';
+	import { promote } from '@spam-live/ui/promote.js';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -53,7 +53,7 @@
 
 	async function refresh() {
 		const id = ++latest;
-		const res = await api(fetch, location.origin)
+		const res = await client()
 			.GET('/api/decks', { params: { query: { sort: 'recent', limit: 12 } } })
 			.catch(() => null);
 		if (id !== latest || !res?.data) return;
@@ -196,7 +196,7 @@
 				{@attach watch}
 			>
 				{#each recent as deck (deck.id)}
-					<DeckTile {deck} {catalog} />
+					<DeckTile {deck} {catalog} vote={writes.vote} />
 				{/each}
 			</ul>
 		</div>

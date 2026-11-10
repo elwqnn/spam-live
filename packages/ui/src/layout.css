@@ -1,0 +1,338 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn-svelte/tailwind.css';
+@import '@fontsource-variable/ibm-plex-sans';
+@import '@fontsource/ibm-plex-serif/400.css';
+@import '@fontsource/ibm-plex-serif/400-italic.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+@import '@fontsource/raleway/800.css';
+
+@source '.';
+
+:root {
+	--background: #171715;
+	--foreground: #f2f1ea;
+	--card: #1d1d1a;
+	--card-foreground: #f2f1ea;
+	--popover: #1d1d1a;
+	--popover-foreground: #f2f1ea;
+	--tile: #211f1c;
+	--row: #22221f;
+	--primary: #f2ead3;
+	--primary-foreground: #171715;
+	--secondary: #2a2925;
+	--secondary-foreground: #f2f1ea;
+	--muted: #22221f;
+	--muted-foreground: #a3a199;
+	--accent: #22221f;
+	--accent-foreground: #f2f1ea;
+	--destructive: oklch(0.704 0.191 22.216);
+	--up: #86c275;
+	--down: #f07a5c;
+	--border: rgba(255, 255, 255, 0.08);
+	--input: rgba(255, 255, 255, 0.12);
+	--ring: rgba(242, 234, 211, 0.5);
+	--grain: 0.05;
+	--spring: cubic-bezier(0.3, 1.6, 0.5, 1);
+	--el: #a3a199;
+	--el-mix: 100%;
+	--el-tint: #f2f1ea;
+	--el-fire: #e2603f;
+	--el-water: #4a90c2;
+	--el-nature: #6fa760;
+	--el-earth: #c99a45;
+	--el-shadow: #9a7fd0;
+	--el-light: #e8c95a;
+	--el-divine: #d987b4;
+	--plum: #543b78;
+	--terra: #e36140;
+	--straw: #edc966;
+	--slate: #4585b3;
+	--moss: #6b9e5e;
+	--shader-plum: oklch(from var(--plum) 0.66 calc(c * 1.7) h);
+	--shader-terra: oklch(from var(--terra) 0.7 c h);
+	--shader-straw: var(--straw);
+	--shader-slate: oklch(from var(--slate) 0.68 calc(c * 1.2) h);
+	--side: clamp(1.5rem, (100vw - 75rem) / 6, 4rem);
+	--reach: 10rem;
+	--gutter: 1.25rem;
+	--contour: color-mix(in oklab, var(--foreground) 10%, transparent);
+	color-scheme: dark;
+}
+
+@media (width >= 40rem) {
+	:root {
+		--gutter: 2rem;
+	}
+}
+
+.el-fire {
+	--el: var(--el-fire);
+}
+.el-water {
+	--el: var(--el-water);
+}
+.el-nature {
+	--el: var(--el-nature);
+}
+.el-earth {
+	--el: var(--el-earth);
+}
+.el-shadow {
+	--el: var(--el-shadow);
+}
+.el-light {
+	--el: var(--el-light);
+}
+.el-divine {
+	--el: var(--el-divine);
+}
+
+@theme inline {
+	--font-sans: 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;
+	--font-heading: 'IBM Plex Serif', Georgia, serif;
+	--font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+	--color-plum: var(--plum);
+	--color-terra: var(--terra);
+	--color-straw: var(--straw);
+	--color-slate: var(--slate);
+	--color-moss: var(--moss);
+	--color-tile: var(--tile);
+	--color-row: var(--row);
+	--color-ring: var(--ring);
+	--color-input: var(--input);
+	--color-border: var(--border);
+	--color-destructive: var(--destructive);
+	--color-up: var(--up);
+	--color-down: var(--down);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-accent: var(--accent);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-muted: var(--muted);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-secondary: var(--secondary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-primary: var(--primary);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-popover: var(--popover);
+	--color-card-foreground: var(--card-foreground);
+	--color-card: var(--card);
+	--color-foreground: var(--foreground);
+	--color-background: var(--background);
+	--radius-*: initial;
+	--radius-xs: 2px;
+	--radius-sm: 4px;
+	--animate-grow: grow 1s ease-out 0.25s backwards;
+	--animate-pop: pop 400ms var(--spring);
+
+	@keyframes grow {
+		from {
+			transform: scaleX(0);
+		}
+	}
+
+	@keyframes pop {
+		from {
+			scale: 0.6;
+		}
+	}
+}
+
+@utility eyebrow {
+	font-family: var(--font-sans);
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+@utility text-el {
+	color: color-mix(in oklab, var(--el) var(--el-mix), var(--el-tint));
+}
+
+@utility shader-text {
+	background:
+		radial-gradient(closest-side, var(--shader-straw), transparent) 10% 0 / 40% 130% no-repeat,
+		radial-gradient(closest-side, var(--shader-slate), transparent) 90% 100% / 35% 140% no-repeat,
+		linear-gradient(
+				110deg,
+				var(--shader-plum),
+				var(--shader-terra) 35%,
+				var(--shader-plum) 65%,
+				var(--shader-terra)
+			)
+			0 0 / 300% 100%;
+	background-clip: text;
+	@supports (color: oklch(from red l c h)) {
+		color: transparent;
+	}
+	@variant motion-safe {
+		animation: shader-text 14s ease-in-out infinite alternate;
+	}
+}
+
+@keyframes shader-text {
+	to {
+		background-position:
+			90% 100%,
+			10% 0,
+			100% 0;
+	}
+}
+
+@utility grain {
+	background: url(/noise.webp) repeat 0 0 / 180px;
+	pointer-events: none;
+}
+
+@utility rows {
+	& > * + * {
+		position: relative;
+		border-top-width: 1px;
+	}
+	@variant lg {
+		& > * + *::before,
+		& > * + *::after {
+			--cross: color-mix(in oklab, var(--foreground) 30%, transparent);
+			content: '';
+			position: absolute;
+			top: -5px;
+			left: calc(-5px - var(--reach));
+			z-index: 1;
+			width: calc(9px + var(--reach));
+			height: 9px;
+			background:
+				linear-gradient(var(--cross), var(--cross)) right 4px top 0 / 1px 100% no-repeat,
+				linear-gradient(var(--cross), var(--cross)) right 0 center / 9px 1px no-repeat,
+				linear-gradient(var(--cross), var(--cross)) right calc(var(--side) + 3px) center / 3px 3px
+					no-repeat,
+				linear-gradient(to left, var(--border) calc(var(--side) - 4px), transparent) left center /
+					calc(100% - 9px) 1px no-repeat;
+			pointer-events: none;
+		}
+		& > * + *::after {
+			right: calc(-5px - var(--reach));
+			left: auto;
+			transform: scaleX(-1);
+		}
+	}
+}
+
+@utility sides {
+	@variant lg {
+		position: relative;
+		&::before,
+		&::after {
+			content: '';
+			position: absolute;
+			inset-block: 0;
+			width: var(--side);
+			border: 0 solid var(--border);
+			background: linear-gradient(var(--contour) 4rem, transparent 28rem) padding-box;
+			mask:
+				url(/contours.svg) 0 0 / 4rem 96rem repeat-y,
+				linear-gradient(#000 0 0) left / 1px 100% no-repeat;
+			pointer-events: none;
+		}
+		&::before {
+			right: calc(100% - max(2rem, 50% - 37.5rem));
+			border-left-width: 1px;
+		}
+		&::after {
+			left: calc(100% - max(2rem, 50% - 37.5rem));
+			border-right-width: 1px;
+			mask-position:
+				0 48rem,
+				right;
+		}
+	}
+}
+
+@utility head {
+	z-index: 20;
+	border-bottom-width: 1px;
+	background-color: var(--background);
+	@variant sm {
+		position: sticky;
+		top: 0;
+	}
+	@variant lg {
+		&::before,
+		&::after {
+			--cross: color-mix(in oklab, var(--foreground) 30%, transparent);
+			content: '';
+			position: absolute;
+			bottom: -5px;
+			left: calc(-5px - var(--reach));
+			z-index: 1;
+			width: calc(9px + var(--reach));
+			height: 9px;
+			background:
+				linear-gradient(var(--cross), var(--cross)) right 4px top 0 / 1px 100% no-repeat,
+				linear-gradient(var(--cross), var(--cross)) right 0 center / 9px 1px no-repeat,
+				linear-gradient(var(--cross), var(--cross)) right calc(var(--side) + 3px) center / 3px 3px
+					no-repeat,
+				linear-gradient(to left, var(--border) calc(var(--side) - 4px), transparent) left center /
+					calc(100% - 9px) 1px no-repeat;
+			pointer-events: none;
+		}
+		&::after {
+			right: calc(-5px - var(--reach));
+			left: auto;
+			transform: scaleX(-1);
+		}
+	}
+}
+
+@utility row {
+	@apply px-(--gutter) py-8;
+}
+
+@utility hatch {
+	background: repeating-linear-gradient(-45deg, var(--border) 0 1px, transparent 1px 7px);
+}
+
+@utility band {
+	height: 0.875rem;
+	@apply hatch;
+}
+
+@utility section-head {
+	@apply px-(--gutter) pt-8 pb-2;
+}
+
+@utility key-hint {
+	@apply ml-1 border-current/25 bg-current/10 text-current max-sm:hidden pointer-coarse:hidden;
+}
+
+@utility cells {
+	margin-right: -1px;
+	margin-bottom: -1px;
+	clip-path: inset(0 1px 1px 0);
+	& > * {
+		border-right-width: 1px;
+		border-bottom-width: 1px;
+	}
+}
+
+@layer base {
+	* {
+		@apply border-border outline-ring;
+	}
+	body {
+		@apply bg-background text-foreground;
+	}
+	html {
+		@apply font-sans sm:scroll-pt-28;
+	}
+	kbd {
+		@apply inline-flex h-5 min-w-5 items-center justify-center rounded-xs border px-1 font-mono text-[11px] leading-none font-normal tracking-normal text-muted-foreground normal-case;
+	}
+}
+
+@media (scripting: enabled) {
+	[data-wait]:disabled {
+		opacity: 1;
+	}
+}

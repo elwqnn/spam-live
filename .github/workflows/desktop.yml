@@ -30,8 +30,7 @@ jobs:
         with:
           workspaces: desktop/src-tauri
       - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-        working-directory: desktop
+      - run: bun install --frozen-lockfile --filter desktop
       - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

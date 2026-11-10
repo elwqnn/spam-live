@@ -81,15 +81,16 @@ seed: db
     cd api && cargo run --features seed -- --seed
 
 [group('dev')]
-[doc('Regenerate web/src/lib/api.d.ts from the API.')]
+[doc('Regenerate packages/ui/src/api.d.ts from the API.')]
 api-types:
-    cd api && cargo run -q -- --openapi | (cd ../web && bunx openapi-typescript --empty-objects-unknown -o src/lib/api.d.ts)
+    cd api && cargo run -q -- --openapi | (cd ../packages/ui && bunx openapi-typescript --empty-objects-unknown -o src/api.d.ts)
 
 [group('check')]
 [doc('Run the linters and type checks of all apps.')]
 check:
     cd api && cargo clippy --all-targets -- -D warnings
     cd web && bun run check && bun run lint
+    cd packages/ui && bun run lint
     cd desktop/src-tauri && cargo clippy --all-targets -- -D warnings
     cd desktop && bun run check && bun run lint
 
@@ -98,6 +99,7 @@ check:
 test *args: db
     cd api && cargo test {{args}}
     cd web && bun run test
+    cd packages/ui && bun run test
     cd desktop/src-tauri && cargo test
 
 [group('release')]
@@ -105,7 +107,7 @@ test *args: db
 images:
     @test -d web/static/art/card -a -d web/static/art/thumb -a -d web/static/art/avatar -a -f web/static/art/ui/card_mask.webp -a -d web/static/art/tox || { echo "web/static/art/ is missing or incomplete: run just art first" >&2; exit 1; }
     docker build -f api/Dockerfile -t {{image}}-api:latest .
-    docker build --build-arg SITE_VERSION=$(git rev-parse --short HEAD) -t {{image}}-web:latest web
+    docker build -f web/Dockerfile --build-arg SITE_VERSION=$(git rev-parse --short HEAD) -t {{image}}-web:latest .
 
 [group('release')]
 [doc('Build and push the images with the tags latest and the commit SHA.')]

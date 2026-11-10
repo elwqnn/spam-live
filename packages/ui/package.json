@@ -1,0 +1,54 @@
+{
+	"name": "@spam-live/ui",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./*": "./src/*"
+	},
+	"imports": {
+		"#ui": "./src/index.ts",
+		"#ui/*": "./src/*"
+	},
+	"scripts": {
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write .",
+		"test": "vitest --run"
+	},
+	"dependencies": {
+		"@fontsource-variable/ibm-plex-sans": "^5.3.0",
+		"@fontsource/ibm-plex-mono": "^5.3.0",
+		"@fontsource/ibm-plex-serif": "^5.3.0",
+		"@fontsource/raleway": "^5.3.0",
+		"@hugeicons/core-free-icons": "^4.4.0",
+		"@hugeicons/svelte": "^1.1.5",
+		"@sveltejs/kit": "^3.0.0",
+		"cn": "^0.5.0",
+		"layerchart": "^2.0.0",
+		"modern-screenshot": "^4.7.0",
+		"openapi-fetch": "^0.17.0",
+		"shadcn-svelte": "^1.7.2",
+		"svelte": "^5.57.2",
+		"tailwind-variants": "^3.3.0",
+		"tailwindcss": "^4.3.0",
+		"tw-animate-css": "^1.4.0"
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"@inlang/paraglide-js": "^2.18.2",
+		"@types/node": "^26",
+		"eslint": "^10.4.1",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-svelte": "^3.19.0",
+		"globals": "^17.6.0",
+		"openapi-typescript": "^7.13.0",
+		"prettier": "^3.8.3",
+		"prettier-plugin-svelte": "^4.1.0",
+		"prettier-plugin-tailwindcss": "^0.8.0",
+		"typescript": "^6.0.3",
+		"typescript-eslint": "^8.60.1",
+		"vite": "^8.3.0",
+		"vitest": "^4.1.8"
+	}
+}

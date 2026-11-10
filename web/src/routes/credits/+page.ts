@@ -1,12 +1,11 @@
-import { api, ok } from '#lib';
-import { getLocale } from '#lib/paraglide/runtime.js';
+import { api } from '#lib';
+import { creditsData } from '@spam-live/ui/views/data.js';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ fetch, url, untrack }) => {
-	const client = api(
-		fetch,
-		untrack(() => url.origin)
+export const load: PageLoad = ({ fetch, url, untrack }) =>
+	creditsData(
+		api(
+			fetch,
+			untrack(() => url.origin)
+		)
 	);
-	const artists = await client.GET('/api/artists', { params: { query: { lang: getLocale() } } });
-	return { artists: ok(artists) };
-};

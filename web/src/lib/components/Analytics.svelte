@@ -4,10 +4,10 @@
 	import { BarChart, LineChart } from 'layerchart';
 	import type { Schemas } from '#lib';
 	import { hourLabel, hourTicks, type Range } from '#lib/analytics.js';
-	import FilterMenu from '#lib/components/FilterMenu.svelte';
-	import * as Chart from '#lib/components/ui/chart/index.js';
-	import * as Table from '#lib/components/ui/table/index.js';
-	import type { Filter } from '#lib/filter.js';
+	import FilterMenu from '@spam-live/ui/components/FilterMenu.svelte';
+	import * as Chart from '@spam-live/ui/components/ui/chart/index.js';
+	import * as Table from '@spam-live/ui/components/ui/table/index.js';
+	import type { Filter } from '@spam-live/ui/filter.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 

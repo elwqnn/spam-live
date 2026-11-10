@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { href } from '#lib';
-	import TitleRow from '#lib/components/TitleRow.svelte';
+	import TitleRow from '@spam-live/ui/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 </script>
 

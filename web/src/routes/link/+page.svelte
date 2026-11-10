@@ -2,9 +2,9 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import { loginHref } from '#lib';
-	import { Button } from '#lib/components/ui/button/index.js';
-	import { Input } from '#lib/components/ui/input/index.js';
-	import TitleRow from '#lib/components/TitleRow.svelte';
+	import { Button } from '@spam-live/ui/components/ui/button/index.js';
+	import { Input } from '@spam-live/ui/components/ui/input/index.js';
+	import TitleRow from '@spam-live/ui/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
 

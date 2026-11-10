@@ -3,7 +3,7 @@
 	import { Download04Icon } from '@hugeicons/core-free-icons';
 	import { href } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
-	import { Button } from './ui/button/index.js';
+	import { Button } from '@spam-live/ui/components/ui/button/index.js';
 
 	let { version, cards }: { version?: string | null; cards: string[] } = $props();
 
@@ -32,7 +32,7 @@
 									alt=""
 									loading="lazy"
 									decoding="async"
-									class="tile [mask:url(/art/ui/card_mask.webp)_0_0/100%_100%]"
+									class="tile [mask:var(--mask-card)_0_0/100%_100%]"
 								/>
 							{/each}
 						</div>

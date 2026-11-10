@@ -5,6 +5,3 @@ bun.lock
 bun.lockb
 
 /static/
-/project.inlang/
-
-src/lib/api.d.ts

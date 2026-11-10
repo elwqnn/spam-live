@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
@@ -16,12 +17,18 @@ export default defineConfig({
 		}),
 
 		paraglideVitePlugin({
-			project: './project.inlang',
+			project: '../packages/ui/project.inlang',
 			outdir: './src/lib/paraglide',
 			emitTsDeclarations: true,
 			strategy: ['url', 'baseLocale']
 		})
 	],
+	resolve: {
+		alias: {
+			$paraglide: fileURLToPath(new URL('./src/lib/paraglide', import.meta.url)),
+			$host: fileURLToPath(new URL('./src/lib/host.ts', import.meta.url))
+		}
+	},
 	server: {
 		proxy: { '/api': process.env.API_URL ?? 'http://localhost:8080' }
 	},

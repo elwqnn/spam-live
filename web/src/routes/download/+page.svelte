@@ -3,8 +3,8 @@
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { ArrowRight02Icon, Download04Icon, GithubIcon } from '@hugeicons/core-free-icons';
 	import { formatDate, href, type Schemas } from '#lib';
-	import TitleRow from '#lib/components/TitleRow.svelte';
-	import { Button } from '#lib/components/ui/button/index.js';
+	import TitleRow from '@spam-live/ui/components/TitleRow.svelte';
+	import { Button } from '@spam-live/ui/components/ui/button/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import type { PageProps } from './$types';

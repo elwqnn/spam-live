@@ -10,9 +10,9 @@
 	} from '@hugeicons/core-free-icons';
 	import { href, loginHref, type Schemas } from '#lib';
 	import { selectImport } from '#lib/import.js';
-	import { Badge } from '#lib/components/ui/badge/index.js';
-	import { Button } from '#lib/components/ui/button/index.js';
-	import TitleRow from '#lib/components/TitleRow.svelte';
+	import { Badge } from '@spam-live/ui/components/ui/badge/index.js';
+	import { Button } from '@spam-live/ui/components/ui/button/index.js';
+	import TitleRow from '@spam-live/ui/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
 

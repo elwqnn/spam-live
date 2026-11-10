@@ -1,38 +1,9 @@
 <script lang="ts">
-	import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
-	import { href } from '#lib';
-	import DeckForm from '#lib/components/DeckForm.svelte';
-	import TitleRow from '#lib/components/TitleRow.svelte';
-	import { m } from '#lib/paraglide/messages.js';
+	import { writes } from '#lib';
+	import EditDeckView from '@spam-live/ui/views/EditDeckView.svelte';
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data }: PageProps = $props();
 </script>
 
-<svelte:head>
-	<title>{m.edit_deck()} · {m.site_name()}</title>
-</svelte:head>
-
-<TitleRow class="grid gap-2 row">
-	<a
-		class="eyebrow wrap-anywhere text-muted-foreground transition-colors hover:text-foreground"
-		href={href(`/decks/${data.deck.id}`)}
-		><HugeiconsIcon
-			icon={ArrowLeft02Icon}
-			aria-hidden="true"
-			class="inline size-[1em] align-[-0.125em]"
-		/>
-		{data.deck.name}</a
-	>
-	<h1 class="font-heading text-3xl font-normal tracking-tight sm:text-4xl">{m.edit_deck()}</h1>
-</TitleRow>
-{#key data.deck.id}
-	<DeckForm
-		cards={data.cards}
-		deck={data.deck}
-		details={data.details}
-		keywords={data.keywords}
-		error={form?.error}
-	/>
-{/key}
+<EditDeckView {data} {writes} />

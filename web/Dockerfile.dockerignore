@@ -1,0 +1,16 @@
+**
+!package.json
+!bun.lock
+!desktop/package.json
+!packages/ui
+!web
+**/node_modules
+**/.env
+**/.env.*
+packages/ui/.paraglide
+packages/ui/project.inlang/cache
+web/build
+web/.svelte-kit
+web/src/lib/paraglide
+web/Dockerfile
+web/Dockerfile.dockerignore

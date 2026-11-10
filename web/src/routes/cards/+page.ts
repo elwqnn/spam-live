@@ -1,16 +1,12 @@
-import { api, ok } from '#lib';
-import { getLocale } from '#lib/paraglide/runtime.js';
+import { api } from '#lib';
+import { cardsData } from '@spam-live/ui/views/data.js';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ fetch, url, untrack }) => {
-	const client = api(
-		fetch,
-		untrack(() => url.origin)
+export const load: PageLoad = ({ fetch, url, untrack }) =>
+	cardsData(
+		api(
+			fetch,
+			untrack(() => url.origin)
+		),
+		url
 	);
-	const trend = url.searchParams.get('trend') === 'version' ? 'version' : 'week';
-	const [cards, stats] = await Promise.all([
-		client.GET('/api/cards', { params: { query: { lang: getLocale() } } }),
-		client.GET('/api/stats/cards', { params: { query: { trend } } })
-	]);
-	return { cards: ok(cards), stats: stats.data ?? [] };
-};

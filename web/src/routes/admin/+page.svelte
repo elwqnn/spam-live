@@ -3,14 +3,14 @@
 	import { page } from '$app/state';
 	import { closeAfter, formAction, href, modeName, queryHref } from '#lib';
 	import Analytics from '#lib/components/Analytics.svelte';
-	import DeckCards from '#lib/components/DeckCards.svelte';
-	import Dialog from '#lib/components/Dialog.svelte';
-	import Time from '#lib/components/Time.svelte';
-	import { Badge } from '#lib/components/ui/badge/index.js';
-	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
-	import { Input } from '#lib/components/ui/input/index.js';
-	import * as Table from '#lib/components/ui/table/index.js';
-	import TitleRow from '#lib/components/TitleRow.svelte';
+	import DeckCards from '@spam-live/ui/components/DeckCards.svelte';
+	import Dialog from '@spam-live/ui/components/Dialog.svelte';
+	import Time from '@spam-live/ui/components/Time.svelte';
+	import { Badge } from '@spam-live/ui/components/ui/badge/index.js';
+	import { Button, buttonVariants } from '@spam-live/ui/components/ui/button/index.js';
+	import { Input } from '@spam-live/ui/components/ui/input/index.js';
+	import * as Table from '@spam-live/ui/components/ui/table/index.js';
+	import TitleRow from '@spam-live/ui/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
 
