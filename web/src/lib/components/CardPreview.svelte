@@ -70,6 +70,8 @@
 	import ToxIcon from './ToxIcon.svelte';
 
 	let popup = $state<HTMLElement>();
+	let art = $state<HTMLElement>();
+	let info = $state<HTMLElement>();
 	const card = $derived(preview.card);
 	const stats = $derived.by(() => {
 		const list: Schemas['CardStats'][] | undefined = page.data.cardStats;
@@ -80,7 +82,8 @@
 	$effect(() => {
 		if (!popup) return;
 		popup.togglePopover(!!card);
-		if (!card) return;
+		if (!card || !art || !info) return;
+		art.style.height = `calc(${info.offsetHeight}px - 1.5rem)`;
 		const { left, top } = place(
 			preview.at,
 			{ width: popup.offsetWidth, height: popup.offsetHeight },
@@ -126,21 +129,17 @@
 	bind:this={popup}
 	popover="manual"
 	aria-hidden="true"
-	class="pointer-events-none inset-auto m-0 w-72 divide-y rounded-sm border bg-popover p-0 text-sm text-popover-foreground"
+	class="pointer-events-none inset-auto m-0 rounded-sm border bg-popover p-0 text-sm text-popover-foreground open:flex"
 >
 	{#if card}
-		<div class="flex gap-3 p-3">
-			<span
-				class="el-{card.element} aspect-[1432/2048] w-14 shrink-0 bg-[color-mix(in_oklab,var(--el)_40%,#000)] [mask:url(/art/ui/card_mask.webp)_0_0/100%_100%]"
-			>
-				<img
-					src="/art/thumb/{card.id}.webp"
-					alt=""
-					decoding="async"
-					class="size-full object-cover"
-				/>
-			</span>
-			<div class="grid min-w-0 content-start gap-2">
+		<span
+			bind:this={art}
+			class="el-{card.element} m-3 mr-0 aspect-[1432/2048] shrink-0 bg-[color-mix(in_oklab,var(--el)_40%,#000)] [mask:url(/art/ui/card_mask.webp)_0_0/100%_100%]"
+		>
+			<img src="/art/card/{card.id}.webp" alt="" decoding="async" class="size-full object-cover" />
+		</span>
+		<div bind:this={info} class="min-h-72 w-64 divide-y">
+			<div class="grid gap-2 p-3">
 				<p class="leading-snug font-medium wrap-anywhere">{card.name ?? card.id}</p>
 				<CardBadgeStack>
 					<CardBadge type="element" value={card.element} display="compact" />
@@ -149,40 +148,40 @@
 					<CardBadge type="income" value={card.goldIncome} display="compact" />
 				</CardBadgeStack>
 			</div>
+			{#if card.face.abilities.length}
+				<div class="grid gap-1.5 p-3">
+					<p class="eyebrow text-muted-foreground">{m.abilities()}</p>
+					<ul class="grid gap-1">
+						{#each card.face.abilities as ability, i (i)}
+							<li class="flex items-center justify-between gap-2">
+								<span class="min-w-0 truncate">{ability.name}</span>
+								<CardBadge type="cooldown" value={ability.cooldown} display="compact" />
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
+			{#if card.face.tox.length}
+				<div class="grid gap-1.5 p-3">
+					<p class="eyebrow text-muted-foreground">{m.tox()}</p>
+					<ul class="grid gap-1">
+						{#each card.face.tox as tox, i (i)}
+							<li class="flex items-center justify-between gap-2">
+								<ToxIcon id={tox.id} image={tox.image} lazy={false} class="size-5" />
+								<span class="mr-auto min-w-0 truncate">{tox.name}</span>
+								{#if tox.rarity}<RarityMark rarity={tox.rarity} tooltip={false} />{/if}
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
+			{#if stats}
+				<dl class="grid grid-cols-3 gap-2 p-3">
+					{@render stat(m.play_rate(), percent(stats.games ? stats.playRate : null))}
+					{@render stat(m.games(), stats.games)}
+					{@render stat(m.win_rate(), percent(stats.winRate), winRateColor(stats.winRate))}
+				</dl>
+			{/if}
 		</div>
-		{#if card.face.abilities.length}
-			<div class="grid gap-1.5 p-3">
-				<p class="eyebrow text-muted-foreground">{m.abilities()}</p>
-				<ul class="grid gap-1">
-					{#each card.face.abilities as ability, i (i)}
-						<li class="flex items-center justify-between gap-2">
-							<span class="min-w-0 truncate">{ability.name}</span>
-							<CardBadge type="cooldown" value={ability.cooldown} display="compact" />
-						</li>
-					{/each}
-				</ul>
-			</div>
-		{/if}
-		{#if card.face.tox.length}
-			<div class="grid gap-1.5 p-3">
-				<p class="eyebrow text-muted-foreground">{m.tox()}</p>
-				<ul class="grid gap-1">
-					{#each card.face.tox as tox, i (i)}
-						<li class="flex items-center justify-between gap-2">
-							<ToxIcon id={tox.id} image={tox.image} lazy={false} class="size-5" />
-							<span class="mr-auto min-w-0 truncate">{tox.name}</span>
-							{#if tox.rarity}<RarityMark rarity={tox.rarity} tooltip={false} />{/if}
-						</li>
-					{/each}
-				</ul>
-			</div>
-		{/if}
-		{#if stats}
-			<dl class="grid grid-cols-3 gap-2 p-3">
-				{@render stat(m.play_rate(), percent(stats.games ? stats.playRate : null))}
-				{@render stat(m.games(), stats.games)}
-				{@render stat(m.win_rate(), percent(stats.winRate), winRateColor(stats.winRate))}
-			</dl>
-		{/if}
 	{/if}
 </div>

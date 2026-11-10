@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { ArrowRight02Icon, Download04Icon } from '@hugeicons/core-free-icons';
+	import { ArrowRight02Icon, Download04Icon, GithubIcon } from '@hugeicons/core-free-icons';
 	import { formatDate, href, type Schemas } from '#lib';
 	import TitleRow from '#lib/components/TitleRow.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
@@ -11,7 +11,8 @@
 
 	let { data }: PageProps = $props();
 
-	const REPO = 'https://github.com/elwqnn/spam-live';
+	const PROFILE = 'https://github.com/elwqnn';
+	const REPO = `${PROFILE}/spam-live`;
 	const mb = (size: number) =>
 		new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 1 }).format(size / 1e6);
 	const shell = (name: string) =>
@@ -131,6 +132,25 @@
 	</div>
 
 	<aside class="grid content-start gap-5 row">
+		<section class="grid gap-3 border-b pb-5">
+			<h2 class="eyebrow text-muted-foreground">{m.download_author()}</h2>
+			<a class="group flex items-center gap-3" href={PROFILE} rel="external">
+				<img
+					src="{PROFILE}.png?size=96"
+					alt=""
+					width="48"
+					height="48"
+					class="size-12 shrink-0 rounded-full border"
+				/>
+				<span class="grid gap-0.5">
+					<span class="font-medium underline-offset-4 group-hover:underline">elwqnn</span>
+					<span class="flex items-center gap-1.5 text-sm text-muted-foreground"
+						><HugeiconsIcon icon={GithubIcon} aria-hidden="true" class="size-4" />GitHub</span
+					>
+				</span>
+			</a>
+			<p class="text-sm leading-6 text-muted-foreground">{m.download_about()}</p>
+		</section>
 		<h2 class="font-heading text-2xl font-normal tracking-tight">{m.download_how()}</h2>
 		<ol class="grid gap-3 text-sm">
 			{#each steps as step, i (i)}
