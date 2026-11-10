@@ -3,9 +3,18 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="text-scale" content="scale" />
+		<script>
+			try {
+				if (localStorage.getItem('shortcuts') === 'off')
+					document.documentElement.classList.add('keys-off');
+				if (localStorage.getItem('cardStats') === 'off')
+					document.documentElement.classList.add('stats-off');
+			} catch {}
+		</script>
 		%sveltekit.head%
 	</head>
-	<body>
+	<body data-sveltekit-preload-data="hover">
 		<div class="contents">%sveltekit.body%</div>
 	</body>
 </html>

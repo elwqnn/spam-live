@@ -57,6 +57,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let desktop_min_version = env("DESKTOP_MIN_VERSION").unwrap_or_else(|| "0.0.0".into());
     catalog::parse_version(&desktop_min_version).ok_or("DESKTOP_MIN_VERSION is invalid")?;
     let catalog_dir = PathBuf::from(env("CATALOG_DIR").unwrap_or_else(|| "catalog".into()));
+    let cors_origins: Vec<String> =
+        env("CORS_ORIGINS").map(|v| v.split(',').map(|o| o.trim().to_string()).collect()).unwrap_or_default();
+    if let Some(bad) = cors_origins
+        .iter()
+        .find(|o| reqwest::Url::parse(o).map_or(true, |url| url.origin().ascii_serialization() != **o))
+    {
+        return Err(format!("CORS_ORIGINS has an invalid origin: {bad}").into());
+    }
     let bind = env("BIND").unwrap_or_else(|| "0.0.0.0:8080".into());
 
     let catalog = catalog::Catalog::load(&catalog_dir)?;
@@ -73,6 +81,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         github_feedback_token: env("GITHUB_FEEDBACK_TOKEN"),
         desktop_min_version,
         max_pending_device_codes: 1000,
+        cors_origins,
     };
     let state = AppState::new(db, config, catalog);
 

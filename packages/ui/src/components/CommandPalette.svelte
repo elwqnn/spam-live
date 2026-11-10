@@ -15,7 +15,18 @@
 	import CardBadgeStack from './CardBadgeStack.svelte';
 	import ToxIcon from './ToxIcon.svelte';
 
-	let { mac, onfeedback }: { mac: boolean; onfeedback: () => void } = $props();
+	let {
+		mac,
+		onfeedback,
+		download = true,
+		onlanguage = (locale) =>
+			location.assign(localizeHref(page.url.pathname + page.url.search, { locale }))
+	}: {
+		mac: boolean;
+		onfeedback: () => void;
+		download?: boolean;
+		onlanguage?: (locale: Locale) => void;
+	} = $props();
 
 	const LANGUAGES: Record<Locale, string> = { en: 'English', fr: 'Français' };
 
@@ -128,13 +139,17 @@
 		const names = (name: (options: { locale: Locale }) => string) =>
 			locales.map((l) => name({ locale: l })).join(' · ');
 		return [
-			{
-				key: 'action-download',
-				label: m.palette_download(),
-				names: names((o) => m.palette_download({}, o)),
-				go: '/download',
-				hint: 'D'
-			},
+			...(download
+				? [
+						{
+							key: 'action-download',
+							label: m.palette_download(),
+							names: names((o) => m.palette_download({}, o)),
+							go: '/download',
+							hint: 'D'
+						}
+					]
+				: []),
 			{
 				key: 'action-feedback',
 				label: m.feedback_title(),
@@ -146,7 +161,7 @@
 				key: 'action-language',
 				label: m.palette_language(language),
 				names: names((o) => m.palette_language(language, o)),
-				run: () => location.assign(localizeHref(page.url.pathname + page.url.search, { locale }))
+				run: () => onlanguage(locale)
 			}
 		];
 	});

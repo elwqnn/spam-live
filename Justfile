@@ -8,6 +8,7 @@ game_data := home_directory() / ".local/share/Steam/steamapps/common/SPAM/SPAM_D
 export DATABASE_URL := env("DATABASE_URL", "postgres://spam:spam@127.0.0.1:" + db_port + "/spam")
 export PUBLIC_URL := env("PUBLIC_URL", "http://localhost:5173")
 export CATALOG_DIR := env("CATALOG_DIR", justfile_directory() / "catalog")
+export CORS_ORIGINS := env("CORS_ORIGINS", "http://localhost:1420")
 
 [private]
 default:
@@ -100,6 +101,7 @@ test *args: db
     cd api && cargo test {{args}}
     cd web && bun run test
     cd packages/ui && bun run test
+    cd desktop && bun run test
     cd desktop/src-tauri && cargo test
 
 [group('release')]

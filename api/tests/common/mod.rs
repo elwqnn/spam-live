@@ -14,6 +14,7 @@ use sqlx::PgPool;
 use tower::ServiceExt;
 
 pub const PUBLIC_URL: &str = "http://localhost:5173";
+pub const DEV_ORIGIN: &str = "http://localhost:1420";
 pub const ACCOUNT_A: &str = "00000000-0000-4000-8000-00000000000a";
 pub const ACCOUNT_B: &str = "00000000-0000-4000-8000-00000000000b";
 pub const SEAT0_CARDS: [&str; 4] = [
@@ -40,6 +41,7 @@ pub fn config(openid_url: &str) -> Config {
         github_feedback_token: None,
         desktop_min_version: "1.2.3".into(),
         max_pending_device_codes: 1000,
+        cors_origins: vec![DEV_ORIGIN.into()],
     }
 }
 

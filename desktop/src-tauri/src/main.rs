@@ -3,6 +3,7 @@
 mod uploader;
 
 use std::{
+    collections::HashMap,
     fs,
     path::PathBuf,
     process::Command,
@@ -14,14 +15,20 @@ use std::{
     time::{Duration, Instant},
 };
 
-use reqwest::Url;
+use reqwest::{
+    Method, Url,
+    header::{CONTENT_TYPE, USER_AGENT},
+};
 use serde::{Deserialize, Serialize};
 use tauri::{
     AppHandle, Emitter, Manager, WindowEvent, Wry,
+    ipc::{InvokeBody, Request},
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
+    utils::config::{Csp, CspDirectiveSources},
 };
 use tauri_plugin_autostart::ManagerExt;
+use tauri_plugin_window_state::StateFlags;
 
 use uploader::{Api, RETRY, Report, Uploader};
 
@@ -33,6 +40,8 @@ const RELEASES: &str = "https://github.com/elwqnn/spam-live/releases/latest";
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const KEYRING_SERVICE: &str = "io.github.elwqnn.spamlive";
 const POLL: Duration = Duration::from_secs(2);
+const API_TIMEOUT: Duration = Duration::from_secs(60);
+const DEV_ORIGIN: &str = "http://localhost:1420";
 const APPIMAGE_VARS: [&str; 11] = [
     "LD_LIBRARY_PATH",
     "LD_PRELOAD",
@@ -51,6 +60,7 @@ const APPIMAGE_VARS: [&str; 11] = [
 struct Shared {
     data: Mutex<Data>,
     pairing: AtomicU64,
+    http: reqwest::Client,
 }
 
 #[derive(Default)]
@@ -92,6 +102,14 @@ struct Status {
     autostart: bool,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Answer {
+    status: u16,
+    content_type: Option<String>,
+    body: String,
+}
+
 #[derive(Serialize, Deserialize, Default)]
 struct Settings {
     folder: Option<PathBuf>,
@@ -108,6 +126,36 @@ enum Link {
 
 fn site() -> &'static str {
     SITE.trim_end_matches('/')
+}
+
+fn origin(url: &Url) -> String {
+    url.origin().ascii_serialization()
+}
+
+fn app_url(url: &Url) -> bool {
+    match (url.scheme(), url.host_str()) {
+        ("tauri", Some("localhost")) | ("http" | "https", Some("tauri.localhost")) => true,
+        _ => cfg!(debug_assertions) && origin(url) == DEV_ORIGIN,
+    }
+}
+
+fn api_url(site: &str, path: &str) -> Option<Url> {
+    let route = path.split('?').next()?;
+    if !route.starts_with("/api/") || route.contains(['%', '\\', '#']) {
+        return None;
+    }
+    let url = Url::parse(&format!("{site}{path}")).ok()?;
+    let first = url.path().strip_prefix("/api/")?.split('/').next()?.to_ascii_lowercase();
+    let empty = url.path().split('/').skip(1).any(str::is_empty);
+    let same = origin(&url) == origin(&Url::parse(site).ok()?);
+    (same && !empty && url.fragment().is_none() && first != "admin" && first != "device").then_some(url)
+}
+
+fn api_method(method: &str) -> Option<Method> {
+    ["GET", "POST", "PUT", "PATCH", "DELETE"]
+        .contains(&method)
+        .then(|| Method::from_bytes(method.as_bytes()).ok())
+        .flatten()
 }
 
 fn data(app: &AppHandle) -> MutexGuard<'_, Data> {
@@ -289,6 +337,52 @@ fn open(app: AppHandle, link: Link) {
 }
 
 #[tauri::command]
+async fn api(app: AppHandle, request: Request<'_>) -> Result<Answer, String> {
+    let header = |name: &str| request.headers().get(name).and_then(|v| v.to_str().ok());
+    let method = header("x-method").and_then(api_method).ok_or("method is not allowed")?;
+    let url = header("x-path").and_then(|path| api_url(site(), path)).ok_or("path is not allowed")?;
+    let token = data(&app).token.clone();
+    let mut req = app
+        .state::<Shared>()
+        .http
+        .request(method, url)
+        .timeout(API_TIMEOUT)
+        .header(USER_AGENT, format!("SPAM.live/{VERSION} ({})", std::env::consts::OS));
+    if let Some(token) = &token {
+        req = req.bearer_auth(token);
+    }
+    if let Some(kind) = header("x-type") {
+        req = req.header(CONTENT_TYPE, kind);
+    }
+    if let InvokeBody::Raw(body) = request.body()
+        && !body.is_empty()
+    {
+        req = req.body(body.clone());
+    }
+    let res = req.send().await.map_err(|e| e.to_string())?;
+    let status = res.status().as_u16();
+    let content_type = res.headers().get(CONTENT_TYPE).and_then(|v| v.to_str().ok()).map(str::to_owned);
+    let body = res.text().await.map_err(|e| e.to_string())?;
+    if status == 401
+        && let Some(token) = &token
+    {
+        revoke(&app, token);
+        emit(&app);
+    }
+    Ok(Answer { status, content_type, body })
+}
+
+#[tauri::command]
+fn browse(url: String) -> Result<(), String> {
+    let url = Url::parse(&url).map_err(|e| e.to_string())?;
+    if !matches!(url.scheme(), "http" | "https") {
+        return Err("only web links can open".into());
+    }
+    open_url(url.as_str());
+    Ok(())
+}
+
+#[tauri::command]
 fn tray_labels(app: AppHandle, open: String, quit: String) {
     if let Some(tray) = app.try_state::<Tray>() {
         let _ = tray.0.set_text(open);
@@ -421,10 +515,40 @@ fn worker(app: AppHandle) {
     }
 }
 
+fn csp(context: &mut tauri::Context<Wry>) {
+    let security = &mut context.config_mut().app.security;
+    let Some(policy) = security.csp.take() else { return };
+    let mut map: HashMap<String, CspDirectiveSources> = policy.into();
+    if let Ok(url) = Url::parse(site()) {
+        for directive in ["connect-src", "img-src"] {
+            map.entry(directive.into()).or_default().push(origin(&url));
+        }
+    }
+    security.csp = Some(Csp::DirectiveMap(map));
+}
+
 fn main() {
+    let mut context = tauri::generate_context!();
+    csp(&mut context);
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _, _| show(app)))
         .plugin(tauri_plugin_autostart::Builder::new().arg("--minimized").build())
+        .plugin(
+            tauri_plugin_window_state::Builder::new()
+                .with_state_flags(StateFlags::SIZE | StateFlags::POSITION | StateFlags::MAXIMIZED)
+                .build(),
+        )
+        .plugin(
+            tauri::plugin::Builder::<Wry>::new("links")
+                .on_navigation(|_, url| {
+                    let local = app_url(url);
+                    if !local && matches!(url.scheme(), "http" | "https") {
+                        open_url(url.as_str());
+                    }
+                    local
+                })
+                .build(),
+        )
         .manage(Shared::default())
         .invoke_handler(tauri::generate_handler![
             get_status,
@@ -434,7 +558,9 @@ fn main() {
             set_folder,
             set_autostart,
             open,
-            tray_labels
+            tray_labels,
+            api,
+            browse
         ])
         .setup(|app| {
             let settings: Settings = settings_file(app.handle())
@@ -474,7 +600,7 @@ fn main() {
                 let _ = window.hide();
             }
         })
-        .run(tauri::generate_context!())
+        .run(context)
         .expect("failed to run the app");
 }
 
@@ -495,5 +621,80 @@ mod tests {
         assert!(env.contains(&("PATH", Some("/usr/bin:/bin".into()))));
         assert!(env.contains(&("XDG_DATA_DIRS", Some("/usr/share:/tmp/.mount_ab/share".into()))));
         assert!(appimage_env("/", var).is_empty());
+    }
+
+    #[test]
+    fn api_paths() {
+        let site = "http://localhost:5173";
+        let ok = |path: &str| api_url(site, path).map(String::from);
+        assert_eq!(ok("/api/me").as_deref(), Some("http://localhost:5173/api/me"));
+        assert!(ok("/api/me/devices/3").is_some());
+        assert!(ok("/api/decks/12/vote").is_some());
+        assert!(ok("/api/feedback").is_some());
+        assert_eq!(
+            ok("/api/decks?q=a%20b&author=me").as_deref(),
+            Some("http://localhost:5173/api/decks?q=a%20b&author=me")
+        );
+        for path in [
+            "/api/admin",
+            "/api/admin/reports",
+            "/api//admin",
+            "/api//admin/reports",
+            "/api//device",
+            "/api//device/token",
+            "/api/.//admin/reports",
+            "/api/./admin",
+            "/api/./admin/reports",
+            "/api/me/",
+            "/api/decks//3",
+            "/api/",
+            "/api/ADMIN/reports",
+            "/api/device/token",
+            "/api/device",
+            "/api/./device/code",
+            "/api/x/../admin/reports",
+            "/api/../admin",
+            "/api/%61dmin/reports",
+            "/api/%2e%2e/admin",
+            "/api/..\\admin",
+            "/api/ad\tmin/reports",
+            "/api/de\nvice/token",
+            "/api/me#x",
+            "/api/me?x#y",
+            "/api",
+            "/apix/me",
+            "api/me",
+            "//evil.example/api/me",
+            "https://evil.example/api/me",
+            "/admin",
+            "",
+        ] {
+            assert_eq!(ok(path), None, "{path}");
+        }
+        assert!(api_url("https://spam-live.elwqnn.eu", "/api/cards?lang=fr").is_some());
+    }
+
+    #[test]
+    fn api_methods() {
+        for method in ["GET", "POST", "PUT", "PATCH", "DELETE"] {
+            assert_eq!(api_method(method).map(|m| m.to_string()).as_deref(), Some(method));
+        }
+        for method in ["HEAD", "OPTIONS", "TRACE", "CONNECT", "get", ""] {
+            assert!(api_method(method).is_none(), "{method}");
+        }
+    }
+
+    #[test]
+    fn app_urls() {
+        let url = |s: &str| Url::parse(s).unwrap();
+        assert!(app_url(&url("tauri://localhost/decks/1")));
+        assert!(app_url(&url("http://tauri.localhost/settings?link")));
+        assert!(app_url(&url("https://tauri.localhost/")));
+        assert_eq!(app_url(&url("http://localhost:1420/cards")), cfg!(debug_assertions));
+        for other in
+            ["https://spam-live.elwqnn.eu/decks", "tauri://evil/", "http://localhost:5173/", "file:///etc/passwd"]
+        {
+            assert!(!app_url(&url(other)), "{other}");
+        }
     }
 }

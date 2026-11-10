@@ -30,9 +30,5 @@ export default defineConfig(
 				parser: ts.parser
 			}
 		}
-	},
-	{
-		files: ['src/lib/components/ui/**'],
-		rules: { 'svelte/no-navigation-without-resolve': 'off' }
 	}
 );

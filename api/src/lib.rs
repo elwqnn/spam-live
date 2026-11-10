@@ -16,13 +16,16 @@ use std::{sync::Arc, time::Duration};
 
 use axum::{
     Json, Router,
-    http::{StatusCode, header},
+    http::{HeaderValue, Method, StatusCode, header},
     response::{IntoResponse, Response},
     routing::get,
 };
 use serde::Serialize;
 use sqlx::PgPool;
+use tower_http::cors::{AllowOrigin, CorsLayer};
 use utoipa::{OpenApi, ToSchema};
+
+pub const APP_ORIGINS: [&str; 2] = ["tauri://localhost", "http://tauri.localhost"];
 
 pub struct Config {
     pub public_url: String,
@@ -34,6 +37,7 @@ pub struct Config {
     pub github_feedback_token: Option<String>,
     pub desktop_min_version: String,
     pub max_pending_device_codes: i64,
+    pub cors_origins: Vec<String>,
 }
 
 #[derive(Clone)]
@@ -172,7 +176,15 @@ async fn openapi_json() -> Json<utoipa::openapi::OpenApi> {
     Json(ApiDoc::openapi())
 }
 
+fn cors(extra: &[String]) -> CorsLayer {
+    let origins = APP_ORIGINS.iter().copied().chain(extra.iter().map(String::as_str));
+    CorsLayer::new()
+        .allow_origin(AllowOrigin::list(origins.filter_map(|o| HeaderValue::from_str(o).ok())))
+        .allow_methods([Method::GET, Method::HEAD])
+}
+
 pub fn router(state: AppState) -> Router {
+    let cors = cors(&state.config.cors_origins);
     Router::new()
         .route("/api/openapi.json", get(openapi_json))
         .merge(auth::routes())
@@ -187,6 +199,7 @@ pub fn router(state: AppState) -> Router {
         .merge(analytics::routes())
         .merge(feedback::routes())
         .with_state(state)
+        .layer(cors)
 }
 
 pub async fn cleanup(db: &PgPool) -> Result<(), sqlx::Error> {
