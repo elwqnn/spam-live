@@ -1,11 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { HugeiconsIcon } from '@hugeicons/svelte';
+	import {
+		ArrowRight02Icon,
+		Copy01Icon,
+		FolderOpenIcon,
+		Tick02Icon
+	} from '@hugeicons/core-free-icons';
 	import { href, loginHref, type Schemas } from '#lib';
 	import { selectImport } from '#lib/import.js';
 	import { Badge } from '#lib/components/ui/badge/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
-	import { Input } from '#lib/components/ui/input/index.js';
 	import TitleRow from '#lib/components/TitleRow.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import type { PageProps } from './$types';
@@ -29,9 +35,11 @@
 		skipped: [m.status_skipped, 'outline']
 	} as const;
 	type Status = keyof typeof STATUS;
+	const MATCH_KEYS: Status[] = ['new', 'known', 'rejected'];
 
 	let ready = $state(false);
-	let selection = $state<Awaited<ReturnType<typeof selectImport>> | null>(null);
+	let input = $state<HTMLInputElement>();
+	let copied = $state<string | null>(null);
 	let error = $state<string | null>(null);
 	let progress = $state<{ done: number; total: number } | null>(null);
 	let uploads = $state<Upload[]>([]);
@@ -41,17 +49,15 @@
 
 	onMount(() => (ready = true));
 
-	async function pick(event: Event & { currentTarget: HTMLInputElement }) {
-		const files = [...(event.currentTarget.files ?? [])].map((file) => ({
-			path: file.webkitRelativePath || file.name,
-			file
-		}));
-		uploads = [];
-		decks = null;
-		progress = null;
-		selection = await selectImport(files);
-		error = selection.groups.length ? null : m.import_no_replays({ path: EXPECTED });
-		if (error) selection = null;
+	async function copy(event: MouseEvent & { currentTarget: HTMLElement }, path: string) {
+		const code = event.currentTarget.previousElementSibling!;
+		try {
+			await navigator.clipboard.writeText(path);
+			copied = path;
+			setTimeout(() => copied === path && (copied = null), 2000);
+		} catch {
+			getSelection()?.selectAllChildren(code);
+		}
 	}
 
 	async function post<T>(url: string, body: BodyInit): Promise<Sent<T>> {
@@ -64,10 +70,18 @@
 		}
 	}
 
-	async function send() {
-		if (!selection) return;
-		const { groups, deckLines } = selection;
-		selection = null;
+	async function pick(event: Event & { currentTarget: HTMLInputElement }) {
+		const files = [...(event.currentTarget.files ?? [])].map((file) => ({
+			path: file.webkitRelativePath || file.name,
+			file
+		}));
+		event.currentTarget.value = '';
+		uploads = [];
+		decks = null;
+		progress = null;
+		const { groups, deckLines } = await selectImport(files);
+		error = groups.length ? null : m.import_no_replays({ path: EXPECTED });
+		if (error) return;
 		progress = { done: 0, total: groups.length + (deckLines.length ? 1 : 0) };
 		for (const group of groups) {
 			const body = new FormData();
@@ -92,12 +106,38 @@
 	<Badge variant={STATUS[status][1]}>{STATUS[status][0]()}</Badge>
 {/snippet}
 
-{#snippet counts(items: { status: Status }[], keys: Status[])}
-	<p class="text-muted-foreground tabular-nums">
-		{keys
-			.map((k) => `${STATUS[k][0]()}: ${items.filter((i) => i.status === k).length}`)
-			.join(' · ')}
+{#snippet counts(title: string, items: { status: Status }[], keys: Status[])}
+	<p class="tabular-nums">
+		<span class="font-medium">{title}</span>
+		<span class="text-muted-foreground"
+			>{keys
+				.map((k) => `${STATUS[k][0]()}: ${items.filter((i) => i.status === k).length}`)
+				.join(' · ')}</span
+		>
 	</p>
+{/snippet}
+
+{#snippet rejected(items: { status: Status; reason?: string | null; name: string }[])}
+	{#if items.some((i) => i.status === 'rejected')}
+		<ul class="grid gap-1">
+			{#each items.filter((i) => i.status === 'rejected') as item, i (i)}
+				<li class="flex flex-wrap items-center gap-x-2 gap-y-1">
+					{@render badge(item.status)}
+					<code class="text-xs wrap-anywhere">{item.name}</code>
+					{#if item.reason}
+						<span class="wrap-anywhere text-muted-foreground">{item.reason}</span>
+					{/if}
+				</li>
+			{/each}
+		</ul>
+	{/if}
+{/snippet}
+
+{#snippet step(n: number, text: string)}
+	<span aria-hidden="true" class="text-muted-foreground tabular-nums"
+		>{String(n).padStart(2, '0')}</span
+	>
+	<p class="font-medium">{text}</p>
 {/snippet}
 
 <TitleRow class="grid gap-2 row *:max-w-3xl">
@@ -107,157 +147,124 @@
 	<p class="text-muted-foreground">{m.import_intro()}</p>
 </TitleRow>
 
-<section class="grid gap-2 row text-sm *:max-w-3xl">
-	<h2 class="font-heading text-2xl font-normal tracking-tight">{m.import_folder_title()}</h2>
-	<dl class="grid gap-x-3 gap-y-1 sm:grid-cols-[auto_1fr]">
-		{#each FOLDERS as [os, path] (os)}
-			<dt class="font-medium">{os}</dt>
-			<dd><code class="rounded-xs bg-muted px-1.5 py-0.5 text-xs break-all">{path}</code></dd>
-		{/each}
-	</dl>
-	<p class="text-muted-foreground">{m.import_folder_hidden()}</p>
-</section>
-
-<section class="grid gap-2 row text-sm *:max-w-3xl">
-	<h2 class="font-heading text-2xl font-normal tracking-tight">{m.import_sent_title()}</h2>
-	<p>{m.import_sent_text()}</p>
-	<ul class="grid list-disc gap-1 pl-5">
-		<li>{m.import_sent_replays()}</li>
-		<li>{m.import_sent_logs()}</li>
-	</ul>
-	<p>{m.import_sent_nothing_else()}</p>
-</section>
-
-{#if !data.me}
-	<section class="grid gap-3 row text-sm">
-		<p>{m.import_login()}</p>
-		<Button href={loginHref(page.url)} rel="external" class="justify-self-start"
-			>{m.login_steam()}</Button
-		>
-	</section>
-{:else}
-	<noscript class="block row text-sm">{m.import_needs_js()}</noscript>
-	{#if ready}
-		<section class="grid gap-3 row text-sm *:max-w-3xl">
-			<label class="grid gap-1.5">
-				<span class="font-medium">{m.import_pick()}</span>
-				<Input
-					type="file"
-					webkitdirectory
-					disabled={!!progress && !done}
-					onchange={pick}
-					aria-describedby="import-pick-help"
-				/>
-			</label>
-			<p id="import-pick-help" class="text-muted-foreground">{m.import_pick_help()}</p>
-			{#if error}<p role="alert" class="wrap-anywhere text-destructive">{error}</p>{/if}
-			{#if selection}
-				<p class="tabular-nums">
-					{m.import_ready({
-						accounts: selection.groups.length,
-						replays: selection.groups.reduce((n, g) => n + g.replays.length, 0),
-						decks: selection.deckLines.length
-					})}
-				</p>
-				<Button onclick={send} class="justify-self-start">{m.import_send()}</Button>
-			{/if}
-			{#if progress && !done}
-				<div class="grid gap-1.5" role="status">
-					<span id="import-progress">{m.import_progress(progress)}</span>
-					<progress
-						aria-labelledby="import-progress"
-						class="w-full accent-primary"
-						max={progress.total}
-						value={progress.done}
-					></progress>
-				</div>
-			{/if}
-		</section>
-	{/if}
-
-	{#if done}
-		<section class="rows text-sm" aria-live="polite">
-			{#each uploads as upload (upload.accountId)}
-				<div class="grid gap-2 row">
-					<h2 class="font-medium wrap-anywhere" data-private>
-						{m.import_account({ id: upload.accountId })}
-					</h2>
-					{#if upload.error}
-						<p role="alert" class="text-destructive">{upload.error}</p>
-					{:else if upload.data}
-						<h3 class="font-medium">{m.import_matches()}</h3>
-						{@render counts(upload.data.entries, ['new', 'known', 'rejected'])}
-						{#if upload.data.entries.length}
-							<ul class="grid gap-1">
-								{#each upload.data.entries as entry, i (i)}
-									<li class="flex flex-wrap items-center gap-x-2 gap-y-1">
-										{@render badge(entry.status)}
-										<code class="text-xs">{entry.gameUid ?? '—'}</code>
-										{#if entry.reason}
-											<span class="wrap-anywhere text-muted-foreground">{entry.reason}</span>
-										{/if}
-									</li>
-								{/each}
-							</ul>
-						{:else}
-							<p class="text-muted-foreground">{m.import_no_entries()}</p>
+<section class="grid gap-6 row text-sm *:max-w-3xl">
+	<ol class="grid gap-6">
+		<li class="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-3 gap-y-3">
+			{@render step(1, m.import_step_copy())}
+			<dl class="col-start-2 grid items-center gap-x-3 gap-y-2 sm:grid-cols-[auto_minmax(0,1fr)]">
+				{#each FOLDERS as [os, path] (os)}
+					<dt class="text-muted-foreground">{os}</dt>
+					<dd class="flex items-center gap-1">
+						<code class="rounded-xs bg-muted px-1.5 py-1 text-xs break-all select-all">{path}</code>
+						{#if ready}
+							<Button
+								variant="ghost"
+								size="icon-sm"
+								aria-label={copied === path ? m.import_copied() : m.import_copy({ os })}
+								onclick={(event) => copy(event, path)}
+							>
+								<HugeiconsIcon icon={copied === path ? Tick02Icon : Copy01Icon} />
+							</Button>
 						{/if}
-						{#if upload.data.replays.length}
-							<h3 class="font-medium">{m.import_replays()}</h3>
-							{@render counts(upload.data.replays, ['new', 'known', 'rejected'])}
-							<ul class="grid gap-1">
-								{#each upload.data.replays as replay, i (i)}
-									<li class="flex flex-wrap items-center gap-x-2 gap-y-1">
-										{@render badge(replay.status)}
-										<code class="text-xs wrap-anywhere">{replay.fileName ?? replay.gameUid}</code>
-										{#if replay.reason}
-											<span class="wrap-anywhere text-muted-foreground">{replay.reason}</span>
-										{/if}
-									</li>
-								{/each}
-							</ul>
-						{/if}
+					</dd>
+				{/each}
+			</dl>
+		</li>
+		<li class="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-3 gap-y-3">
+			{@render step(2, m.import_step_pick())}
+			<div class="col-start-2 grid justify-items-start gap-3">
+				{#if !data.me}
+					<p>{m.import_login()}</p>
+					<Button href={loginHref(page.url)} rel="external" size="lg">{m.login_steam()}</Button>
+				{:else}
+					<noscript>{m.import_needs_js()}</noscript>
+					{#if ready}
+						<input type="file" webkitdirectory hidden bind:this={input} onchange={pick} />
+						<Button size="lg" disabled={!!progress && !done} onclick={() => input?.click()}>
+							<HugeiconsIcon icon={FolderOpenIcon} data-icon="inline-start" />
+							{m.import_pick()}
+						</Button>
 					{/if}
-				</div>
-			{/each}
+				{/if}
+				<p class="text-muted-foreground">{m.import_sent()}</p>
+			</div>
+		</li>
+	</ol>
+	{#if error}<p role="alert" class="wrap-anywhere text-destructive">{error}</p>{/if}
+	{#if progress && !done}
+		<div class="grid gap-1.5" role="status">
+			<span id="import-progress">{m.import_progress(progress)}</span>
+			<progress
+				aria-labelledby="import-progress"
+				class="w-full accent-primary"
+				max={progress.total}
+				value={progress.done}
+			></progress>
+		</div>
+	{/if}
+</section>
 
+{#if done}
+	<section class="rows text-sm" aria-live="polite">
+		{#each uploads as upload (upload.accountId)}
 			<div class="grid gap-2 row">
-				<h2 class="font-medium">{m.decks_title()}</h2>
-				{#if !decks}
-					<p class="text-muted-foreground">{m.import_no_deck_lines()}</p>
-				{:else if decks.error}
-					<p role="alert" class="text-destructive">{decks.error}</p>
-				{:else if decks.data}
-					{@render counts(decks.data.decks, ['new', 'updated', 'unchanged', 'skipped'])}
-					<ul class="grid gap-1">
-						{#each decks.data.decks as deck, i (i)}
-							<li class="flex flex-wrap items-center gap-x-2 gap-y-1">
-								{@render badge(deck.status)}
-								{#if deck.deckId}
-									<a class="wrap-anywhere hover:underline" href={href(`/decks/${deck.deckId}`)}
-										>{deck.name ?? deck.gameDeckId}</a
-									>
-								{:else}
-									<span class="wrap-anywhere">{deck.name ?? deck.gameDeckId}</span>
-								{/if}
-								{#if deck.reason}
-									<span class="wrap-anywhere text-muted-foreground">{deck.reason}</span>
-								{/if}
-							</li>
-						{/each}
-					</ul>
+				<h2 class="font-medium wrap-anywhere" data-private>
+					{m.import_account({ id: upload.accountId })}
+				</h2>
+				{#if upload.error}
+					<p role="alert" class="text-destructive">{upload.error}</p>
+				{:else if upload.data}
+					{@render counts(m.import_matches(), upload.data.entries, MATCH_KEYS)}
+					{@render rejected(upload.data.entries.map((e) => ({ ...e, name: e.gameUid ?? '' })))}
+					{#if upload.data.replays.length}
+						{@render counts(m.import_replays(), upload.data.replays, MATCH_KEYS)}
+						{@render rejected(
+							upload.data.replays.map((r) => ({ ...r, name: r.fileName ?? r.gameUid ?? '' }))
+						)}
+					{/if}
 				{/if}
 			</div>
+		{/each}
 
-			<div class="grid gap-1 bg-muted px-(--gutter) py-4">
-				<p>{m.import_keep_10()}</p>
-				<p class="text-muted-foreground">
-					{m.import_app()}
-					<a class="underline underline-offset-4 hover:text-foreground" href={href('/download')}
-						>{m.import_app_download()}</a
-					>
-				</p>
-			</div>
-		</section>
-	{/if}
+		<div class="grid gap-2 row">
+			<h2 class="font-medium">{m.decks_title()}</h2>
+			{#if !decks}
+				<p class="text-muted-foreground">{m.import_no_deck_lines()}</p>
+			{:else if decks.error}
+				<p role="alert" class="text-destructive">{decks.error}</p>
+			{:else if decks.data}
+				<ul class="grid gap-1">
+					{#each decks.data.decks as deck, i (i)}
+						<li class="flex flex-wrap items-center gap-x-2 gap-y-1">
+							{@render badge(deck.status)}
+							{#if deck.deckId}
+								<a class="wrap-anywhere hover:underline" href={href(`/decks/${deck.deckId}`)}
+									>{deck.name ?? deck.gameDeckId}</a
+								>
+							{:else}
+								<span class="wrap-anywhere">{deck.name ?? deck.gameDeckId}</span>
+							{/if}
+							{#if deck.reason}
+								<span class="wrap-anywhere text-muted-foreground">{deck.reason}</span>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</div>
+	</section>
 {/if}
+
+<aside class="grid gap-1 row text-sm *:max-w-3xl">
+	<p>{m.import_keep_10()}</p>
+	<p class="text-muted-foreground">
+		{m.import_app()}
+		<a class="underline underline-offset-4 hover:text-foreground" href={href('/download')}
+			>{m.import_app_download()}<HugeiconsIcon
+				icon={ArrowRight02Icon}
+				aria-hidden="true"
+				class="ml-1 inline size-[1em] align-[-0.125em]"
+			/></a
+		>
+	</p>
+</aside>
