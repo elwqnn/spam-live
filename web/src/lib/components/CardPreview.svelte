@@ -11,8 +11,15 @@
 	}>({ card: null, mode: 'pointer', at: { x: 0, y: 0 }, owner: null });
 
 	const fine = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
+	let timer: ReturnType<typeof setTimeout> | undefined;
+
+	function show(next: typeof preview) {
+		clearTimeout(timer);
+		Object.assign(preview, next);
+	}
 
 	function close() {
+		clearTimeout(timer);
 		preview.card = null;
 		preview.owner = null;
 	}
@@ -23,7 +30,7 @@
 			const owns = (mode: 'pointer' | 'focus') => preview.owner === node && preview.mode === mode;
 			const enter = (e: PointerEvent) => {
 				if (e.pointerType === 'mouse' && fine())
-					Object.assign(preview, {
+					show({
 						card,
 						mode: 'pointer',
 						at: { x: e.clientX, y: e.clientY },
@@ -34,11 +41,11 @@
 				if (owns('pointer')) preview.at = { x: e.clientX, y: e.clientY };
 			};
 			const leave = () => {
-				if (owns('pointer')) close();
+				if (owns('pointer')) timer = setTimeout(close, 120);
 			};
 			const focus = () => {
 				if (node.matches(':focus-visible') && fine())
-					Object.assign(preview, {
+					show({
 						card,
 						mode: 'focus',
 						at: node.getBoundingClientRect(),
@@ -129,7 +136,7 @@
 	bind:this={popup}
 	popover="manual"
 	aria-hidden="true"
-	class="pointer-events-none inset-auto m-0 rounded-sm border bg-popover p-0 text-sm text-popover-foreground open:flex"
+	class="pointer-events-none inset-auto m-0 rounded-sm border bg-popover p-0 text-sm text-popover-foreground shadow-2xl backdrop:pointer-events-none backdrop:bg-black/40 backdrop:transition-opacity backdrop:duration-200 open:flex starting:open:backdrop:opacity-0"
 >
 	{#if card}
 		<span

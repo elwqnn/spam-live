@@ -583,6 +583,7 @@
 	"feedback_attachments": "Attachments",
 	"feedback_screenshot": "Screenshot",
 	"feedback_no_screenshot": "No screenshot",
+	"feedback_capturing": "Capturing the page…",
 	"feedback_marks": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
