@@ -18,11 +18,12 @@ default:
 dev: db
     #!/usr/bin/env bash
     set -m
-    trap 'kill -- $(jobs -p | sed "s/^/-/") 2>/dev/null' EXIT
-    trap exit INT TERM
-    (cd api && CARGO_TERM_COLOR=always cargo run 2>&1 | awk '{ print "api | " $0; fflush() }') &
-    (cd web && FORCE_COLOR=1 bun run dev 2>&1 | awk '{ print "web | " $0; fflush() }') &
-    wait
+    (
+        trap 'wait; exit 0' INT
+        (cd api && CARGO_TERM_COLOR=always cargo run 2>&1 | awk '{ print "api | " $0; fflush() }') </dev/null &
+        (cd web && FORCE_COLOR=1 bun run dev 2>&1 | awk '{ print "web | " $0; fflush() }') </dev/null &
+        wait
+    )
 
 [group('dev')]
 [doc('Start the local Postgres container.')]
