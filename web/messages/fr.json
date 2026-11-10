@@ -356,6 +356,8 @@
 	"download_none": "Aucune version pour l'instant",
 	"download_error": "Les informations de version ne sont pas disponibles pour le moment",
 	"download_releases": "Versions sur GitHub",
+	"download_author": "Créé par",
+	"download_about": "Je joue à SPAM et je développe SPAM.live sur mon temps libre. Je veux un seul endroit pour partager des decks et lire la méta à partir de vrais matchs classés. Le code est open source : envoyez vos idées et vos bugs sur GitHub.",
 	"download_how": "Comment ça marche",
 	"download_step_install": "Installez l'application.",
 	"download_step_link": "Liez-la à votre compte SPAM.live.",
