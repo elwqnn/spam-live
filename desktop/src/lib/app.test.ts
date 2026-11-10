@@ -24,6 +24,8 @@ const status = (patch: Partial<Status>): Status => ({
 	found: true,
 	last: null,
 	update: false,
+	ready: null,
+	manual: false,
 	autostart: false,
 	...patch
 });
@@ -169,6 +171,9 @@ describe('uploader state', () => {
 		expect(uploaderState(status({ linked: false, found: false }))).toBe('unlinked');
 		expect(uploaderState(status({ linked: false, update: true }))).toBe('update');
 		expect(uploaderState(status({ linked: false, code: 'ABCD', update: true }))).toBe('linking');
+		expect(uploaderState(status({ manual: true }))).toBe('update');
+		expect(uploaderState(status({ ready: '0.2.0', update: true, linked: false }))).toBe('ready');
+		expect(uploaderState(status({ ready: '0.2.0', code: 'ABCD' }))).toBe('linking');
 	});
 });
 

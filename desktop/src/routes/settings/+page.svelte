@@ -83,9 +83,16 @@
 {/if}
 
 {#if status}
-	{#if status.update}
+	{#if status.ready}
 		<section class="flex flex-wrap items-center gap-3 row" role="status">
-			<p class="flex-1 text-sm">{m.desktop_update_text()}</p>
+			<p class="flex-1 text-sm">{m.desktop_ready_text({ version: status.ready })}</p>
+			<Button size="sm" onclick={() => run('restart')}>{m.desktop_ready_restart()}</Button>
+		</section>
+	{:else if status.update || status.manual}
+		<section class="flex flex-wrap items-center gap-3 row" role="status">
+			<p class="flex-1 text-sm">
+				{status.manual ? m.desktop_update_manual() : m.desktop_update_text()}
+			</p>
 			<Button size="sm" onclick={() => open('releases')}>{m.desktop_update_link()}</Button>
 		</section>
 	{/if}

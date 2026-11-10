@@ -19,9 +19,11 @@ export type Status = {
 	found: boolean;
 	last: Report | null;
 	update: boolean;
+	ready: string | null;
+	manual: boolean;
 	autostart: boolean;
 };
-export type UploaderState = 'linking' | 'update' | 'unlinked' | 'folder' | 'watching';
+export type UploaderState = 'linking' | 'ready' | 'update' | 'unlinked' | 'folder' | 'watching';
 export type Move = 'back' | 'forward' | 'reload';
 export type Target = { go: string } | { open: string } | null;
 
@@ -64,7 +66,8 @@ export const account = (method: string, path: string) =>
 export function uploaderState(status: Status | null): UploaderState | null {
 	if (!status) return null;
 	if (status.code) return 'linking';
-	if (status.update) return 'update';
+	if (status.ready) return 'ready';
+	if (status.update || status.manual) return 'update';
 	if (!status.linked) return 'unlinked';
 	return status.found ? 'watching' : 'folder';
 }

@@ -30,6 +30,7 @@
 	"bundle": {
 		"active": true,
 		"targets": ["nsis", "appimage"],
+		"createUpdaterArtifacts": true,
 		"icon": [
 			"icons/32x32.png",
 			"icons/128x128.png",
@@ -37,5 +38,11 @@
 			"icons/icon.png",
 			"icons/icon.ico"
 		]
+	},
+	"plugins": {
+		"updater": {
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDBBMEM0ODI3MTI4Mjk1MzYKUldRMmxZSVNKMGdNQ2tmbEpEV2UwdFU1cEZ1NWRNcDlrZndsUk5pRmRnZThhWXlHakVSaFVXSVUK",
+			"requireSignedVersion": true
+		}
 	}
 }

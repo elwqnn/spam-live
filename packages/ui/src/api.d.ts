@@ -500,6 +500,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/desktop/update/{target}/{arch}/{current_version}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["update"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/device/code": {
         parameters: {
             query?: never;
@@ -1494,6 +1510,14 @@ export interface components {
             lastSeen: string;
             /** Format: int64 */
             seenCount: number;
+        };
+        Update: {
+            notes: string;
+            /** Format: date-time */
+            pub_date: string;
+            signature: string;
+            url: string;
+            version: string;
         };
         UploadForm: {
             /** Format: binary */
@@ -2890,6 +2914,57 @@ export interface operations {
             };
             /** @description No release */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description windows or linux */
+                target: string;
+                /** @description x86_64 */
+                arch: string;
+                /** @description The installed app version */
+                current_version: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Tauri updater JSON of the latest published release when it is newer than current_version */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Update"];
+                };
+            };
+            /** @description No newer release with a signed asset for this target */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unsupported target or invalid version */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

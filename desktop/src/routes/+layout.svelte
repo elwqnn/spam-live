@@ -43,7 +43,8 @@
 		unlinked: m.desktop_state_unlinked,
 		linking: m.desktop_state_linking,
 		folder: m.desktop_state_folder,
-		update: m.desktop_state_update
+		update: m.desktop_state_update,
+		ready: m.desktop_state_ready
 	};
 
 	let mac = $state(false);
@@ -63,11 +64,17 @@
 		mac = isMac();
 		single = !document.documentElement.classList.contains('keys-off');
 		document.documentElement.lang = getLocale();
-		invoke('tray_labels', { open: m.desktop_tray_open(), quit: m.desktop_tray_quit() }).catch(
-			() => undefined
-		);
+		invoke('tray_labels', {
+			open: m.desktop_tray_open(),
+			quit: m.desktop_tray_quit(),
+			update: m.desktop_state_ready()
+		}).catch(() => undefined);
 		watch();
 	});
+
+	function restart() {
+		invoke('restart').catch(() => goto(settings));
+	}
 
 	async function login() {
 		await invoke('pair').catch(() => undefined);
@@ -203,7 +210,8 @@
 					<Button
 						variant="ghost"
 						size="sm"
-						href={settings}
+						href={upload === 'ready' ? undefined : settings}
+						onclick={upload === 'ready' ? restart : undefined}
 						aria-current={page.url.pathname === settings ? 'page' : undefined}
 						class={upload === 'watching' ? 'text-muted-foreground' : undefined}
 						><HugeiconsIcon icon={CloudUploadIcon} /><span class="sr-only"

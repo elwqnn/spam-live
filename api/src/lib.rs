@@ -127,6 +127,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         matches::my_matches,
         matches::min_version,
         release::release,
+        release::update,
         decks::import,
         decks::list_decks,
         decks::create_deck,

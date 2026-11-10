@@ -5,7 +5,7 @@ mod uploader;
 use std::{
     collections::HashMap,
     fs,
-    path::PathBuf,
+    path::{Path, PathBuf},
     process::Command,
     sync::{
         Mutex, MutexGuard, PoisonError,
@@ -28,7 +28,8 @@ use tauri::{
     utils::config::{Csp, CspDirectiveSources},
 };
 use tauri_plugin_autostart::ManagerExt;
-use tauri_plugin_window_state::StateFlags;
+use tauri_plugin_updater::{Update, UpdaterExt};
+use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
 use uploader::{Api, RETRY, Report, Uploader};
 
@@ -42,6 +43,8 @@ const KEYRING_SERVICE: &str = "io.github.elwqnn.spamlive";
 const POLL: Duration = Duration::from_secs(2);
 const API_TIMEOUT: Duration = Duration::from_secs(60);
 const DEV_ORIGIN: &str = "http://localhost:1420";
+const UPDATE_CHECK: Duration = Duration::from_secs(6 * 60 * 60);
+const WINDOW_STATE: StateFlags = StateFlags::SIZE.union(StateFlags::POSITION).union(StateFlags::MAXIMIZED);
 const APPIMAGE_VARS: [&str; 11] = [
     "LD_LIBRARY_PATH",
     "LD_PRELOAD",
@@ -73,10 +76,17 @@ struct Data {
     custom: bool,
     last: Option<Report>,
     update: bool,
+    ready: Option<Update>,
+    manual: bool,
     reset: bool,
 }
 
-struct Tray(MenuItem<Wry>, MenuItem<Wry>);
+struct Tray {
+    menu: Menu<Wry>,
+    open: MenuItem<Wry>,
+    quit: MenuItem<Wry>,
+    update: MenuItem<Wry>,
+}
 
 #[derive(Serialize, Clone)]
 #[serde(tag = "kind", content = "message", rename_all = "camelCase")]
@@ -99,6 +109,8 @@ struct Status {
     found: bool,
     last: Option<Report>,
     update: bool,
+    ready: Option<String>,
+    manual: bool,
     autostart: bool,
 }
 
@@ -179,6 +191,8 @@ fn status(app: &AppHandle) -> Status {
         custom: d.custom,
         last: d.last.clone(),
         update: d.update,
+        ready: d.ready.as_ref().map(|u| u.version.clone()),
+        manual: d.manual,
         autostart,
     }
 }
@@ -236,6 +250,12 @@ fn open_url(url: &str) {
 
 fn settings_file(app: &AppHandle) -> Option<PathBuf> {
     app.path().app_config_dir().ok().map(|dir| dir.join("settings.json"))
+}
+
+fn cache_file(app: &AppHandle, name: &str) -> Option<PathBuf> {
+    let dir = app.path().app_cache_dir().ok()?;
+    fs::create_dir_all(&dir).ok()?;
+    Some(dir.join(name))
 }
 
 fn apply_folder(app: &AppHandle, custom: Option<PathBuf>) {
@@ -382,12 +402,108 @@ fn browse(url: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command(async)]
+fn restart(app: AppHandle) -> Result<(), String> {
+    let update = data(&app).ready.take().ok_or("no update is ready")?;
+    let token = data(&app).token.clone();
+    close(token);
+    apply(&app, update, true)?;
+    app.restart()
+}
+
 #[tauri::command]
-fn tray_labels(app: AppHandle, open: String, quit: String) {
+fn tray_labels(app: AppHandle, open: String, quit: String, update: String) {
     if let Some(tray) = app.try_state::<Tray>() {
-        let _ = tray.0.set_text(open);
-        let _ = tray.1.set_text(quit);
+        let _ = tray.open.set_text(open);
+        let _ = tray.quit.set_text(quit);
+        let _ = tray.update.set_text(update);
     }
+}
+
+fn tray_update(app: &AppHandle, ready: bool) {
+    if let Some(tray) = app.try_state::<Tray>() {
+        let _ = if ready { tray.menu.prepend(&tray.update) } else { tray.menu.remove(&tray.update) };
+    }
+}
+
+fn writable(dir: &Path) -> bool {
+    let probe = dir.join(format!(".spam-live-{}", std::process::id()));
+    let created = fs::OpenOptions::new().write(true).create_new(true).open(&probe).is_ok();
+    if created {
+        let _ = fs::remove_file(&probe);
+    }
+    created
+}
+
+fn replaceable() -> bool {
+    !cfg!(target_os = "linux")
+        || std::env::var_os("APPIMAGE").is_some_and(|path| Path::new(&path).parent().is_some_and(writable))
+}
+
+async fn download(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+    let endpoint =
+        Url::parse(&format!("{}/api/desktop/update/{{{{target}}}}/{{{{arch}}}}/{{{{current_version}}}}", site()))?;
+    let updater = app
+        .updater_builder()
+        .endpoints(vec![endpoint])?
+        .configure_client(|client| client.connect_timeout(API_TIMEOUT).read_timeout(API_TIMEOUT))
+        .build()?;
+    let Some(update) = updater.check().await? else { return Ok(()) };
+    if !replaceable() {
+        data(app).manual = true;
+        emit(app);
+        return Ok(());
+    }
+    let bytes = update.download(|_, _| {}, || {}).await?;
+    fs::write(cache_file(app, "update").ok_or("no cache folder")?, bytes)?;
+    data(app).ready = Some(update);
+    tray_update(app, true);
+    emit(app);
+    Ok(())
+}
+
+fn updates(app: AppHandle) {
+    if let Some(file) = cache_file(&app, "update") {
+        let _ = fs::remove_file(file);
+    }
+    loop {
+        let idle = {
+            let d = data(&app);
+            d.ready.is_none() && !d.manual
+        };
+        if idle {
+            let _ = tauri::async_runtime::block_on(download(&app));
+        }
+        thread::sleep(UPDATE_CHECK);
+    }
+}
+
+fn install(app: &AppHandle, update: Update, restart: bool) -> Result<(), String> {
+    let file = cache_file(app, "update").ok_or("no cache folder")?;
+    let bytes = fs::read(&file).map_err(|e| e.to_string())?;
+    let _ = fs::remove_file(&file);
+    let show = cache_file(app, "show").filter(|_| restart);
+    if let Some(show) = &show {
+        let _ = fs::write(show, "");
+    }
+    let _ = app.save_window_state(WINDOW_STATE);
+    let result = update.restart_after_install(restart).install(bytes).map_err(|e| e.to_string());
+    if result.is_err()
+        && let Some(show) = &show
+    {
+        let _ = fs::remove_file(show);
+    }
+    result
+}
+
+fn apply(app: &AppHandle, update: Update, restart: bool) -> Result<(), String> {
+    tray_update(app, false);
+    let result = install(app, update, restart);
+    if result.is_err() {
+        data(app).manual = true;
+        emit(app);
+    }
+    result
 }
 
 fn pairing(app: &AppHandle, id: u64) {
@@ -533,11 +649,8 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _, _| show(app)))
         .plugin(tauri_plugin_autostart::Builder::new().arg("--minimized").build())
-        .plugin(
-            tauri_plugin_window_state::Builder::new()
-                .with_state_flags(StateFlags::SIZE | StateFlags::POSITION | StateFlags::MAXIMIZED)
-                .build(),
-        )
+        .plugin(tauri_plugin_window_state::Builder::new().with_state_flags(WINDOW_STATE).build())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
             tauri::plugin::Builder::<Wry>::new("links")
                 .on_navigation(|_, url| {
@@ -560,7 +673,8 @@ fn main() {
             open,
             tray_labels,
             api,
-            browse
+            browse,
+            restart
         ])
         .setup(|app| {
             let settings: Settings = settings_file(app.handle())
@@ -570,28 +684,42 @@ fn main() {
             apply_folder(app.handle(), settings.folder);
             let open = MenuItem::with_id(app, "open", "Open", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-            let mut tray = TrayIconBuilder::new()
-                .tooltip("SPAM.live")
-                .menu(&Menu::with_items(app, &[&open, &quit])?)
-                .on_menu_event(|app, event| match event.id.as_ref() {
+            let update = MenuItem::with_id(app, "update", "Update ready, restart", true, None::<&str>)?;
+            let menu = Menu::with_items(app, &[&open, &quit])?;
+            let mut tray = TrayIconBuilder::new().tooltip("SPAM.live").menu(&menu).on_menu_event(|app, event| {
+                match event.id.as_ref() {
                     "open" => show(app),
+                    "update" => {
+                        let app = app.clone();
+                        thread::spawn(move || restart(app));
+                    }
                     "quit" => {
                         let token = data(app).token.clone();
                         close(token);
+                        let ready = data(app).ready.take();
+                        if let Some(update) = ready {
+                            let _ = apply(app, update, false);
+                        }
                         app.exit(0);
                     }
                     _ => {}
-                });
+                }
+            });
             if let Some(icon) = app.default_window_icon() {
                 tray = tray.icon(icon.clone());
             }
             tray.build(app)?;
-            app.manage(Tray(open, quit));
-            if !std::env::args().any(|arg| arg == "--minimized") {
+            app.manage(Tray { menu, open, quit, update });
+            let restarted = cache_file(app.handle(), "show").is_some_and(|file| fs::remove_file(file).is_ok());
+            if restarted || !std::env::args().any(|arg| arg == "--minimized") {
                 show(app.handle());
             }
             let handle = app.handle().clone();
             thread::spawn(move || worker(handle));
+            if !cfg!(debug_assertions) {
+                let handle = app.handle().clone();
+                thread::spawn(move || updates(handle));
+            }
             Ok(())
         })
         .on_window_event(|window, event| {
@@ -672,6 +800,22 @@ mod tests {
             assert_eq!(ok(path), None, "{path}");
         }
         assert!(api_url("https://spam-live.elwqnn.eu", "/api/cards?lang=fr").is_some());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn checks_the_appimage_folder() {
+        use std::os::unix::fs::PermissionsExt;
+        let dir = std::env::temp_dir().join(format!("spam-live-writable-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        assert!(writable(&dir));
+        assert_eq!(fs::read_dir(&dir).unwrap().count(), 0);
+        fs::set_permissions(&dir, fs::Permissions::from_mode(0o555)).unwrap();
+        let root = fs::File::create(dir.join("x")).is_ok();
+        assert_eq!(writable(&dir), root);
+        fs::set_permissions(&dir, fs::Permissions::from_mode(0o755)).unwrap();
+        fs::remove_dir_all(&dir).unwrap();
+        assert!(!writable(&dir));
     }
 
     #[test]
