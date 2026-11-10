@@ -1,4 +1,5 @@
 import type { IconSvgElement } from '@hugeicons/svelte';
+import type { Tier } from './tier.js';
 
 export type FilterOption = {
 	value: string;
@@ -6,6 +7,7 @@ export type FilterOption = {
 	count?: number;
 	icon?: string;
 	hugeicon?: IconSvgElement;
+	tier?: Tier;
 	reset?: Record<string, null>;
 };
 

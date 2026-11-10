@@ -3,7 +3,7 @@ import { selection } from '#lib/filter.js';
 import { getLocale } from '#lib/paraglide/runtime.js';
 import type { PageLoad } from './$types';
 
-const TABS = ['meta', 'tiers', 'counters', 'duos', 'length', 'trends'] as const;
+const TABS = ['meta', 'counters', 'duos', 'length', 'trends'] as const;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 export const load: PageLoad = async ({ fetch, url, untrack }) => {
@@ -28,9 +28,7 @@ export const load: PageLoad = async ({ fetch, url, untrack }) => {
 			: [],
 		versioned ? client.GET('/api/catalog/versions').then(ok) : [],
 		tab === 'meta' ? client.GET('/api/stats/overview', query).then(ok) : null,
-		tab === 'meta' || tab === 'tiers' || tab === 'duos'
-			? client.GET('/api/stats/cards', query).then(ok)
-			: [],
+		tab === 'meta' || tab === 'duos' ? client.GET('/api/stats/cards', query).then(ok) : [],
 		tab === 'counters' && against.length
 			? client
 					.GET('/api/stats/counters', {

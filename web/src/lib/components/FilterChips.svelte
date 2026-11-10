@@ -7,6 +7,7 @@
 	import { selection, target, type Filter } from '#lib/filter.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { cn } from '#lib/utils.js';
+	import TierBadge from './TierBadge.svelte';
 
 	let {
 		filter,
@@ -65,7 +66,9 @@
 						class="-ml-1 h-5 w-auto max-w-none shrink-0"
 					/>
 				{/if}
-				{#if option.hugeicon}
+				{#if option.tier}
+					<TierBadge tier={option.tier} class="-ml-1" />
+				{:else if option.hugeicon}
 					<HugeiconsIcon icon={option.hugeicon} aria-hidden="true" class="size-4" />
 					<span class="sr-only">{option.label}</span>
 				{:else}

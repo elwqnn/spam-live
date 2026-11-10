@@ -38,7 +38,7 @@
 	const resistances = $derived(Object.entries(card.resistances));
 	const version = $derived(page.url.searchParams.get('version'));
 	const tierHref = $derived(
-		href(`/stats?tab=tiers${version ? `&version=${encodeURIComponent(version)}` : ''}`)
+		href(`/stats${version ? `?version=${encodeURIComponent(version)}` : ''}#tiers`)
 	);
 </script>
 

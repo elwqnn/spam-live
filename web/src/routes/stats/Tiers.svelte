@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { href, percent, winRateColor, type CardMap, type Schemas } from '#lib';
 	import { cardPreview } from '#lib/components/CardPreview.svelte';
-	import { TONES } from '#lib/components/TierBadge.svelte';
+	import TierBadge from '#lib/components/TierBadge.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { TIERS, tierCards } from '#lib/tier.js';
 
@@ -42,7 +42,7 @@
 	</ul>
 {/snippet}
 
-<section aria-labelledby="tiers-title">
+<section id="tiers" aria-labelledby="tiers-title" class="sm:scroll-mt-(--head)">
 	<div class="grid gap-1 section-head">
 		<h2 id="tiers-title" class="font-heading text-2xl font-normal tracking-tight">
 			{m.tiers_title()}
@@ -52,17 +52,9 @@
 	{#if data.length}
 		<ol class="divide-y">
 			{#each tiers as { tier, cards } (tier)}
-				<li class="flex min-h-20">
-					<span
-						class={[
-							'grid w-14 shrink-0 place-items-center font-heading text-3xl sm:w-20',
-							TONES[tier]
-						]}
-						><span aria-hidden="true">{tier}</span><span class="sr-only"
-							>{m.tier_label({ tier })}</span
-						></span
-					>
-					<div class="min-w-0 flex-1 px-(--gutter) py-3">
+				<li class="flex min-h-20 gap-4 px-(--gutter) py-3 sm:gap-6">
+					<TierBadge {tier} large class="mt-1" />
+					<div class="min-w-0 flex-1">
 						{#if cards.length}{@render avatars(cards)}{/if}
 					</div>
 				</li>
