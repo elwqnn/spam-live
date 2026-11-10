@@ -9,6 +9,7 @@
 	import Description from '#lib/components/Description.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
+	import RarityMark from '#lib/components/RarityMark.svelte';
 	import TitleRow from '#lib/components/TitleRow.svelte';
 	import ToxIcon from '#lib/components/ToxIcon.svelte';
 	import { m } from '#lib/paraglide/messages.js';
@@ -141,6 +142,9 @@
 							<h3 class="min-w-0 text-[15px] leading-6 font-semibold wrap-anywhere">
 								{@render link(anchor, entryName(entry))}
 							</h3>
+							{#if g.type === 'tox' && typeof entry.data?.rarity === 'string'}
+								<RarityMark rarity={entry.data.rarity} />
+							{/if}
 						</div>
 						<div class="grid min-w-0 gap-3">
 							{#if entry.description}

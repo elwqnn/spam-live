@@ -52,6 +52,7 @@
 	let picked = $state.raw<{ selector: string; text: string } | null>(null);
 	let status = $state<Status>('idle');
 	let mode = $state<'annotate' | 'pick' | null>(null);
+	let capturing = $state(false);
 	let busy = false;
 	let run = 0;
 	let closing: ReturnType<typeof setTimeout> | undefined;
@@ -76,7 +77,7 @@
 
 	async function take() {
 		const id = ++run;
-		busy = true;
+		capturing = true;
 		remove();
 		await frame();
 		await frame();
@@ -93,24 +94,18 @@
 			return;
 		} finally {
 			clearTimeout(timer);
-			busy = false;
+			if (id === run) capturing = false;
 		}
 	}
 
-	export async function open() {
+	export function open() {
 		if (busy || mode || dialog()?.open) return;
 		clearTimeout(closing);
 		if (status === 'sent') reset();
 		if (me) {
 			picked = null;
-			await take();
+			if (!capturing) take();
 		}
-		show();
-	}
-
-	async function retake() {
-		hide();
-		await take();
 		show();
 	}
 
@@ -273,16 +268,16 @@
 						<span class="text-xs text-muted-foreground tabular-nums">
 							{#if shot}{shot.width} × {shot.height} · {m.feedback_marks({
 									count: marks.length
-								})}{:else}{m.feedback_no_screenshot()}{/if}
+								})}{:else if capturing}{m.feedback_capturing()}{:else}{m.feedback_no_screenshot()}{/if}
 						</span>
 					</div>
 					<div class="flex shrink-0">
 						{#if shot}
 							{@render action(PencilEdit02Icon, m.feedback_annotate(), annotate)}
-							{@render action(RefreshIcon, m.feedback_retake(), retake)}
+							{@render action(RefreshIcon, m.feedback_retake(), take)}
 							{@render action(Cancel01Icon, m.feedback_remove(), remove)}
-						{:else}
-							{@render action(Camera01Icon, m.feedback_capture(), retake)}
+						{:else if !capturing}
+							{@render action(Camera01Icon, m.feedback_capture(), take)}
 						{/if}
 					</div>
 				</div>
@@ -318,7 +313,7 @@
 				<p role="alert" class="text-sm text-destructive">{m.feedback_error()}</p>
 			{/if}
 			<div class="flex justify-end">
-				<Button type="submit" disabled={!valid || status === 'sending'}
+				<Button type="submit" disabled={!valid || capturing || status === 'sending'}
 					><HugeiconsIcon icon={SentIcon} />{status === 'sending'
 						? m.feedback_sending()
 						: m.feedback_title()}</Button
