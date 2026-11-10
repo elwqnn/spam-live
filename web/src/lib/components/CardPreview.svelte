@@ -136,12 +136,12 @@
 	bind:this={popup}
 	popover="manual"
 	aria-hidden="true"
-	class="pointer-events-none inset-auto m-0 rounded-sm border bg-popover p-0 text-sm text-popover-foreground shadow-2xl backdrop:pointer-events-none backdrop:bg-black/40 backdrop:transition-opacity backdrop:duration-200 open:flex starting:open:backdrop:opacity-0"
+	class="pointer-events-none inset-auto m-0 rounded-sm border bg-popover p-0 text-sm text-popover-foreground shadow-2xl backdrop:pointer-events-none backdrop:bg-black/20 backdrop:transition-opacity backdrop:duration-200 open:flex starting:open:backdrop:opacity-0"
 >
 	{#if card}
 		<span
 			bind:this={art}
-			class="el-{card.element} m-3 mr-0 aspect-[1432/2048] shrink-0 bg-[color-mix(in_oklab,var(--el)_40%,#000)] [mask:url(/art/ui/card_mask.webp)_0_0/100%_100%]"
+			class="el-{card.element} m-3 mr-0 aspect-1432/2048 shrink-0 bg-[color-mix(in_oklab,var(--el)_20%,#000)] [mask:url(/art/ui/card_mask.webp)_0_0/100%_100%]"
 		>
 			<img src="/art/card/{card.id}.webp" alt="" decoding="async" class="size-full object-cover" />
 		</span>
