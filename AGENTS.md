@@ -1,6 +1,6 @@
 # Code
 
-No comments except if asked explicitely.
+No comments except if asked explicitly.
 
 Read [`.agents/CONTEXT.md`](./.agents/CONTEXT.md) before you start a task.
 It is the map of the codebase and links each area guide. If it does not exist, run the `context` skill first.
