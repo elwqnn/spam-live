@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	import type { Tier } from '#lib/tier.js';
 
-	export const TONES: Record<Tier, string> = {
+	const TONES: Record<Tier, string> = {
 		S: 'bg-terra text-background',
 		A: 'bg-straw text-background',
 		B: 'bg-moss text-background',
@@ -14,12 +14,17 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import { cn } from '#lib/utils.js';
 
-	let { tier, class: className }: { tier: Tier; class?: string } = $props();
+	let {
+		tier,
+		large = false,
+		class: className
+	}: { tier: Tier; large?: boolean; class?: string } = $props();
 </script>
 
 <span
 	class={cn(
-		'inline-grid h-5.5 min-w-5.5 shrink-0 place-items-center rounded-xs px-1 text-xs leading-none font-semibold',
+		'inline-grid shrink-0 place-items-center rounded-xs font-sans leading-none font-semibold not-italic',
+		large ? 'size-10 text-lg' : 'size-5.5 text-xs',
 		TONES[tier],
 		className
 	)}

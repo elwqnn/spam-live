@@ -82,7 +82,8 @@
 			multiple: true,
 			options: TIERS.map((value) => ({
 				value,
-				label: value,
+				label: m.tier_label({ tier: value }),
+				tier: value,
 				count: data.cards.filter((c) => stats.get(c.id)?.tier === value).length
 			}))
 		}
@@ -135,7 +136,7 @@
 	</div>
 	{#if top.length}
 		<div class="flex items-start gap-2">
-			<TierBadge tier="S" class="h-10 min-w-10 font-heading text-xl font-normal" />
+			<TierBadge tier="S" large />
 			<ul class="flex flex-wrap gap-2">
 				{#each top as card (card.id)}
 					<li>
@@ -158,7 +159,7 @@
 	{/if}
 	<a
 		class={[buttonVariants({ variant: 'outline', size: 'sm' }), 'ml-auto bg-background']}
-		href={href('/stats?tab=tiers')}
+		href={href('/stats#tiers')}
 		>{m.tiers_banner_link()}
 		<HugeiconsIcon icon={ArrowRight02Icon} aria-hidden="true" /></a
 	>
