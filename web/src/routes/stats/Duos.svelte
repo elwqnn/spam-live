@@ -55,15 +55,28 @@
 	{/if}
 {/snippet}
 
-{#snippet bar(duo: Schemas['Duo'], height: string)}
-	<span class={['relative block rounded-[2px] bg-foreground/6', height]} aria-hidden="true">
-		<span
-			class="block h-full origin-left rounded-[2px] motion-safe:animate-grow"
-			style:width="{Math.min(1, Math.max(0, duo.winRate ?? 0)) * 100}%"
-			style:background-color={winRateColor(duo.winRate) ?? 'var(--foreground)'}
-		></span>
-		<span class="absolute -inset-y-1 left-1/2 w-px bg-foreground/50"></span>
-	</span>
+{#snippet ring(duo: Schemas['Duo'], size: string)}
+	<svg viewBox="0 0 36 36" class={['shrink-0 -rotate-90', size]} aria-hidden="true">
+		<circle cx="18" cy="18" r="14" fill="none" stroke-width="5" class="stroke-foreground/10" />
+		<circle
+			cx="18"
+			cy="18"
+			r="14"
+			fill="none"
+			stroke-width="5"
+			pathLength="100"
+			stroke-dasharray="{Math.min(1, Math.max(0, duo.winRate ?? 0)) * 100} 100"
+			style:stroke={winRateColor(duo.winRate) ?? 'var(--foreground)'}
+		/>
+		<line
+			x1="0.5"
+			x2="7.5"
+			y1="18"
+			y2="18"
+			class="stroke-foreground/50"
+			vector-effect="non-scaling-stroke"
+		/>
+	</svg>
 {/snippet}
 
 {#snippet rate(duo: Schemas['Duo'], size: string)}
@@ -151,11 +164,13 @@
 									<span class="max-w-full truncate">{name(b)}</span>
 								</div>
 							</div>
-							<p class="flex flex-wrap items-baseline justify-between gap-x-3">
-								{@render rate(duo, i === 0 ? 'text-4xl' : 'text-3xl')}
-								{@render games(duo)}
-							</p>
-							{@render bar(duo, 'h-2')}
+							<div class="flex items-center gap-4">
+								{@render ring(duo, i === 0 ? 'size-16' : 'size-14')}
+								<p class="grid gap-1">
+									{@render rate(duo, i === 0 ? 'text-4xl' : 'text-3xl')}
+									{@render games(duo)}
+								</p>
+							</div>
 							{@render gain(duo, true)}
 						</div>
 					</div>
@@ -186,13 +201,17 @@
 							<span class="truncate">{name(a)}</span>
 							<span class="truncate">{name(b)}</span>
 						</div>
-						<div class="col-span-2 col-start-2 grid gap-1.5 sm:col-span-1 sm:col-start-auto">
-							<p class="flex flex-wrap items-baseline justify-between gap-x-3">
-								{@render rate(duo, 'text-lg')}
-								{@render gain(duo, false)}
-							</p>
-							{@render bar(duo, 'h-1.5')}
-							{@render games(duo)}
+						<div
+							class="col-span-2 col-start-2 flex items-center gap-3 sm:col-span-1 sm:col-start-auto"
+						>
+							{@render ring(duo, 'size-10')}
+							<div class="grid min-w-0 flex-1 gap-0.5">
+								<p class="flex flex-wrap items-baseline justify-between gap-x-3">
+									{@render rate(duo, 'text-lg')}
+									{@render gain(duo, false)}
+								</p>
+								{@render games(duo)}
+							</div>
 						</div>
 					</li>
 				{/each}

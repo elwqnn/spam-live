@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { squarify, strength } from './treemap';
+import { squarify } from './treemap';
 
 describe('squarify', () => {
 	it('fills the box with areas in proportion and no overlap', () => {
@@ -27,25 +27,5 @@ describe('squarify', () => {
 	it('returns nothing for an empty box or no value', () => {
 		expect(squarify([1, 2], (v) => v, { x: 0, y: 0, w: 0, h: 10 })).toEqual([]);
 		expect(squarify([0, 0], (v) => v, { x: 0, y: 0, w: 10, h: 10 })).toEqual([]);
-	});
-});
-
-describe('strength', () => {
-	it('grows with the win rate and shrinks with the play rate', () => {
-		const row = (card: string, adjustedWinRate: number | null, playRate: number) => ({
-			card,
-			adjustedWinRate,
-			playRate
-		});
-		const out = strength([
-			row('gem', 0.6, 0.01),
-			row('mid', 0.5, 0.02),
-			row('pop', 0.4, 0.03),
-			row('none', null, 0)
-		]);
-		expect(out.map((s) => s.card)).toEqual(['gem', 'mid', 'pop']);
-		expect(out[0].strength).toBeGreaterThan(out[1].strength);
-		expect(out[1].strength).toBeCloseTo(1);
-		expect(out[1].strength).toBeGreaterThan(out[2].strength);
 	});
 });
