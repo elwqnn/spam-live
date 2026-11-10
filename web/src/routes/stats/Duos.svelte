@@ -136,7 +136,7 @@
 							<div
 								class={[
 									'transition-[rotate,translate] motion-safe:duration-300',
-									i === 0 ? 'w-36 sm:w-44' : 'w-32 sm:w-36',
+									i === 0 ? 'w-36 sm:w-44 lg:w-32 xl:w-40' : 'w-32 sm:w-36 lg:w-28 xl:w-36',
 									j === 0
 										? 'origin-bottom-right -rotate-6 group-hover/fan:-translate-x-2 group-hover/fan:-rotate-9'
 										: '-ml-8 origin-bottom-left rotate-6 group-hover/fan:translate-x-2 group-hover/fan:rotate-9'
