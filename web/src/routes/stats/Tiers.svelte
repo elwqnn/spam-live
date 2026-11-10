@@ -52,9 +52,9 @@
 	{#if data.length}
 		<ol class="divide-y">
 			{#each tiers as { tier, cards } (tier)}
-				<li class="flex min-h-20 gap-4 px-(--gutter) py-3 sm:gap-6">
-					<TierBadge {tier} large class="mt-1" />
-					<div class="min-w-0 flex-1">
+				<li class="flex min-h-20 gap-4 px-(--gutter) sm:gap-6">
+					<TierBadge {tier} stretch />
+					<div class="min-w-0 flex-1 py-3">
 						{#if cards.length}{@render avatars(cards)}{/if}
 					</div>
 				</li>

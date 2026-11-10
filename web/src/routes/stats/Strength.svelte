@@ -3,7 +3,7 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import ElementLegend from './ElementLegend.svelte';
-	import { squarify, strength, type Box } from './treemap.js';
+	import { squarify, type Box } from './treemap.js';
 
 	let { data, catalog }: { data: Schemas['CardStats'][]; catalog: CardMap } = $props();
 
@@ -12,26 +12,22 @@
 	let height = $state(640);
 
 	const items = $derived(
-		strength(data).flatMap((s) => {
+		data.flatMap((s) => {
 			const card = catalog.get(s.card);
-			return card ? [{ ...s, name: card.name ?? s.card.slice(0, 8), element: card.element }] : [];
+			return card && s.playRate > 0
+				? [{ ...s, name: card.name ?? s.card.slice(0, 8), element: card.element }]
+				: [];
 		})
 	);
 	type Item = (typeof items)[number];
 
 	const inset = (b: Box, d: number) => ({ x: b.x + d, y: b.y + d, w: b.w - 2 * d, h: b.h - 2 * d });
-	const sum = (list: Item[]) => list.reduce((a, s) => a + s.strength, 0);
-
-	const layout = $derived.by(() => {
-		const groups = Map.groupBy(items, (s) => s.element);
-		const boxes = squarify([...groups.values()], sum, { x: 0, y: 0, w: width, h: height });
-		return {
-			groups: boxes.map((g) => ({ ...inset(g, 1), element: g.item[0].element })),
-			tiles: boxes.flatMap((g) =>
-				squarify(g.item, (s) => s.strength, inset(g, 3)).map((t) => ({ ...inset(t, 1), s: t.item }))
-			)
-		};
-	});
+	const tiles = $derived(
+		squarify(items, (s) => s.playRate, { x: 0, y: 0, w: width, h: height }).map((t) => ({
+			...inset(t, 1),
+			s: t.item
+		}))
+	);
 	const place = (b: Box) =>
 		`left:${(b.x / width) * 100}%;top:${(b.y / height) * 100}%;width:${(Math.max(0, b.w) / width) * 100}%;height:${(Math.max(0, b.h) / height) * 100}%`;
 
@@ -64,7 +60,7 @@
 					/>
 					<span class="min-w-0 truncate font-medium">{active.name}</span>
 					<dl class="ml-auto flex shrink-0 gap-4 text-xs tabular-nums sm:gap-6">
-						{#each [[m.win_rate(), percent(active.winRate), winRateColor(active.winRate)], [m.play_rate(), percent(active.playRate), undefined], [m.games(), number.format(active.games), undefined]] as [label, value, color] (label)}
+						{#each [[m.play_rate(), percent(active.playRate), undefined], [m.win_rate(), percent(active.winRate), winRateColor(active.winRate)], [m.games(), number.format(active.games), undefined]] as [label, value, color] (label)}
 							<div class="grid gap-0.5">
 								<dt class="text-muted-foreground">{label}</dt>
 								<dd class="text-sm font-medium" style:color>{value}</dd>
@@ -82,22 +78,15 @@
 				bind:clientWidth={width}
 				bind:clientHeight={height}
 			>
-				{#each layout.groups as g (g.element)}
-					<div
-						class="el-{g.element} absolute rounded-xs bg-(--el)"
-						style={place(g)}
-						aria-hidden="true"
-					></div>
-				{/each}
-				{#each layout.tiles as { s, ...t } (s.card)}
+				{#each tiles as { s, ...t } (s.card)}
 					<a
 						href={href(`/cards/${s.card}`)}
-						class="group absolute overflow-hidden bg-background hover:z-1 hover:outline-2 hover:outline-foreground focus-visible:z-1 focus-visible:outline-2 focus-visible:outline-foreground"
+						class="el-{s.element} group absolute overflow-hidden rounded-xs border-2 border-(--el) bg-(--el) hover:z-1 hover:outline-2 hover:outline-foreground focus-visible:z-1 focus-visible:outline-2 focus-visible:outline-foreground"
 						style={place(t)}
 						aria-label={m.strength_tile({
 							name: s.name,
-							winRate: percent(s.winRate),
-							playRate: percent(s.playRate)
+							playRate: percent(s.playRate),
+							winRate: percent(s.winRate)
 						})}
 						onpointerenter={() => (active = s)}
 						onpointerleave={() => hide(s)}
@@ -117,7 +106,7 @@
 								aria-hidden="true"
 							>
 								<span class="truncate font-medium">{s.name}</span>
-								<span style:color={winRateColor(s.winRate)}>{percent(s.winRate)}</span>
+								<span class="text-muted-foreground">{percent(s.playRate)}</span>
 							</span>
 						{/if}
 					</a>

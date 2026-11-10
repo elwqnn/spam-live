@@ -1,5 +1,3 @@
-import type { Schemas } from '#lib';
-
 export type Box = { x: number; y: number; w: number; h: number };
 
 export function squarify<T>(items: T[], value: (item: T) => number, box: Box) {
@@ -50,19 +48,4 @@ export function squarify<T>(items: T[], value: (item: T) => number, box: Box) {
 		i = j;
 	}
 	return out;
-}
-
-type Rated = Pick<Schemas['CardStats'], 'card' | 'playRate' | 'adjustedWinRate'>;
-
-const zScores = (values: number[]) => {
-	const mean = values.reduce((a, b) => a + b, 0) / values.length;
-	const sd = Math.sqrt(values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length);
-	return values.map((v) => (sd > 1e-9 ? (v - mean) / sd : 0));
-};
-
-export function strength<T extends Rated>(stats: T[]) {
-	const rated = stats.filter((s) => s.adjustedWinRate != null);
-	const wins = zScores(rated.map((s) => s.adjustedWinRate ?? 0));
-	const plays = zScores(rated.map((s) => s.playRate));
-	return rated.map((s, i) => ({ ...s, strength: Math.exp((wins[i] - plays[i]) / 2) }));
 }
