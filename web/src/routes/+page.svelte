@@ -3,7 +3,7 @@
 	import { ArrowLeft01Icon, ArrowRight01Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
 	import { onMount, tick } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
-	import { client, href, writes } from '#lib';
+	import { STEAM_STORE, client, href, writes } from '#lib';
 	import Arrow from '@spam-live/ui/components/Arrow.svelte';
 	import DeckKeyTile from '@spam-live/ui/components/DeckKeyTile.svelte';
 	import DeckTile from '@spam-live/ui/components/DeckTile.svelte';
@@ -12,6 +12,7 @@
 	import { Button } from '@spam-live/ui/components/ui/button/index.js';
 	import { live } from '@spam-live/ui/live.js';
 	import { m } from '#lib/paraglide/messages.js';
+	import { getLocale } from '#lib/paraglide/runtime.js';
 	import { promote } from '@spam-live/ui/promote.js';
 	import type { PageProps } from './$types';
 
@@ -21,6 +22,8 @@
 	const promoted = $derived(promote(data.top));
 	const cardStats = $derived(new Map(data.stats.map((s) => [s.card, s])));
 	const line = 'border-[#fbf8f0]/35 bg-[#171715]/35 hover:border-[#fbf8f0]/70';
+	const textLink =
+		'underline underline-offset-4 decoration-[#fbf8f0]/50 hover:decoration-[#fbf8f0]';
 
 	let row: HTMLElement | undefined;
 	let start = $state(true);
@@ -122,6 +125,18 @@
 				>{m.import_title()}</Button
 			>
 		</div>
+		<p class="flex flex-wrap justify-center gap-x-5 gap-y-1 text-sm">
+			{#if data.players}
+				<span class="tabular-nums"
+					>{new Intl.NumberFormat(getLocale()).format(data.players.players)}
+					{m.players_now({ count: data.players.players })}</span
+				>
+				<a class={textLink} href={STEAM_STORE} target="_blank" rel="external noopener"
+					>{m.steam_data()}</a
+				>
+			{/if}
+			<a class={textLink} href={href('/patch-notes')}>{m.patch_notes_title()}</a>
+		</p>
 	</div>
 </section>
 

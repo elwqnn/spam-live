@@ -35,6 +35,7 @@ pub fn config(openid_url: &str) -> Config {
         public_url: PUBLIC_URL.into(),
         steam_api_key: None,
         steam_openid_url: openid_url.into(),
+        steam_api_url: "http://127.0.0.1:9".into(),
         github_release_url: "http://127.0.0.1:9/releases/latest".into(),
         github_api_url: "http://127.0.0.1:9".into(),
         github_feedback_repo: "elwqnn/spam-live".into(),

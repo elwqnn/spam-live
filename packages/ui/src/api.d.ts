@@ -900,6 +900,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/steam/news": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["news"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/steam/players": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["players"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1476,6 +1508,18 @@ export interface components {
             /** Format: uuid */
             id: string;
         };
+        PlayerCount: {
+            /** Format: date-time */
+            at: string;
+            /** Format: int32 */
+            players: number;
+        };
+        PlayerHour: {
+            /** Format: date-time */
+            hour: string;
+            /** Format: int32 */
+            max?: number | null;
+        };
         Players: {
             /** Format: int64 */
             accounts: number;
@@ -1561,6 +1605,19 @@ export interface components {
         StatsSort: "winrate" | "games";
         /** @enum {string} */
         Status: "new" | "known" | "rejected";
+        SteamNews: {
+            feed: string;
+            gid: string;
+            /** Format: date-time */
+            publishedAt: string;
+            title: string;
+            url: string;
+            version?: string | null;
+        };
+        SteamPlayers: {
+            current?: components["schemas"]["PlayerCount"] | null;
+            hourly: components["schemas"]["PlayerHour"][];
+        };
         /** @enum {string} */
         TargetType: "deck" | "comment";
         Term: {
@@ -3959,6 +4016,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    news: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Steam news of the game, newest first, max 50. url is an https Steam page. version: a catalog version that is a token of the title; else the only catalog version that starts with a dotted token of the title and a dot (1.28 gives 1.28.1); else null. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SteamNews"][];
+                };
+            };
+        };
+    };
+    players: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Steam player count of the game. current: the last count of the last 30 minutes, else null. hourly: 1 item per UTC hour of the last 7 days, oldest first, the current hour last, with the highest count of the hour or null. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SteamPlayers"];
                 };
             };
         };

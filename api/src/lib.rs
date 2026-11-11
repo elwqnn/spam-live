@@ -11,6 +11,7 @@ pub mod release;
 #[cfg(feature = "seed")]
 pub mod seed;
 pub mod stats;
+pub mod steam;
 
 use std::{sync::Arc, time::Duration};
 
@@ -31,6 +32,7 @@ pub struct Config {
     pub public_url: String,
     pub steam_api_key: Option<String>,
     pub steam_openid_url: String,
+    pub steam_api_url: String,
     pub github_release_url: String,
     pub github_api_url: String,
     pub github_feedback_repo: String,
@@ -170,6 +172,8 @@ pub fn public<T: Serialize>(body: T) -> Response {
         feedback::image,
         feedback::list,
         feedback::delete_image,
+        steam::players,
+        steam::news,
     ),
     components(schemas(decks::DeckSort, stats::StatsSort, stats::Trend, analytics::AnalyticsRange))
 )]
@@ -201,6 +205,7 @@ pub fn router(state: AppState) -> Router {
         .merge(admin::routes())
         .merge(analytics::routes())
         .merge(feedback::routes())
+        .merge(steam::routes())
         .with_state(state)
         .layer(cors)
 }
@@ -209,5 +214,6 @@ pub async fn cleanup(db: &PgPool) -> Result<(), sqlx::Error> {
     sqlx::query("DELETE FROM replays WHERE expires_at < now()").execute(db).await?;
     sqlx::query("DELETE FROM sessions WHERE expires_at < now()").execute(db).await?;
     sqlx::query("DELETE FROM device_codes WHERE expires_at < now()").execute(db).await?;
+    sqlx::query("DELETE FROM steam_players WHERE at < now() - interval '30 days'").execute(db).await?;
     Ok(())
 }

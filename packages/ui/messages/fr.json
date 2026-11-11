@@ -707,5 +707,24 @@
 	"dashboard_publish_title": "Publier ce deck",
 	"dashboard_guide_hint": "Facultatif. Écrivez un court guide qui explique comment bien jouer le deck. Le Markdown est accepté.",
 	"dashboard_all_stats": "Voir toutes les stats",
-	"dashboard_login_text": "Connectez-vous pour voir vos decks les plus joués et votre historique des matchs."
+	"dashboard_login_text": "Connectez-vous pour voir vos decks les plus joués et votre historique des matchs.",
+	"patch_notes_title": "Notes de patch",
+	"patch_notes_intro": "Les actualités et les notes de patch de SPAM sur Steam, les plus récentes en premier.",
+	"patch_notes_empty": "Aucune note de patch pour le moment.",
+	"patch_notes_read": "Lire sur Steam",
+	"patch_notes_read_label": "Lire {title} sur Steam",
+	"patch_notes_stats": "Statistiques de la version {version}",
+	"steam_data": "Données de Steam",
+	"players_now": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "joueur en jeu maintenant",
+				"countPlural=*": "joueurs en jeu maintenant"
+			}
+		}
+	],
+	"analytics_steam_players": "Joueurs en jeu sur Steam, 7 derniers jours",
+	"palette_patch_notes": "Ouvrir les notes de patch"
 }

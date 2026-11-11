@@ -222,6 +222,10 @@ impl Catalog {
         Ok(Self { versions })
     }
 
+    pub fn version_names(&self) -> impl Iterator<Item = &str> {
+        self.versions.iter().map(|v| v.name.as_str())
+    }
+
     pub fn latest(&self) -> &str {
         &self.versions[0].name
     }

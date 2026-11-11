@@ -707,5 +707,24 @@
 	"dashboard_publish_title": "Publish this deck",
 	"dashboard_guide_hint": "Optional. Write a short guide that tells how to play the deck well. You can use Markdown.",
 	"dashboard_all_stats": "See all stats",
-	"dashboard_login_text": "Log in to see your most played decks and your match history."
+	"dashboard_login_text": "Log in to see your most played decks and your match history.",
+	"patch_notes_title": "Patch notes",
+	"patch_notes_intro": "The news and patch notes of SPAM on Steam, newest first.",
+	"patch_notes_empty": "No patch note yet.",
+	"patch_notes_read": "Read on Steam",
+	"patch_notes_read_label": "Read {title} on Steam",
+	"patch_notes_stats": "Stats of version {version}",
+	"steam_data": "Data from Steam",
+	"players_now": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "player in game now",
+				"countPlural=*": "players in game now"
+			}
+		}
+	],
+	"analytics_steam_players": "Players in game on Steam, last 7 days",
+	"palette_patch_notes": "Open the patch notes"
 }

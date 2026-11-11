@@ -281,6 +281,10 @@ export async function accountData(client: Client, me: Me) {
 	return { me, devices: ok(await client.GET('/api/me/devices')) };
 }
 
+export async function patchNotesData(client: Client) {
+	return { news: ok(await client.GET('/api/steam/news')) };
+}
+
 export async function creditsData(client: Client) {
 	const artists = await client.GET('/api/artists', { params: { query: { lang: getLocale() } } });
 	return { artists: ok(artists) };

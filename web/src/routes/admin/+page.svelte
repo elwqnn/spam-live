@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { closeAfter, formAction, href, modeName, queryHref } from '#lib';
 	import Analytics from '#lib/components/Analytics.svelte';
+	import SteamPlayers from './SteamPlayers.svelte';
 	import DeckCards from '@spam-live/ui/components/DeckCards.svelte';
 	import Dialog from '@spam-live/ui/components/Dialog.svelte';
 	import Time from '@spam-live/ui/components/Time.svelte';
@@ -238,6 +239,9 @@
 	{/if}
 {:else if data.tab === 'analytics' && data.analytics}
 	<Analytics data={data.analytics} range={data.range} />
+	{#if data.steam}
+		<SteamPlayers hourly={data.steam.hourly} />
+	{/if}
 {:else if data.unknown.length}
 	<div>
 		<Table.Root>

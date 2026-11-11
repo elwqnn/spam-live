@@ -28,6 +28,8 @@ export const percent = (value: number | null | undefined) =>
 
 export const entryName = (entry: { id: string; name?: string | null }) => entry.name ?? entry.id;
 
+export const STEAM_STORE = 'https://store.steampowered.com/app/2902720/';
+
 export const modeName = (mode: number) => (mode === 10 ? m.mode_ranked() : m.mode_n({ n: mode }));
 
 export const formatDate = (iso: string) =>

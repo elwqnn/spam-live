@@ -12,7 +12,7 @@ export const load: PageLoad = async ({ fetch, url, parent }) => {
 	const client = api(fetch, url.origin);
 	const tab = TABS.find((t) => t === url.searchParams.get('tab')) ?? 'reports';
 	const range = RANGES.find((r) => r === url.searchParams.get('range')) ?? '7d';
-	const [reports, disputed, unknown, cards, analytics, feedback] = await Promise.all([
+	const [reports, disputed, unknown, cards, analytics, feedback, steam] = await Promise.all([
 		tab === 'reports'
 			? client.GET('/api/admin/reports', { params: { query: { status: 'open' } } }).then(ok)
 			: [],
@@ -24,7 +24,8 @@ export const load: PageLoad = async ({ fetch, url, parent }) => {
 		tab === 'analytics'
 			? client.GET('/api/admin/analytics', { params: { query: { range } } }).then(ok)
 			: null,
-		tab === 'feedback' ? client.GET('/api/admin/feedback').then(ok) : []
+		tab === 'feedback' ? client.GET('/api/admin/feedback').then(ok) : [],
+		tab === 'analytics' ? client.GET('/api/steam/players').then((r) => r.data ?? null) : null
 	]);
-	return { tab, reports, disputed, unknown, cards, analytics, range, feedback };
+	return { tab, reports, disputed, unknown, cards, analytics, range, feedback, steam };
 };
