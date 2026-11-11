@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/state';
+	import { pageUrl } from '#ui/modal.js';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { ArrowDown01Icon, ArrowUp01Icon } from '@hugeicons/core-free-icons';
 	import { formatChange } from '#ui';
@@ -16,8 +16,8 @@
 
 	const change = $derived(formatChange(value, getLocale()));
 	const against = $derived(
-		page.url.searchParams.get('trend') === 'version' &&
-			page.url.searchParams.get('version') !== 'all'
+		pageUrl().searchParams.get('trend') === 'version' &&
+			pageUrl().searchParams.get('version') !== 'all'
 			? m.against_version()
 			: m.against_week()
 	);

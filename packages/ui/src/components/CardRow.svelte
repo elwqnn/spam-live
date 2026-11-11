@@ -26,7 +26,7 @@
 	} = $props();
 </script>
 
-<li
+<div
 	class={[
 		'relative flex items-center gap-3 px-(--gutter) py-3 transition-colors hover:bg-row sm:gap-4',
 		active && 'bg-row'
@@ -78,4 +78,4 @@
 		</dl>
 	{/if}
 	{#if action}<div class="relative">{@render action()}</div>{/if}
-</li>
+</div>

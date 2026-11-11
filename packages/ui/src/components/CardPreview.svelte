@@ -18,7 +18,7 @@
 		Object.assign(preview, next);
 	}
 
-	function close() {
+	export function close() {
 		clearTimeout(timer);
 		preview.card = null;
 		preview.owner = null;

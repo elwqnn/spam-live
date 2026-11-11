@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ClassValue } from 'svelte/elements';
-	import { page } from '$app/state';
+	import { pageUrl } from '#ui/modal.js';
 	import { queryHref } from '$host';
 	import { buttonVariants } from '#ui/components/ui/button/index.js';
 	import { selection, target, type Filter } from '#ui/filter.js';
@@ -16,12 +16,12 @@
 
 	const id = $derived(`filter-${filter.id}`);
 	const current = $derived(
-		selection(selected === undefined ? page.url.searchParams.get(filter.id) : selected)
+		selection(selected === undefined ? pageUrl().searchParams.get(filter.id) : selected)
 	);
 	const chosen = $derived(filter.multiple ? current : [current[0] ?? filter.default]);
 	const name = (value: string) => filter.options.find((o) => o.value === value)?.label ?? value;
 	const link = (value: string | null, extra?: Record<string, null>) =>
-		queryHref(page.url, { ...reset, ...extra, [filter.id]: value });
+		queryHref(pageUrl(), { ...reset, ...extra, [filter.id]: value });
 	const close = () => menu?.hidePopover();
 	const item =
 		'flex items-center gap-2 px-2 py-1.5 text-sm transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none';

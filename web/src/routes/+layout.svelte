@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { Download04Icon, Message01Icon } from '@hugeicons/core-free-icons';
-	import { goto } from '$app/navigation';
+	import { goto, onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { client, href, loginHref, writes, type Schemas } from '#lib';
 	import AccountMenu from '@spam-live/ui/components/AccountMenu.svelte';
@@ -12,13 +12,19 @@
 	import Switch from '@spam-live/ui/components/Switch.svelte';
 	import Tooltip from '@spam-live/ui/components/Tooltip.svelte';
 	import FeedbackDialog from '@spam-live/ui/components/feedback/FeedbackDialog.svelte';
+	import PageModal from '@spam-live/ui/components/PageModal.svelte';
 	import { Button } from '@spam-live/ui/components/ui/button/index.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale, locales, localizeHref } from '#lib/paraglide/runtime.js';
 	import { masks } from '@spam-live/ui/art.js';
 	import { isMac, shortcut } from '@spam-live/ui/shortcut.js';
+	import { viewTransition } from '@spam-live/ui/transition.js';
 	import favicon from '#lib/assets/favicon.svg';
 	import './layout.css';
+	import CardPage from './cards/[id]/+page.svelte';
+	import DeckPage from './decks/[id]/+page.svelte';
+	import type { PageData as CardData } from './cards/[id]/$types';
+	import type { PageData as DeckData } from './decks/[id]/$types';
 	import type { LayoutProps } from './$types';
 
 	let { children, data }: LayoutProps = $props();
@@ -48,6 +54,8 @@
 	let presenceId = '';
 	let presenceTimer: ReturnType<typeof setInterval> | undefined;
 	const count = (n: number) => new Intl.NumberFormat(getLocale()).format(n);
+
+	onNavigate(viewTransition);
 
 	onMount(() => {
 		mac = isMac();
@@ -128,7 +136,7 @@
 	>
 		<header
 			bind:offsetHeight={head}
-			class="head mx-auto flex w-full max-w-300 flex-wrap items-center gap-x-8 gap-y-3 px-(--gutter) py-4 sm:py-5 lg:border-x"
+			class="head mx-auto flex w-full max-w-300 flex-wrap items-center gap-x-8 gap-y-3 px-(--gutter) py-4 [view-transition-name:site-header] sm:py-5 lg:border-x"
 		>
 			<a href={href('/')} class="text-[17px] font-semibold tracking-wide"
 				>SPAM<span class="text-muted-foreground">.live</span></a
@@ -239,6 +247,16 @@
 		</div>
 	</Dialog>
 	<FeedbackDialog bind:this={feedback} me={data.me} post={writes.feedback} />
+	<PageModal>
+		{#snippet children(modal)}
+			{@const params = { id: page.shallow?.params?.id ?? '' }}
+			{#if modal.kind === 'card'}
+				<CardPage data={modal.data as CardData} {params} />
+			{:else}
+				<DeckPage data={modal.data as DeckData} {params} />
+			{/if}
+		{/snippet}
+	</PageModal>
 	<CardPreview />
 	<div
 		class="grain fixed inset-0 z-50 opacity-(--grain) mix-blend-overlay"
