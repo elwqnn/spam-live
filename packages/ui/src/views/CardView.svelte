@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import CardDetail from '#ui/components/CardDetail.svelte';
 	import { m } from '$paraglide/messages.js';
 	import type { Writes } from '#ui/writes.js';
@@ -6,8 +7,13 @@
 
 	let {
 		data,
-		writes
-	}: { data: Awaited<ReturnType<typeof cardData>>; writes: Pick<Writes, 'vote'> } = $props();
+		writes,
+		exportImage
+	}: {
+		data: Awaited<ReturnType<typeof cardData>>;
+		writes: Pick<Writes, 'vote'>;
+		exportImage?: Snippet;
+	} = $props();
 
 	const card = $derived(data.card);
 	const catalog = $derived(new Map(data.cards.map((c) => [c.id, c])));
@@ -27,4 +33,5 @@
 	{catalog}
 	keywords={data.keywords}
 	vote={writes.vote}
+	{exportImage}
 />

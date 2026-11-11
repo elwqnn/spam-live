@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
@@ -30,8 +31,13 @@
 
 	let {
 		data,
-		writes
-	}: { data: Awaited<ReturnType<typeof deckData>> & { me: Me | null }; writes: Writes } = $props();
+		writes,
+		exportImage
+	}: {
+		data: Awaited<ReturnType<typeof deckData>> & { me: Me | null };
+		writes: Writes;
+		exportImage?: Snippet;
+	} = $props();
 
 	let form = $state<{ key: string; error: string | null } | null>(null);
 	const done = (key: string) => (error: string | null) => (form = { key, error });
@@ -109,6 +115,7 @@
 		<div class="flex flex-wrap items-center gap-2">
 			{#if open}<DeckComments {deck} />{/if}
 			<DeckVotes {deck} vote={writes.vote} />
+			{@render exportImage?.()}
 			{#if me && open && !author}<Report type="deck" id={deck.id} report={writes.report} />{/if}
 			{#if author}
 				<Button variant="outline" size="sm" href={href(`/decks/${deck.id}/edit`)}>{m.edit()}</Button

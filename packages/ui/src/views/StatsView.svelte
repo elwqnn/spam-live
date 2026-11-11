@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import { queryHref } from '$host';
 	import FilterBar from '#ui/components/FilterBar.svelte';
@@ -16,7 +17,10 @@
 	import Tiers from './stats/Tiers.svelte';
 	import type { statsData } from './data.js';
 
-	let { data }: { data: Awaited<ReturnType<typeof statsData>> } = $props();
+	let {
+		data,
+		exportImage
+	}: { data: Awaited<ReturnType<typeof statsData>>; exportImage?: Snippet } = $props();
 
 	const catalog = $derived(new Map(data.cards.map((c) => [c.id, c])));
 	const tabs = [
@@ -63,7 +67,7 @@
 
 {#if data.tab === 'meta' && data.overview}
 	<Overview data={data.overview} />
-	<Tiers data={data.stats} {catalog} />
+	<Tiers data={data.stats} {catalog} {exportImage} />
 	<MetaMap data={data.stats} {catalog} />
 	<Strength data={data.stats} {catalog} />
 {:else if data.tab === 'counters'}

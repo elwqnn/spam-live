@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { percent, winRateColor, type CardMap, type Schemas } from '#ui';
 	import { art, href } from '$host';
 	import { cardPreview } from '#ui/components/CardPreview.svelte';
@@ -6,7 +7,11 @@
 	import { m } from '$paraglide/messages.js';
 	import { TIERS, tierCards } from '#ui/tier.js';
 
-	let { data, catalog }: { data: Schemas['CardStats'][]; catalog: CardMap } = $props();
+	let {
+		data,
+		catalog,
+		exportImage
+	}: { data: Schemas['CardStats'][]; catalog: CardMap; exportImage?: Snippet } = $props();
 
 	const tiers = $derived(TIERS.map((tier) => ({ tier, cards: tierCards(data, tier) })));
 </script>
@@ -45,9 +50,12 @@
 
 <section id="tiers" aria-labelledby="tiers-title" class="sm:scroll-mt-(--head)">
 	<div class="grid gap-1 section-head">
-		<h2 id="tiers-title" class="font-heading text-2xl font-normal tracking-tight">
-			{m.tiers_title()}
-		</h2>
+		<div class="flex flex-wrap items-center justify-between gap-2">
+			<h2 id="tiers-title" class="font-heading text-2xl font-normal tracking-tight">
+				{m.tiers_title()}
+			</h2>
+			{#if data.length}{@render exportImage?.()}{/if}
+		</div>
 		<p class="text-sm text-muted-foreground">{m.tiers_text()}</p>
 	</div>
 	{#if data.length}

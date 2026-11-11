@@ -1,3 +1,4 @@
+import type { Options } from 'modern-screenshot';
 import { MAX_BYTES, blockSize, captureScale, pixelate } from '#ui/feedback.js';
 
 export type Tool = 'pen' | 'rect' | 'arrow' | 'highlight' | 'blur';
@@ -115,25 +116,29 @@ export function pixelateRect(
 	ctx.putImageData(image, left, top);
 }
 
+export async function render(node: Node, options: Options, wait = 300) {
+	const { createContext, domToCanvas } = await import('modern-screenshot');
+	const context = await createContext(node, { ...options, timeout: wait, autoDestruct: true });
+	context.timeout = 5000;
+	return domToCanvas(context);
+}
+
 export async function capture(): Promise<Base> {
 	if (active) throw new Error('busy');
 	active = true;
 	let marked: Element[] = [];
 	try {
-		const { createContext, domToCanvas } = await import('modern-screenshot');
 		const width = document.documentElement.clientWidth;
 		const height = document.documentElement.clientHeight;
 		const scroll = window.scrollY;
 		const popover = CSS.supports('selector(:popover-open)');
 		marked = prepare(width, height);
 		const rects = privateRects(width, height);
-		const context = await createContext(document.body, {
+		const canvas = await render(document.body, {
 			width,
 			height,
 			scale: captureScale(width, height, devicePixelRatio),
 			backgroundColor: getComputedStyle(document.body).backgroundColor,
-			timeout: 300,
-			autoDestruct: true,
 			style: { margin: `${-scroll}px 0 0`, height: `${scroll + height}px`, overflow: 'hidden' },
 			filter: (node) =>
 				!node.parentElement?.hasAttribute(BOX) &&
@@ -143,8 +148,6 @@ export async function capture(): Promise<Base> {
 				),
 			onCloneEachNode: fix
 		});
-		context.timeout = 5000;
-		const canvas = await domToCanvas(context);
 		const ctx = canvas.getContext('2d');
 		const sx = canvas.width / width;
 		const sy = canvas.height / height;

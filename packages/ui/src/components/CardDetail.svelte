@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { ArrowLeft02Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
@@ -27,7 +28,8 @@
 		matchups,
 		catalog,
 		keywords,
-		vote
+		vote,
+		exportImage
 	}: {
 		card: CardDetail;
 		stats: Schemas['CardStats'] | null;
@@ -37,6 +39,7 @@
 		catalog: ReadonlyMap<string, Schemas['CardBase']>;
 		keywords: Schemas['Term'][];
 		vote: Writes['vote'];
+		exportImage?: Snippet;
 	} = $props();
 
 	const resistances = $derived(Object.entries(card.resistances));
@@ -172,6 +175,7 @@
 						{/if}
 					</div>
 					<div class="flex flex-wrap items-center gap-2">
+						{@render exportImage?.()}
 						<TrendMenu />
 						<VersionSelect {versions} />
 					</div>
