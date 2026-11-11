@@ -95,6 +95,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             Ok((cleaned, deleted)) => tracing::info!(cleaned, deleted, "stored replays are clean"),
             Err(e) => tracing::error!(error = %e, "stored replay cleanup failed"),
         }
+        match api::replay::decode_stored_replays(&replays_db).await {
+            Ok(matches) => tracing::info!(matches, "stored replays are decoded"),
+            Err(e) => tracing::error!(error = %e, "stored replay decode failed"),
+        }
     });
 
     let cleanup_db = state.db.clone();

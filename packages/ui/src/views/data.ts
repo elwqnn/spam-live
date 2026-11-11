@@ -47,7 +47,7 @@ export async function cardData(client: Client, url: URL, id: string) {
 	const version = url.searchParams.get('version') ?? undefined;
 	const trend =
 		version !== 'all' && url.searchParams.get('trend') === 'version' ? 'version' : 'week';
-	const [card, stats, versions, decks, keywords, found] = await Promise.all([
+	const [card, stats, versions, decks, keywords, found, replay] = await Promise.all([
 		client.GET('/api/cards/{id}', { params: { path: { id }, query: { lang } } }),
 		client.GET('/api/stats/cards', { params: { query: { version, trend } } }),
 		client.GET('/api/catalog/versions'),
@@ -55,7 +55,10 @@ export async function cardData(client: Client, url: URL, id: string) {
 		client.GET('/api/glossary/keywords', { params: { query: { lang } } }),
 		client.GET('/api/stats/cards/{id}/matchups', {
 			params: { path: { id }, query: { version } }
-		})
+		}),
+		client
+			.GET('/api/stats/cards/{id}/replay', { params: { path: { id }, query: { version, lang } } })
+			.then((r) => r.data ?? null)
 	]);
 	const cardStats = ok(stats);
 	const list = decks.data ?? [];
@@ -71,6 +74,7 @@ export async function cardData(client: Client, url: URL, id: string) {
 		versions: ok(versions).map((v) => v.version),
 		decks: cards ? list : [],
 		matchups: cards ? matchups : NO_MATCHUPS,
+		replay,
 		cards: cards ?? [],
 		keywords: keywords.data ?? []
 	};

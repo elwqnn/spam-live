@@ -8,6 +8,8 @@ pub mod feedback;
 pub mod live;
 pub mod matches;
 pub mod release;
+pub mod replay;
+pub mod replay_stats;
 #[cfg(feature = "seed")]
 pub mod seed;
 pub mod stats;
@@ -158,6 +160,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         stats::history,
         card_matchups::card_matchups,
         card_matchups::deck_matchups,
+        replay_stats::card_replay,
         admin::reports,
         admin::resolve,
         admin::ban,
@@ -202,6 +205,7 @@ pub fn router(state: AppState) -> Router {
         .merge(live::routes())
         .merge(stats::routes())
         .merge(card_matchups::routes())
+        .merge(replay_stats::routes())
         .merge(admin::routes())
         .merge(analytics::routes())
         .merge(feedback::routes())

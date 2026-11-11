@@ -287,7 +287,7 @@
 	"privacy_store_steam": "Votre SteamID, votre nom Steam et l'adresse de votre avatar Steam. Steam nous les donne quand vous vous connectez.",
 	"privacy_store_account": "Votre AccountId SPAM (l'identifiant de votre compte de jeu), dès votre premier import.",
 	"privacy_store_matches": "Les données des matchs : les cartes des deux joueurs, le gagnant, le mode de jeu, la version du jeu, les heures de début et de fin, et vos étoiles.",
-	"privacy_store_replays": "Les fichiers de replay (.srpl). Ils contiennent le pseudo de votre adversaire dans le jeu. Nous les gardons 12 mois et ne les montrons jamais en public.",
+	"privacy_store_replays": "Les fichiers de replay (.srpl), sans les pseudos des joueurs ni le ticket de partie. Nous les gardons 12 mois et ne les montrons jamais en public. Pour les statistiques, nous lisons les événements de la partie dans ces fichiers : états des cartes, achats de Tox, talents, dégâts et PV par tour. Nous gardons ces événements sans nom, aussi après la suppression du fichier.",
 	"privacy_store_content": "Vos decks, guides, commentaires, votes et signalements.",
 	"privacy_store_devices": "Les applications de bureau que vous liez à votre compte.",
 	"privacy_not_store_title": "Les données que nous ne gardons pas",
@@ -726,5 +726,17 @@
 		}
 	],
 	"analytics_steam_players": "Joueurs en jeu sur Steam, 7 derniers jours",
-	"palette_patch_notes": "Ouvrir les notes de patch"
+	"palette_patch_notes": "Ouvrir les notes de patch",
+	"replay_title": "Depuis les replays",
+	"replay_text": "Données des replays décodés des parties classées, dans la version choisie. Les taux des talents utilisent seulement les replays du joueur de la carte.",
+	"replay_none": "Aucune donnée de replay pour cette carte pour l'instant.",
+	"replay_list_none": "Aucune donnée pour l'instant.",
+	"replay_games": "Parties avec un replay",
+	"buy_rate": "Taux d'achat",
+	"pick_rate": "Taux de choix",
+	"damage_done": "Dégâts infligés moyens",
+	"damage_taken": "Dégâts subis moyens",
+	"hp_curve": "PV par tour",
+	"hp_mine": "Moi",
+	"hp_opponent": "Adversaire"
 }

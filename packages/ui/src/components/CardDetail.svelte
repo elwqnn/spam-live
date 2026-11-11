@@ -8,6 +8,7 @@
 	import { entryName, percent, winRateColor, type CardDetail, type Schemas } from '#ui';
 	import { art, href, type PageData } from '$host';
 	import { m } from '$paraglide/messages.js';
+	import { getLocale } from '$paraglide/runtime.js';
 	import { Badge } from './ui/badge/index.js';
 	import ArtistCredit from './ArtistCredit.svelte';
 	import CardBadge, { ELEMENTS } from './CardBadge.svelte';
@@ -16,12 +17,23 @@
 	import Change from './Change.svelte';
 	import DeckTile from './DeckTile.svelte';
 	import Description from './Description.svelte';
+	import RarityMark from './RarityMark.svelte';
 	import TierBadge from './TierBadge.svelte';
 	import TitleRow from './TitleRow.svelte';
 	import ToxIcon from './ToxIcon.svelte';
 	import TrendMenu from './TrendMenu.svelte';
 	import VersionSelect from './VersionSelect.svelte';
+	import WinRate from './WinRate.svelte';
 	import type { Writes } from '#ui/writes.js';
+
+	type ReplayRow = {
+		id: string;
+		name: string;
+		rate: number;
+		games: number;
+		winRate?: number | null;
+		tox?: Schemas['ToxStats'];
+	};
 
 	let {
 		card,
@@ -29,6 +41,7 @@
 		versions,
 		decks,
 		matchups,
+		replay = null,
 		catalog,
 		keywords,
 		vote,
@@ -39,6 +52,7 @@
 		versions: string[];
 		decks: Schemas['DeckItem'][];
 		matchups: Schemas['CardMatchups'];
+		replay?: Schemas['CardReplayStats'] | null;
 		catalog: ReadonlyMap<string, Schemas['CardBase']>;
 		keywords: Schemas['Term'][];
 		vote: Writes['vote'];
@@ -50,6 +64,24 @@
 	const version = $derived(pageUrl().searchParams.get('version'));
 	const tierHref = $derived(
 		href(`/stats${version ? `?version=${encodeURIComponent(version)}` : ''}#tiers`)
+	);
+	const number = new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 0 });
+	const toxRows = $derived<ReplayRow[]>(
+		(replay?.tox ?? []).map((t) => ({
+			...t,
+			id: t.tox,
+			name: t.name ?? t.tox,
+			rate: t.buyRate,
+			tox: t
+		}))
+	);
+	const talentRows = $derived<ReplayRow[]>(
+		(replay?.talents ?? []).map((t) => ({
+			...t,
+			id: t.talent,
+			name: t.name ?? t.talent,
+			rate: t.pickRate
+		}))
 	);
 </script>
 
@@ -112,6 +144,43 @@
 			</ul>
 		{:else}
 			<p class="text-sm text-muted-foreground">{m.card_matchups_none()}</p>
+		{/if}
+	</div>
+{/snippet}
+
+{#snippet replayList(title: string, rateLabel: string, rows: ReplayRow[])}
+	<div class="grid min-w-0 content-start gap-2">
+		<h3 class="eyebrow text-muted-foreground">{title}</h3>
+		{#if rows.length}
+			<ul class="divide-y border bg-card text-sm">
+				{#each rows as row (row.id)}
+					<li class="flex items-center gap-3 px-3 py-2">
+						{#if row.tox}
+							<ToxIcon id={row.tox.tox} image={row.tox.image} class="size-8" />
+						{/if}
+						<span class="flex min-w-0 flex-1 items-center gap-2">
+							<span class="truncate">{row.name}</span>
+							{#if row.tox?.rarity}<RarityMark rarity={row.tox.rarity} />{/if}
+						</span>
+						<dl class="flex shrink-0 items-center gap-x-5 text-[13px] tabular-nums">
+							<div class="grid gap-0.5 text-right">
+								<dt class="eyebrow text-[10px] text-muted-foreground">{rateLabel}</dt>
+								<dd>{percent(row.rate)}</dd>
+							</div>
+							<div class="grid gap-0.5 text-right">
+								<dt class="eyebrow text-[10px] text-muted-foreground">{m.games()}</dt>
+								<dd>{row.games}</dd>
+							</div>
+							<div class="grid gap-0.5">
+								<dt class="text-right eyebrow text-[10px] text-muted-foreground">{m.win_rate()}</dt>
+								<dd><WinRate value={row.winRate} element={card.element} /></dd>
+							</div>
+						</dl>
+					</li>
+				{/each}
+			</ul>
+		{:else}
+			<p class="text-sm text-muted-foreground">{m.replay_list_none()}</p>
 		{/if}
 	</div>
 {/snippet}
@@ -227,6 +296,32 @@
 			{@render matchupList(m.weak_against(), matchups.weak)}
 		</div>
 		<p class="text-xs text-muted-foreground">{m.card_matchups_text()}</p>
+	</section>
+
+	<section class="grid gap-3 row">
+		{@render heading(m.replay_title())}
+		{#if replay?.games}
+			<div class="border bg-card">
+				<dl class="cells grid grid-cols-3">
+					{@render stat(m.replay_games(), replay.games)}
+					{@render stat(
+						m.damage_done(),
+						replay.damage.done == null ? '—' : number.format(replay.damage.done)
+					)}
+					{@render stat(
+						m.damage_taken(),
+						replay.damage.taken == null ? '—' : number.format(replay.damage.taken)
+					)}
+				</dl>
+			</div>
+			<div class="grid gap-3 xl:grid-cols-2 xl:gap-6">
+				{@render replayList(m.tox(), m.buy_rate(), toxRows)}
+				{@render replayList(m.talents(), m.pick_rate(), talentRows)}
+			</div>
+			<p class="text-xs text-muted-foreground">{m.replay_text()}</p>
+		{:else}
+			<p class="text-sm text-muted-foreground">{m.replay_none()}</p>
+		{/if}
 	</section>
 
 	<section class="grid gap-6 row lg:grid-cols-2">

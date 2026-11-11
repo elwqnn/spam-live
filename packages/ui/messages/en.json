@@ -287,7 +287,7 @@
 	"privacy_store_steam": "Your SteamID, your Steam name and the address of your Steam avatar. Steam gives them when you log in.",
 	"privacy_store_account": "Your SPAM AccountId (the ID of your game account), from your first import.",
 	"privacy_store_matches": "Match data: the cards of both players, the winner, the game mode, the game version, the start and end times, and your stars.",
-	"privacy_store_replays": "The replay files (.srpl). They contain the in-game name of your opponent. We keep them 12 months and never show them in public.",
+	"privacy_store_replays": "The replay files (.srpl), without the player names and the game ticket. We keep them 12 months and never show them in public. For the stats, we read the match events in them: card states, Tox buys, talents, damage and HP per turn. We keep these events without names, also after we delete the file.",
 	"privacy_store_content": "Your decks, guides, comments, votes and reports.",
 	"privacy_store_devices": "The desktop apps that you link to your account.",
 	"privacy_not_store_title": "Data we do not keep",
@@ -726,5 +726,17 @@
 		}
 	],
 	"analytics_steam_players": "Players in game on Steam, last 7 days",
-	"palette_patch_notes": "Open the patch notes"
+	"palette_patch_notes": "Open the patch notes",
+	"replay_title": "From replays",
+	"replay_text": "Data from the decoded replays of ranked matches, in the selected version. The talent rates use only the replays of the player of the card.",
+	"replay_none": "No replay data for this card yet.",
+	"replay_list_none": "No data yet.",
+	"replay_games": "Games with a replay",
+	"buy_rate": "Buy rate",
+	"pick_rate": "Pick rate",
+	"damage_done": "Mean damage done",
+	"damage_taken": "Mean damage taken",
+	"hp_curve": "HP per turn",
+	"hp_mine": "Me",
+	"hp_opponent": "Opponent"
 }

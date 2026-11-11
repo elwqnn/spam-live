@@ -235,6 +235,11 @@ impl Catalog {
         self.versions[0].cards.iter().map(|c| c.id).collect()
     }
 
+    #[cfg(feature = "seed")]
+    pub fn tox_ids(&self) -> Vec<Uuid> {
+        self.versions[0].tox.keys().filter_map(|id| id.parse().ok()).collect()
+    }
+
     pub fn previous(&self, version: &str) -> Option<&str> {
         let key = &self.versions.iter().find(|v| v.name == version)?.key;
         self.versions.iter().find(|v| v.key < *key).map(|v| v.name.as_str())
@@ -247,6 +252,28 @@ impl Catalog {
     pub fn knows_card(&self, app_version: &str, id: &Uuid) -> bool {
         let has = |v: &Version| v.cards.iter().any(|c| c.id == *id);
         has(&self.versions[0]) || self.versions.iter().find(|v| v.name == app_version).is_some_and(has)
+    }
+
+    pub fn talent_slots(&self, card: &Uuid) -> (Vec<String>, Vec<i16>, Vec<String>) {
+        let mut out = (Vec::new(), Vec::new(), Vec::new());
+        for v in &self.versions {
+            for c in v.cards.iter().filter(|c| c.id == *card) {
+                for (n, id) in (1..).zip(&c.talents) {
+                    out.0.push(v.name.clone());
+                    out.1.push(n);
+                    out.2.push(id.clone());
+                }
+            }
+        }
+        out
+    }
+
+    pub fn talent_name(&self, id: &str, lang: &str) -> Option<String> {
+        self.versions.iter().find_map(|v| v.talents.get(id)).and_then(|e| tr(&e.name, lang))
+    }
+
+    pub fn tox(&self, id: &str, lang: &str) -> Option<FaceTox> {
+        self.versions.iter().find_map(|v| v.tox.get(id)).map(|e| face_tox(e, lang))
     }
 
     fn select<'a>(&'a self, q: &'a CardQuery) -> Result<(&'a Version, &'a str), ApiError> {
@@ -505,20 +532,17 @@ fn base(v: &Version, c: &RawCard, lang: &str) -> CardBase {
                     }
                 })
                 .collect(),
-            tox: c
-                .passive_abilities
-                .iter()
-                .map(|id| {
-                    let e = &v.tox[id];
-                    FaceTox {
-                        id: e.id.clone(),
-                        name: tr(&e.name, lang).or_else(|| field(e, "title")).unwrap_or_else(|| e.id.clone()),
-                        rarity: field(e, "rarity"),
-                        image: field(e, "modificatorImage").is_some_and(|s| !s.is_empty()),
-                    }
-                })
-                .collect(),
+            tox: c.passive_abilities.iter().map(|id| face_tox(&v.tox[id], lang)).collect(),
         },
+    }
+}
+
+fn face_tox(e: &RawEntry, lang: &str) -> FaceTox {
+    FaceTox {
+        id: e.id.clone(),
+        name: tr(&e.name, lang).or_else(|| field(e, "title")).unwrap_or_else(|| e.id.clone()),
+        rarity: field(e, "rarity"),
+        image: field(e, "modificatorImage").is_some_and(|s| !s.is_empty()),
     }
 }
 

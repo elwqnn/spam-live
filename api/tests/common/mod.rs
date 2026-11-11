@@ -253,3 +253,123 @@ pub async fn count(pool: &PgPool, table: &str) -> i64 {
     };
     sqlx::query_scalar(sql).fetch_one(pool).await.unwrap()
 }
+
+pub const TOX: [&str; 2] = ["0004a1e3-755d-4fe7-8890-316214c67fcd", "04dedce0-2c15-4302-807b-6935254e92f3"];
+
+fn uv(mut n: u64) -> Vec<u8> {
+    let mut out = Vec::new();
+    while n >= 0x80 {
+        out.push((n & 0x7f) as u8 | 0x80);
+        n >>= 7;
+    }
+    out.push(n as u8);
+    out
+}
+
+fn zz(v: i64) -> Vec<u8> {
+    uv(((v << 1) ^ (v >> 63)) as u64)
+}
+
+fn str8(s: &str) -> Vec<u8> {
+    [uv(2 * (s.len() as u64 + 1)), s.as_bytes().to_vec()].concat()
+}
+
+fn str16(s: &str) -> Vec<u8> {
+    let units: Vec<u8> = s.encode_utf16().flat_map(u16::to_le_bytes).collect();
+    [(units.len() as u32 / 2).to_le_bytes().to_vec(), units].concat()
+}
+
+pub struct CardState<'a> {
+    pub card: &'a str,
+    pub uid: &'a str,
+    pub player: i64,
+    pub talent: i64,
+    pub damage: i64,
+    pub hp: i64,
+    pub done: i64,
+    pub taken: i64,
+}
+
+pub fn card_block(c: &CardState) -> Vec<u8> {
+    let mut b = vec![0xC5, 1];
+    b.extend(str8(c.card));
+    b.extend(str8(c.uid));
+    b.extend(zz(c.player));
+    b.extend(str8("cardstyle-standard"));
+    b.extend(zz(c.talent));
+    b.extend([zz(0), zz(0), zz(0)].concat());
+    b.push(0);
+    for v in [c.damage, c.hp, 0, c.done, 0, 0, 0, c.done, c.taken] {
+        b.extend(zz(v));
+    }
+    b.extend([0; 14]);
+    let len = (b.len() as u32).to_le_bytes();
+    [len.to_vec(), len.to_vec(), b].concat()
+}
+
+pub fn message(kind: u16, body: &[u8]) -> Vec<u8> {
+    [kind.to_le_bytes().as_slice(), body].concat()
+}
+
+pub fn new_turn(player: i32, turn: i32) -> Vec<u8> {
+    message(2003, &[player.to_le_bytes(), 30f32.to_le_bytes(), turn.to_le_bytes()].concat())
+}
+
+pub fn shop_buy(player: i32, uid: &str, tox: &str) -> Vec<u8> {
+    message(2020, &[player.to_le_bytes().to_vec(), str16(uid), str16(tox), str16(tox), str16("")].concat())
+}
+
+pub fn states(blocks: &[CardState]) -> Vec<u8> {
+    message(2207, &[vec![blocks.len() as u8], blocks.iter().flat_map(card_block).collect()].concat())
+}
+
+pub fn srpl_messages(header: &Value, messages: &[Vec<u8>]) -> Vec<u8> {
+    let mut header = header.clone();
+    header["MessageCount"] = json!(messages.len());
+    let mut raw = srpl_raw(&header, 0);
+    raw.extend((messages.len() as u32).to_le_bytes());
+    for (i, payload) in messages.iter().enumerate() {
+        raw.extend((i as u32 * 250).to_le_bytes());
+        raw.extend((payload.len() as u32).to_le_bytes());
+        raw.extend(payload);
+    }
+    raw
+}
+
+pub fn match_messages(seat: usize, buys: bool) -> Vec<Vec<u8>> {
+    let decks = [SEAT0_CARDS, SEAT1_CARDS];
+    let uids: Vec<Vec<String>> = (0..2).map(|s| (0..4).map(|i| format!("uid-{s}-{i}")).collect()).collect();
+    let all = |damage: [i64; 2]| {
+        let blocks: Vec<CardState> = (0..2)
+            .flat_map(|s| {
+                let uids = &uids;
+                (0..4).map(move |i| CardState {
+                    card: decks[s][i],
+                    uid: &uids[s][i],
+                    player: s as i64,
+                    talent: if s == seat { i as i64 % 3 } else { 0 },
+                    damage: damage[s],
+                    hp: 1000,
+                    done: damage[1 - s] / 2,
+                    taken: damage[s],
+                })
+            })
+            .collect();
+        states(&blocks)
+    };
+    let mut out = vec![all([0, 0]), new_turn(1, 1), new_turn(0, 1)];
+    if buys {
+        out.extend([shop_buy(0, "uid-0-0", TOX[0]), shop_buy(1, "uid-1-1", TOX[1])]);
+    }
+    out.extend([all([200, 100]), new_turn(1, 2), new_turn(0, 2)]);
+    if buys {
+        out.extend([shop_buy(0, "uid-0-0", TOX[1]), shop_buy(0, "uid-unknown", TOX[0])]);
+    }
+    out.push(all([300, 1000]));
+    out
+}
+
+pub fn match_srpl(header: &Value) -> Vec<u8> {
+    let seat = header["Seat"].as_u64().unwrap() as usize;
+    gzip(&srpl_messages(header, &match_messages(seat, true)))
+}

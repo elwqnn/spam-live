@@ -804,6 +804,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/stats/cards/{id}/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["card_replay"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/stats/counters": {
         parameters: {
             query?: never;
@@ -1040,6 +1056,13 @@ export interface components {
             /** Format: int64 */
             shortWins: number;
         };
+        CardReplayStats: {
+            damage: components["schemas"]["DamageStats"];
+            /** Format: int64 */
+            games: number;
+            talents: components["schemas"]["TalentStats"][];
+            tox: components["schemas"]["ToxStats"][];
+        };
         CardStats: {
             /** Format: double */
             adjustedWinRate?: number | null;
@@ -1120,6 +1143,14 @@ export interface components {
             cards: components["schemas"]["Counter"][];
             /** Format: int64 */
             games: number;
+        };
+        DamageStats: {
+            /** Format: double */
+            done?: number | null;
+            /** Format: int64 */
+            games: number;
+            /** Format: double */
+            taken?: number | null;
         };
         DayMatches: {
             /** Format: date */
@@ -1386,6 +1417,14 @@ export interface components {
             /** Format: int32 */
             webPeak?: number | null;
         };
+        HpPoint: {
+            /** Format: int32 */
+            mine: number;
+            /** Format: int32 */
+            opponent: number;
+            /** Format: int32 */
+            turn: number;
+        };
         ImportResult: {
             decks: components["schemas"]["ImportedDeck"][];
         };
@@ -1447,6 +1486,7 @@ export interface components {
             /** Format: int32 */
             gameMode: number;
             gameUid: string;
+            hp: components["schemas"]["HpPoint"][];
             isAi: boolean;
             myCards: string[];
             /** Format: int32 */
@@ -1618,6 +1658,20 @@ export interface components {
             current?: components["schemas"]["PlayerCount"] | null;
             hourly: components["schemas"]["PlayerHour"][];
         };
+        TalentStats: {
+            /** Format: int64 */
+            games: number;
+            name?: string | null;
+            /** Format: double */
+            pickRate: number;
+            talent: string;
+            /** Format: double */
+            winRate?: number | null;
+            /** Format: double */
+            winScore?: number | null;
+            /** Format: int64 */
+            wins: number;
+        };
         /** @enum {string} */
         TargetType: "deck" | "comment";
         Term: {
@@ -1634,6 +1688,23 @@ export interface components {
             games: number;
             /** Format: double */
             winRate?: number | null;
+            /** Format: int64 */
+            wins: number;
+        };
+        ToxStats: {
+            /** Format: double */
+            buyRate: number;
+            /** Format: int64 */
+            games: number;
+            image: boolean;
+            name?: string | null;
+            rarity?: string | null;
+            /** Format: uuid */
+            tox: string;
+            /** Format: double */
+            winRate?: number | null;
+            /** Format: double */
+            winScore?: number | null;
             /** Format: int64 */
             wins: number;
         };
@@ -3636,7 +3707,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Newest first */
+            /** @description Newest first. hp: the HP of each seat at the end of each turn, from the decoded replay, empty when the match has no replay events. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3811,6 +3882,52 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CardMatchups"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    card_replay: {
+        parameters: {
+            query?: {
+                /** @example all */
+                version?: string;
+                /** @example 30 */
+                minStars?: number;
+                /** @example en */
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Card UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description From the decoded replays of ranked human matches, not disputed, no mirror. Base: the seats whose deck has the card and that have replay events; games is their count. tox: each Tox bought on this card, games = the base seats with 1 buy or more, buyRate = games / base. talents: base = the seats with a replay of their own player; each talent id picked on this card, pickRate = games / base. name is in lang (default en). Both lists are sorted by winScore, games, descending, then id. damage: the mean damage done and taken by this card, null at 0 games. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardReplayStats"];
                 };
             };
             400: {

@@ -37,7 +37,7 @@ pub async fn key_stats(db: &PgPool, cards: &[Uuid], version: Option<&str>) -> Re
     .await
 }
 
-fn version(s: &AppState, v: Option<&str>) -> Result<Option<String>, ApiError> {
+pub(crate) fn version(s: &AppState, v: Option<&str>) -> Result<Option<String>, ApiError> {
     match v {
         None => Ok(Some(s.catalog.latest().to_string())),
         Some("all") => Ok(None),

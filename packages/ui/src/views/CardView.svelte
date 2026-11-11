@@ -30,6 +30,7 @@
 	versions={data.versions}
 	decks={data.decks}
 	matchups={data.matchups}
+	replay={data.replay}
 	{catalog}
 	keywords={data.keywords}
 	vote={writes.vote}
