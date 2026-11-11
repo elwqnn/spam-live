@@ -6,6 +6,7 @@ declare module '$host' {
 	export type PageData = {
 		me: Schemas['Me'] | null;
 		cardStats?: Schemas['CardStats'][];
+		names?: Schemas['CatalogNames'] | null;
 	};
 
 	export const href: (path: string) => string;

@@ -43,6 +43,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     reqwest::Url::parse(&public_url).map_err(|e| format!("PUBLIC_URL is invalid: {e}"))?;
     let steam_openid_url = env("STEAM_OPENID_URL").unwrap_or_else(|| "https://steamcommunity.com/openid/login".into());
     reqwest::Url::parse(&steam_openid_url).map_err(|e| format!("STEAM_OPENID_URL is invalid: {e}"))?;
+    let steam_api_url =
+        env("STEAM_API_URL").unwrap_or_else(|| "https://api.steampowered.com".into()).trim_end_matches('/').to_string();
+    reqwest::Url::parse(&steam_api_url).map_err(|e| format!("STEAM_API_URL is invalid: {e}"))?;
     let github_release_url = env("GITHUB_RELEASE_URL")
         .unwrap_or_else(|| "https://api.github.com/repos/elwqnn/spam-live/releases/latest".into());
     reqwest::Url::parse(&github_release_url).map_err(|e| format!("GITHUB_RELEASE_URL is invalid: {e}"))?;
@@ -75,6 +78,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         public_url,
         steam_api_key: env("STEAM_API_KEY"),
         steam_openid_url,
+        steam_api_url,
         github_release_url,
         github_api_url,
         github_feedback_repo,
@@ -90,6 +94,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         match api::matches::clean_stored_replays(&replays_db).await {
             Ok((cleaned, deleted)) => tracing::info!(cleaned, deleted, "stored replays are clean"),
             Err(e) => tracing::error!(error = %e, "stored replay cleanup failed"),
+        }
+        match api::replay::decode_stored_replays(&replays_db).await {
+            Ok(matches) => tracing::info!(matches, "stored replays are decoded"),
+            Err(e) => tracing::error!(error = %e, "stored replay decode failed"),
         }
     });
 
@@ -122,6 +130,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Err(e) = api::analytics::tick(&analytics_state, &mut hourly, chrono::Utc::now()).await {
                 tracing::error!(error = %e, "analytics tick failed");
             }
+        }
+    });
+
+    let players_state = state.clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(Duration::from_secs(600));
+        loop {
+            interval.tick().await;
+            api::steam::poll_players(&players_state, chrono::Utc::now()).await;
+        }
+    });
+
+    let news_state = state.clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(Duration::from_secs(3600));
+        loop {
+            interval.tick().await;
+            api::steam::poll_news(&news_state).await;
         }
     });
 

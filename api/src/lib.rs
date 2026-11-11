@@ -8,9 +8,12 @@ pub mod feedback;
 pub mod live;
 pub mod matches;
 pub mod release;
+pub mod replay;
+pub mod replay_stats;
 #[cfg(feature = "seed")]
 pub mod seed;
 pub mod stats;
+pub mod steam;
 
 use std::{sync::Arc, time::Duration};
 
@@ -31,6 +34,7 @@ pub struct Config {
     pub public_url: String,
     pub steam_api_key: Option<String>,
     pub steam_openid_url: String,
+    pub steam_api_url: String,
     pub github_release_url: String,
     pub github_api_url: String,
     pub github_feedback_repo: String,
@@ -117,6 +121,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         auth::device_token,
         auth::list_devices,
         auth::delete_device,
+        catalog::names,
         catalog::versions,
         catalog::list_cards,
         catalog::get_card,
@@ -155,6 +160,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         stats::history,
         card_matchups::card_matchups,
         card_matchups::deck_matchups,
+        replay_stats::card_replay,
         admin::reports,
         admin::resolve,
         admin::ban,
@@ -169,6 +175,8 @@ pub fn public<T: Serialize>(body: T) -> Response {
         feedback::image,
         feedback::list,
         feedback::delete_image,
+        steam::players,
+        steam::news,
     ),
     components(schemas(decks::DeckSort, stats::StatsSort, stats::Trend, analytics::AnalyticsRange))
 )]
@@ -197,9 +205,11 @@ pub fn router(state: AppState) -> Router {
         .merge(live::routes())
         .merge(stats::routes())
         .merge(card_matchups::routes())
+        .merge(replay_stats::routes())
         .merge(admin::routes())
         .merge(analytics::routes())
         .merge(feedback::routes())
+        .merge(steam::routes())
         .with_state(state)
         .layer(cors)
 }
@@ -208,5 +218,6 @@ pub async fn cleanup(db: &PgPool) -> Result<(), sqlx::Error> {
     sqlx::query("DELETE FROM replays WHERE expires_at < now()").execute(db).await?;
     sqlx::query("DELETE FROM sessions WHERE expires_at < now()").execute(db).await?;
     sqlx::query("DELETE FROM device_codes WHERE expires_at < now()").execute(db).await?;
+    sqlx::query("DELETE FROM steam_players WHERE at < now() - interval '30 days'").execute(db).await?;
     Ok(())
 }

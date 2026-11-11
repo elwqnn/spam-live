@@ -31375,6 +31375,265 @@
       }
     }
   ],
+  "elements": [
+    {
+      "id": "fire",
+      "name": {
+        "de": "Feuer",
+        "en": "Fire",
+        "es": "Fuego",
+        "fr": "Feu",
+        "it": "Fuoco",
+        "pt": "Fogo",
+        "pt-BR": "Fogo"
+      },
+      "order": 1
+    },
+    {
+      "id": "light",
+      "name": {
+        "de": "Licht",
+        "en": "Light",
+        "es": "Luz",
+        "fr": "Lumière",
+        "it": "Luce",
+        "pt": "Luz",
+        "pt-BR": "Luz"
+      },
+      "order": 2
+    },
+    {
+      "id": "earth",
+      "name": {
+        "de": "Erde",
+        "en": "Earth",
+        "es": "Tierra",
+        "fr": "Terre",
+        "it": "Terra",
+        "pt": "Terra",
+        "pt-BR": "Terra"
+      },
+      "order": 3
+    },
+    {
+      "id": "nature",
+      "name": {
+        "de": "Natur",
+        "en": "Nature",
+        "es": "Naturaleza",
+        "fr": "Nature",
+        "it": "Natura",
+        "pt": "Natureza",
+        "pt-BR": "Natureza"
+      },
+      "order": 4
+    },
+    {
+      "id": "shadow",
+      "name": {
+        "de": "Schatten",
+        "en": "Shadow",
+        "es": "Sombra",
+        "fr": "Ombre",
+        "it": "Ombra",
+        "pt": "Sombra",
+        "pt-BR": "Sombra"
+      },
+      "order": 5
+    },
+    {
+      "id": "water",
+      "name": {
+        "de": "Wasser",
+        "en": "Water",
+        "es": "Agua",
+        "fr": "Eau",
+        "it": "Acqua",
+        "pt": "Água",
+        "pt-BR": "Água"
+      },
+      "order": 6
+    },
+    {
+      "id": "divine",
+      "name": {
+        "de": "Äther",
+        "en": "Ether",
+        "es": "Éter",
+        "fr": "Éther",
+        "it": "Etere",
+        "pt": "Éter",
+        "pt-BR": "Éter"
+      },
+      "order": 7
+    }
+  ],
+  "enums": {
+    "displayType": {
+      "0": "None",
+      "10": "Damage",
+      "20": "Heal",
+      "30": "Boost"
+    },
+    "effect": {
+      "0": "None",
+      "5": "Aoe",
+      "10": "Berserk",
+      "20": "Brut",
+      "21": "Bomba",
+      "25": "Chance",
+      "30": "Cimetierre",
+      "40": "CoeurElement",
+      "50": "CoeurVital",
+      "51": "CoeurResistance",
+      "55": "ContreCoup",
+      "60": "Cost",
+      "70": "Disparition",
+      "80": "Erosion",
+      "90": "Eternity",
+      "110": "ImunityStatus",
+      "115": "Inversement",
+      "120": "Invincibility",
+      "130": "LifeSteal",
+      "140": "Mimetisme",
+      "150": "Multiplicator",
+      "160": "Mystere",
+      "170": "Optimisation",
+      "180": "Paralysed",
+      "185": "Phoenix",
+      "190": "Poisoned",
+      "200": "Protection",
+      "210": "Protected",
+      "220": "Renvoie",
+      "230": "Reset",
+      "240": "Revanche",
+      "250": "Répétition",
+      "260": "SacDeFrappe",
+      "270": "Shield",
+      "280": "Silenced",
+      "285": "Frozen",
+      "290": "Sleep",
+      "300": "Smoked",
+      "310": "SoinPrimitif",
+      "320": "SpamLand",
+      "330": "SpellImmunity",
+      "340": "Stealth",
+      "350": "Temporality",
+      "360": "Tenacite",
+      "370": "Terrain",
+      "380": "Vengeur",
+      "390": "Metamorph",
+      "391": "MetamorphSimple",
+      "400": "StealTox",
+      "410": "Decouverte",
+      "445": "SolCamouflage",
+      "473": "SolRevealed",
+      "1000": "NeverMiss",
+      "1010": "Aveuglement",
+      "1020": "PlumePhoenix",
+      "1030": "PetitPrix",
+      "1040": "ToxChanceux",
+      "1050": "Roulette",
+      "1060": "InsensibleDisparition",
+      "1070": "InsensibleEternity",
+      "1080": "AttackMultiColor",
+      "1090": "CoeurAcier",
+      "1100": "CoeurCorrompu",
+      "1110": "ChanceVitale",
+      "1120": "OneManArmy",
+      "1130": "Paradoxe",
+      "1140": "Casino",
+      "1150": "Changement",
+      "1160": "Resonance"
+    },
+    "target": {
+      "0": "None",
+      "1": "Self",
+      "4": "PlayerSelf",
+      "5": "PlayerOpponent",
+      "7": "AllPlayers",
+      "10": "AllCardsBoard",
+      "11": "AllCardsHand",
+      "12": "AllCardsAllPiles",
+      "15": "AllSlots",
+      "17": "AllCardData",
+      "20": "PlayTarget",
+      "25": "AbilityTriggerer",
+      "27": "EquippedCard",
+      "30": "SelectTarget",
+      "32": "AdjacentCaster",
+      "33": "AdjacentOpponent",
+      "40": "CardSelector",
+      "50": "ChoiceSelector",
+      "70": "LastPlayed",
+      "72": "LastTargeted",
+      "74": "LastDestroyed",
+      "75": "LastAllyDestroyed",
+      "77": "LastSummoned",
+      "78": "RandomCard",
+      "88": "RandomOpponentCard"
+    },
+    "trigger": {
+      "0": "None",
+      "2": "Ongoing",
+      "5": "Activate",
+      "10": "StartOfGame",
+      "20": "StartOfTurn",
+      "22": "EndOfTurn",
+      "34": "OnCastAbility",
+      "35": "OnKill",
+      "40": "OnDeath",
+      "42": "OnDeathOther",
+      "50": "OnCritick",
+      "55": "OnEcho",
+      "60": "OnDamageTaken",
+      "65": "OnHealTaken",
+      "70": "OnDamageDone",
+      "80": "OnHPPalierChange",
+      "90": "OnSpamtonChange"
+    }
+  },
+  "gameTypes": [
+    {
+      "id": "Casual",
+      "name": {
+        "de": "Normal",
+        "en": "Casual",
+        "es": "Normal",
+        "fr": "Normale",
+        "it": "Normale",
+        "pt": "Normal",
+        "pt-BR": "Normal"
+      },
+      "value": 0
+    },
+    {
+      "id": "Ranked",
+      "name": {
+        "de": "Gewertet",
+        "en": "Ranked",
+        "es": "Clasificatoria",
+        "fr": "Classée",
+        "it": "Classificata",
+        "pt": "Classificativa",
+        "pt-BR": "Ranqueada"
+      },
+      "value": 10
+    },
+    {
+      "id": "Friendly",
+      "name": {
+        "de": "Freundschaftlich",
+        "en": "Friendly",
+        "es": "Amistosa",
+        "fr": "Amicale",
+        "it": "Amichevole",
+        "pt": "Amigável",
+        "pt-BR": "Amigável"
+      },
+      "value": 40
+    }
+  ],
   "keywords": [
     {
       "description": {
@@ -31931,6 +32190,166 @@
     "it",
     "pt",
     "pt-BR"
+  ],
+  "ranks": [
+    {
+      "id": "rank-unranked",
+      "name": {
+        "de": "Ohne Rang",
+        "en": "No rank",
+        "es": "Sin rango",
+        "fr": "Sans rang",
+        "it": "Senza grado",
+        "pt": "Sem classificação",
+        "pt-BR": "Sem rank"
+      },
+      "threshold": 0
+    },
+    {
+      "id": "rank-bronze",
+      "name": {
+        "de": "Bronze",
+        "en": "Bronze",
+        "es": "Bronce",
+        "fr": "Bronze",
+        "it": "Bronzo",
+        "pt": "Bronze",
+        "pt-BR": "Bronze"
+      },
+      "threshold": 15
+    },
+    {
+      "id": "rank-silver",
+      "name": {
+        "de": "Silber",
+        "en": "Silver",
+        "es": "Plata",
+        "fr": "Argent",
+        "it": "Argento",
+        "pt": "Prata",
+        "pt-BR": "Prata"
+      },
+      "threshold": 30
+    },
+    {
+      "id": "rank-gold",
+      "name": {
+        "de": "Gold",
+        "en": "Gold",
+        "es": "Oro",
+        "fr": "Or",
+        "it": "Oro",
+        "pt": "Ouro",
+        "pt-BR": "Ouro"
+      },
+      "threshold": 45
+    },
+    {
+      "id": "rank-crystal",
+      "name": {
+        "de": "Kristall",
+        "en": "Crystal",
+        "es": "Cristal",
+        "fr": "Cristal",
+        "it": "Cristallo",
+        "pt": "Cristal",
+        "pt-BR": "Cristal"
+      },
+      "threshold": 60
+    },
+    {
+      "id": "rank-celeste",
+      "name": {
+        "de": "Celeste",
+        "en": "Celeste",
+        "es": "Celeste",
+        "fr": "Céleste",
+        "it": "Celeste",
+        "pt": "Celeste",
+        "pt-BR": "Celeste"
+      },
+      "threshold": 75
+    },
+    {
+      "id": "rank-legend",
+      "name": {
+        "de": "Legende",
+        "en": "Legend",
+        "es": "Leyenda",
+        "fr": "Légende",
+        "it": "Leggenda",
+        "pt": "Lenda",
+        "pt-BR": "Lenda"
+      },
+      "threshold": 90
+    }
+  ],
+  "rarities": [
+    {
+      "id": "rarity-common",
+      "name": {
+        "de": "Gewöhnlich",
+        "en": "Common",
+        "es": "Común",
+        "fr": "Commune",
+        "it": "Comune",
+        "pt": "Comum",
+        "pt-BR": "Comum"
+      },
+      "order": 1
+    },
+    {
+      "id": "rarity-rare",
+      "name": {
+        "de": "Selten",
+        "en": "Rare",
+        "es": "Rara",
+        "fr": "Rare",
+        "it": "Rara",
+        "pt": "Rara",
+        "pt-BR": "Rara"
+      },
+      "order": 2
+    },
+    {
+      "id": "rarity-epic",
+      "name": {
+        "de": "Episch",
+        "en": "Epic",
+        "es": "Épica",
+        "fr": "Épique",
+        "it": "Epica",
+        "pt": "Épica",
+        "pt-BR": "Épica"
+      },
+      "order": 3
+    },
+    {
+      "id": "rarity-legendary",
+      "name": {
+        "de": "Legendär",
+        "en": "Legendary",
+        "es": "Legendaria",
+        "fr": "Légendaire",
+        "it": "Leggendaria",
+        "pt": "Lendária",
+        "pt-BR": "Lendária"
+      },
+      "order": 4
+    },
+    {
+      "id": "rarity-divine",
+      "name": {
+        "de": "Göttlich",
+        "en": "Divine",
+        "es": "Divina",
+        "fr": "Divine",
+        "it": "Divina",
+        "pt": "Divina",
+        "pt-BR": "Divina"
+      },
+      "order": 5
+    }
   ],
   "talents": [
     {

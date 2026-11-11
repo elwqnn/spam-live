@@ -7,6 +7,7 @@
 	import DeckCards from '#ui/components/DeckCards.svelte';
 	import DeckTile from '#ui/components/DeckTile.svelte';
 	import Dialog from '#ui/components/Dialog.svelte';
+	import HpCurve from '#ui/components/HpCurve.svelte';
 	import Time from '#ui/components/Time.svelte';
 	import { Badge } from '#ui/components/ui/badge/index.js';
 	import { Button, buttonVariants } from '#ui/components/ui/button/index.js';
@@ -113,6 +114,12 @@
 									<dt class="text-xs text-muted-foreground">{m.opponent_cards()}</dt>
 									<dd><DeckCards cards={match.opponentCards} {catalog} /></dd>
 								</div>
+								{#if match.hp.length}
+									<div class="grid gap-1.5">
+										<dt class="text-xs text-muted-foreground">{m.hp_curve()}</dt>
+										<dd><HpCurve hp={match.hp} labels /></dd>
+									</div>
+								{/if}
 							</dl>
 						</li>
 					{/each}

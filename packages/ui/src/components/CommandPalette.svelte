@@ -147,6 +147,12 @@
 							names: names((o) => m.palette_download({}, o)),
 							go: '/download',
 							hint: 'D'
+						},
+						{
+							key: 'action-patch-notes',
+							label: m.palette_patch_notes(),
+							names: names((o) => m.palette_patch_notes({}, o)),
+							go: '/patch-notes'
 						}
 					]
 				: []),

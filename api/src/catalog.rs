@@ -1,4 +1,7 @@
-use std::{collections::HashMap, path::Path};
+use std::{
+    collections::{BTreeMap, HashMap},
+    path::Path,
+};
 
 use axum::{
     Router,
@@ -31,6 +34,37 @@ struct File {
     effects: Vec<RawEntry>,
     #[serde(default)]
     artists: Vec<RawArtist>,
+    #[serde(default)]
+    ranks: Vec<RawRank>,
+    #[serde(default)]
+    elements: Vec<RawOrdered>,
+    #[serde(default)]
+    rarities: Vec<RawOrdered>,
+    #[serde(default)]
+    game_types: Vec<RawGameType>,
+    #[serde(default)]
+    enums: Enums,
+}
+
+#[derive(Deserialize)]
+struct RawRank {
+    id: String,
+    threshold: i64,
+    name: Text,
+}
+
+#[derive(Deserialize)]
+struct RawOrdered {
+    id: String,
+    order: i64,
+    name: Text,
+}
+
+#[derive(Deserialize)]
+struct RawGameType {
+    id: String,
+    value: i64,
+    name: Text,
 }
 
 #[derive(Deserialize)]
@@ -85,6 +119,11 @@ struct Version {
     keywords: Vec<RawEntry>,
     effects: Vec<RawEntry>,
     artists: HashMap<Uuid, RawArtist>,
+    ranks: Vec<RawRank>,
+    elements: Vec<RawOrdered>,
+    rarities: Vec<RawOrdered>,
+    game_types: Vec<RawGameType>,
+    enums: Enums,
 }
 
 pub struct Catalog {
@@ -152,6 +191,11 @@ impl Version {
             keywords: file.keywords,
             effects: file.effects,
             artists,
+            ranks: file.ranks,
+            elements: file.elements,
+            rarities: file.rarities,
+            game_types: file.game_types,
+            enums: file.enums,
         })
     }
 }
@@ -178,6 +222,10 @@ impl Catalog {
         Ok(Self { versions })
     }
 
+    pub fn version_names(&self) -> impl Iterator<Item = &str> {
+        self.versions.iter().map(|v| v.name.as_str())
+    }
+
     pub fn latest(&self) -> &str {
         &self.versions[0].name
     }
@@ -185,6 +233,11 @@ impl Catalog {
     #[cfg(feature = "seed")]
     pub fn card_ids(&self) -> Vec<Uuid> {
         self.versions[0].cards.iter().map(|c| c.id).collect()
+    }
+
+    #[cfg(feature = "seed")]
+    pub fn tox_ids(&self) -> Vec<Uuid> {
+        self.versions[0].tox.keys().filter_map(|id| id.parse().ok()).collect()
     }
 
     pub fn previous(&self, version: &str) -> Option<&str> {
@@ -199,6 +252,28 @@ impl Catalog {
     pub fn knows_card(&self, app_version: &str, id: &Uuid) -> bool {
         let has = |v: &Version| v.cards.iter().any(|c| c.id == *id);
         has(&self.versions[0]) || self.versions.iter().find(|v| v.name == app_version).is_some_and(has)
+    }
+
+    pub fn talent_slots(&self, card: &Uuid) -> (Vec<String>, Vec<i16>, Vec<String>) {
+        let mut out = (Vec::new(), Vec::new(), Vec::new());
+        for v in &self.versions {
+            for c in v.cards.iter().filter(|c| c.id == *card) {
+                for (n, id) in (1..).zip(&c.talents) {
+                    out.0.push(v.name.clone());
+                    out.1.push(n);
+                    out.2.push(id.clone());
+                }
+            }
+        }
+        out
+    }
+
+    pub fn talent_name(&self, id: &str, lang: &str) -> Option<String> {
+        self.versions.iter().find_map(|v| v.talents.get(id)).and_then(|e| tr(&e.name, lang))
+    }
+
+    pub fn tox(&self, id: &str, lang: &str) -> Option<FaceTox> {
+        self.versions.iter().find_map(|v| v.tox.get(id)).map(|e| face_tox(e, lang))
     }
 
     fn select<'a>(&'a self, q: &'a CardQuery) -> Result<(&'a Version, &'a str), ApiError> {
@@ -235,6 +310,47 @@ pub struct CardQuery {
 pub struct CatalogVersion {
     pub version: String,
     pub languages: Vec<String>,
+}
+
+#[derive(Clone, Default, Deserialize, Serialize, ToSchema)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Enums {
+    pub trigger: BTreeMap<String, String>,
+    pub target: BTreeMap<String, String>,
+    pub display_type: BTreeMap<String, String>,
+    pub effect: BTreeMap<String, String>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct Rank {
+    pub id: String,
+    pub threshold: i64,
+    pub name: String,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct Ordered {
+    pub id: String,
+    pub order: i64,
+    pub name: String,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct GameType {
+    pub id: String,
+    pub value: i64,
+    pub name: String,
+}
+
+#[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct CatalogNames {
+    pub version: String,
+    pub ranks: Vec<Rank>,
+    pub elements: Vec<Ordered>,
+    pub rarities: Vec<Ordered>,
+    pub game_types: Vec<GameType>,
+    pub enums: Enums,
 }
 
 #[derive(Deserialize, Serialize, ToSchema)]
@@ -416,20 +532,17 @@ fn base(v: &Version, c: &RawCard, lang: &str) -> CardBase {
                     }
                 })
                 .collect(),
-            tox: c
-                .passive_abilities
-                .iter()
-                .map(|id| {
-                    let e = &v.tox[id];
-                    FaceTox {
-                        id: e.id.clone(),
-                        name: tr(&e.name, lang).or_else(|| field(e, "title")).unwrap_or_else(|| e.id.clone()),
-                        rarity: field(e, "rarity"),
-                        image: field(e, "modificatorImage").is_some_and(|s| !s.is_empty()),
-                    }
-                })
-                .collect(),
+            tox: c.passive_abilities.iter().map(|id| face_tox(&v.tox[id], lang)).collect(),
         },
+    }
+}
+
+fn face_tox(e: &RawEntry, lang: &str) -> FaceTox {
+    FaceTox {
+        id: e.id.clone(),
+        name: tr(&e.name, lang).or_else(|| field(e, "title")).unwrap_or_else(|| e.id.clone()),
+        rarity: field(e, "rarity"),
+        image: field(e, "modificatorImage").is_some_and(|s| !s.is_empty()),
     }
 }
 
@@ -522,6 +635,36 @@ pub async fn versions(State(s): State<AppState>) -> Response {
     public(list)
 }
 
+#[utoipa::path(get, path = "/api/catalog", tag = "catalog", params(CardQuery),
+    responses((status = 200, body = CatalogNames, description = "Names of the ranks (sorted by threshold), elements and \
+        rarities (sorted by order) and game types (sorted by value). enums maps each integer of the ability fields \
+        trigger, target and displayType and of the Tox field effect to its game name. An older catalog version gives \
+        empty lists and maps."),
+        (status = 400, body = crate::ErrorBody), (status = 404, body = crate::ErrorBody)))]
+pub async fn names(State(s): State<AppState>, Query(q): Query<CardQuery>) -> Result<Response, ApiError> {
+    let (v, lang) = s.catalog.select(&q)?;
+    let name = |id: &String, text: &Text| tr(text, lang).unwrap_or_else(|| id.clone());
+    let ordered = |list: &[RawOrdered]| {
+        list.iter().map(|e| Ordered { id: e.id.clone(), order: e.order, name: name(&e.id, &e.name) }).collect()
+    };
+    Ok(public(CatalogNames {
+        version: v.name.clone(),
+        ranks: v
+            .ranks
+            .iter()
+            .map(|r| Rank { id: r.id.clone(), threshold: r.threshold, name: name(&r.id, &r.name) })
+            .collect(),
+        elements: ordered(&v.elements),
+        rarities: ordered(&v.rarities),
+        game_types: v
+            .game_types
+            .iter()
+            .map(|g| GameType { id: g.id.clone(), value: g.value, name: name(&g.id, &g.name) })
+            .collect(),
+        enums: v.enums.clone(),
+    }))
+}
+
 #[utoipa::path(get, path = "/api/cards", tag = "catalog", params(CardQuery),
     responses((status = 200, body = Vec<CardSummary>), (status = 400, body = crate::ErrorBody), (status = 404, body = crate::ErrorBody)))]
 pub async fn list_cards(State(s): State<AppState>, Query(q): Query<CardQuery>) -> Result<Response, ApiError> {
@@ -589,6 +732,7 @@ pub async fn artists(State(s): State<AppState>, Query(q): Query<CardQuery>) -> R
 
 pub fn routes() -> Router<AppState> {
     Router::new()
+        .route("/api/catalog", get(names))
         .route("/api/catalog/versions", get(versions))
         .route("/api/cards", get(list_cards))
         .route("/api/cards/{id}", get(get_card))

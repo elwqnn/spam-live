@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { ok, type Client, type Schemas } from '#ui';
 import { selection } from '#ui/filter.js';
+import { minStars as starsParam } from '#ui/stars.js';
 import { getLocale } from '$paraglide/runtime.js';
 
 type Query = Record<string, string | null>;
@@ -26,6 +27,12 @@ async function cardDetails(client: Client, ids: string[], lang: string) {
 	);
 }
 
+export const namesData = (client: Client) =>
+	client.GET('/api/catalog', { params: { query: { lang: getLocale() } } }).then(
+		(r) => r.data ?? null,
+		() => null
+	);
+
 export async function cardsData(client: Client, url: URL) {
 	const trend = url.searchParams.get('trend') === 'version' ? 'version' : 'week';
 	const [cards, stats] = await Promise.all([
@@ -40,7 +47,7 @@ export async function cardData(client: Client, url: URL, id: string) {
 	const version = url.searchParams.get('version') ?? undefined;
 	const trend =
 		version !== 'all' && url.searchParams.get('trend') === 'version' ? 'version' : 'week';
-	const [card, stats, versions, decks, keywords, found] = await Promise.all([
+	const [card, stats, versions, decks, keywords, found, replay] = await Promise.all([
 		client.GET('/api/cards/{id}', { params: { path: { id }, query: { lang } } }),
 		client.GET('/api/stats/cards', { params: { query: { version, trend } } }),
 		client.GET('/api/catalog/versions'),
@@ -48,7 +55,10 @@ export async function cardData(client: Client, url: URL, id: string) {
 		client.GET('/api/glossary/keywords', { params: { query: { lang } } }),
 		client.GET('/api/stats/cards/{id}/matchups', {
 			params: { path: { id }, query: { version } }
-		})
+		}),
+		client
+			.GET('/api/stats/cards/{id}/replay', { params: { path: { id }, query: { version, lang } } })
+			.then((r) => r.data ?? null)
 	]);
 	const cardStats = ok(stats);
 	const list = decks.data ?? [];
@@ -64,6 +74,7 @@ export async function cardData(client: Client, url: URL, id: string) {
 		versions: ok(versions).map((v) => v.version),
 		decks: cards ? list : [],
 		matchups: cards ? matchups : NO_MATCHUPS,
+		replay,
 		cards: cards ?? [],
 		keywords: keywords.data ?? []
 	};
@@ -176,7 +187,8 @@ export async function editDeckData(client: Client, id: number, me: Me) {
 export async function statsData(client: Client, url: URL) {
 	const tab = STATS_TABS.find((t) => t === url.searchParams.get('tab')) ?? 'meta';
 	const version = url.searchParams.get('version') ?? undefined;
-	const query = { params: { query: { version } } };
+	const minStars = starsParam(url.searchParams.get('minStars'));
+	const query = { params: { query: { version, minStars } } };
 	const against = [
 		...new Set(
 			selection(url.searchParams.get('against'))
@@ -195,7 +207,7 @@ export async function statsData(client: Client, url: URL) {
 		tab === 'counters' && against.length
 			? client
 					.GET('/api/stats/counters', {
-						params: { query: { version, against: against.join(',') } }
+						params: { query: { version, against: against.join(','), minStars } }
 					})
 					.then(ok)
 			: null,
@@ -207,6 +219,7 @@ export async function statsData(client: Client, url: URL) {
 		tab,
 		cards,
 		versions: versions.map((v) => v.version),
+		minStars,
 		overview,
 		stats,
 		against,
@@ -270,6 +283,10 @@ export async function dashboardData(client: Client, url: URL, me: Me | null) {
 
 export async function accountData(client: Client, me: Me) {
 	return { me, devices: ok(await client.GET('/api/me/devices')) };
+}
+
+export async function patchNotesData(client: Client) {
+	return { news: ok(await client.GET('/api/steam/news')) };
 }
 
 export async function creditsData(client: Client) {

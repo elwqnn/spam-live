@@ -25,7 +25,7 @@ use crate::{
     auth::CurrentUser,
     catalog::{Catalog, parse_version},
     decks::DeckStatus,
-    public,
+    public, replay,
 };
 
 pub const MAX_INDEX_BYTES: usize = 1 << 20;
@@ -225,18 +225,28 @@ fn blank(body: &mut [u8], prefix: &[u8], name: &[u8], filler: &[u8]) {
 const NAMES: [&str; 4] =
     ["/OpponentName", "/Loading/me/username", "/Loading/opponent/username", "/Loading/ally/username"];
 
-pub fn clean_replay(gz: &[u8]) -> Result<(String, Vec<u8>), String> {
+pub(crate) fn gunzip(gz: &[u8]) -> Result<Vec<u8>, String> {
     let mut out = Vec::new();
     GzDecoder::new(gz).take(MAX_REPLAY_OUTPUT + 1).read_to_end(&mut out).map_err(|_| "replay is not valid gzip")?;
     if out.len() as u64 > MAX_REPLAY_OUTPUT {
         return Err("replay is larger than 5 MB after gunzip".into());
     }
-    let rest = out.strip_prefix(b"SRPL").ok_or("replay magic is not SRPL")?;
+    Ok(out)
+}
+
+pub(crate) fn split_replay(raw: &[u8]) -> Result<(&[u8], &[u8]), String> {
+    let rest = raw.strip_prefix(b"SRPL").ok_or("replay magic is not SRPL")?;
     if rest.get(..4) != Some(&2u32.to_le_bytes()[..]) {
         return Err("unsupported replay version".into());
     }
     let (len, rest) = varint(&rest[4..]).ok_or("invalid replay header length")?;
     let header = rest.get(..len).ok_or("replay header is truncated")?;
+    Ok((header, &rest[len..]))
+}
+
+pub fn clean_replay(gz: &[u8]) -> Result<(String, Vec<u8>), String> {
+    let out = gunzip(gz)?;
+    let (header, rest) = split_replay(&out)?;
     let mut header: Value = serde_json::from_slice(header).map_err(|_| "invalid replay header")?;
     let game_uid = header.get("GameUid").and_then(Value::as_str).ok_or("invalid replay header")?.to_owned();
     let names: Vec<String> =
@@ -254,7 +264,7 @@ pub fn clean_replay(gz: &[u8]) -> Result<(String, Vec<u8>), String> {
     push_varint(&mut raw, header.len());
     raw.extend(header);
     let start = raw.len();
-    raw.extend(&rest[len..]);
+    raw.extend(rest);
     let body = &mut raw[start..];
     for name in &names {
         let mut prefix = Vec::new();
@@ -530,6 +540,7 @@ pub async fn upload(
     }
 
     let mut replay_results = Vec::with_capacity(replays.len());
+    let mut stored = Vec::new();
     for (file_name, parsed) in replays {
         let (game_uid, status, reason) = match parsed {
             Err(reason) => (None, Status::Rejected, Some(reason)),
@@ -550,10 +561,18 @@ pub async fn upload(
                 .execute(&s.db)
                 .await?
                 .rows_affected();
+                if inserted == 1 {
+                    stored.push(uid.clone());
+                }
                 (Some(uid), if inserted == 1 { Status::New } else { Status::Known }, None)
             }
         };
         replay_results.push(ReplayResult { file_name, game_uid, status, reason });
+    }
+    for uid in &stored {
+        if let Err(e) = replay::decode_match(&s.db, uid).await {
+            tracing::error!(game_uid = uid, error = %e, "replay decode failed");
+        }
     }
     Ok(Json(UploadResult { entries: entry_results, replays: replay_results }))
 }
@@ -618,6 +637,15 @@ pub struct MyMatch {
     pub opponent_cards: Vec<Uuid>,
     pub result: MatchResult,
     pub disputed: bool,
+    #[sqlx(json)]
+    pub hp: Vec<HpPoint>,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct HpPoint {
+    pub turn: i32,
+    pub mine: i32,
+    pub opponent: i32,
 }
 
 #[derive(Deserialize, IntoParams)]
@@ -628,7 +656,10 @@ pub struct HistoryQuery {
 }
 
 #[utoipa::path(get, path = "/api/me/matches", tag = "matches", params(HistoryQuery),
-    responses((status = 200, body = Vec<MyMatch>, description = "Newest first"), (status = 401, body = ErrorBody)))]
+    responses((status = 200, body = Vec<MyMatch>,
+        description = "Newest first. hp: the HP of each seat at the end of each turn, from the decoded replay, \
+            empty when the match has no replay events."),
+        (status = 401, body = ErrorBody)))]
 pub async fn my_matches(
     State(s): State<AppState>,
     user: CurrentUser,
@@ -640,7 +671,12 @@ pub async fn my_matches(
              CASE u.seat WHEN 0 THEN m.seat0_cards ELSE m.seat1_cards END AS my_cards,
              CASE u.seat WHEN 0 THEN m.seat1_cards ELSE m.seat0_cards END AS opponent_cards,
              CASE WHEN m.is_draw THEN 'draw' WHEN m.winner_seat = u.seat THEN 'win' ELSE 'loss' END AS result,
-             m.disputed
+             m.disputed,
+             COALESCE((SELECT json_agg(json_build_object('turn', a.turn, 'mine', a.hp, 'opponent', o.hp)
+                           ORDER BY a.turn)
+                       FROM hp_turns a JOIN hp_turns o ON o.game_uid = a.game_uid AND o.turn = a.turn
+                           AND o.seat = 1 - a.seat
+                       WHERE a.game_uid = m.game_uid AND a.seat = u.seat), '[]') AS hp
          FROM uploads u JOIN matches m USING (game_uid)
          WHERE u.user_id = $1 AND ($2::timestamptz IS NULL OR m.start_utc < $2)
          ORDER BY m.start_utc DESC

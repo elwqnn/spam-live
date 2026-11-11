@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import { modeName, type CardMap, type Schemas } from '#ui';
 	import { queryHref } from '$host';
+	import HpCurve from '#ui/components/HpCurve.svelte';
 	import Time from '#ui/components/Time.svelte';
 	import { Badge } from '#ui/components/ui/badge/index.js';
 	import { buttonVariants } from '#ui/components/ui/button/index.js';
@@ -57,6 +58,7 @@
 					<span class="w-20 truncate font-medium">{modeName(match.gameMode)}</span>
 					{@render cards(match.myCards, m.my_cards())}
 					{@render cards(match.opponentCards, m.opponent_cards())}
+					<HpCurve hp={match.hp} />
 					{#if match.isAi}<Badge variant="outline">{m.ai()}</Badge>{/if}
 					{#if match.disputed}<Badge variant="destructive">{m.disputed()}</Badge>{/if}
 					<span class="ml-auto flex gap-x-4 text-xs text-muted-foreground tabular-nums">

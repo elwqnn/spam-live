@@ -184,6 +184,59 @@ async fn real_catalog_card() {
     assert!(!d["abilities"].as_array().unwrap().is_empty());
 }
 
+#[tokio::test]
+async fn real_catalog_names() {
+    let app = api::router(state_with(lazy_pool(), "https://steamcommunity.com/openid/login", real_catalog()));
+    let res = send(&app, get("/api/catalog?lang=fr", "")).await;
+    assert_eq!(res.status, StatusCode::OK);
+    assert_eq!(res.headers["cache-control"], "public, max-age=300");
+    let n = res.body;
+    assert_eq!(n["version"], "1.29");
+    let pairs = |key: &str, field: &str| {
+        n[key].as_array().unwrap().iter().map(|r| (r[field].clone(), r["name"].clone())).collect::<Vec<_>>()
+    };
+    let ranks = [
+        (0, "Sans rang"),
+        (15, "Bronze"),
+        (30, "Argent"),
+        (45, "Or"),
+        (60, "Cristal"),
+        (75, "Céleste"),
+        (90, "Légende"),
+    ];
+    assert_eq!(pairs("ranks", "threshold"), ranks.map(|(t, name)| (json!(t), json!(name))));
+    assert_eq!(
+        pairs("gameTypes", "value"),
+        [(json!(0), json!("Normale")), (json!(10), json!("Classée")), (json!(40), json!("Amicale"))]
+    );
+    assert_eq!(n["elements"].as_array().unwrap().len(), 7);
+    assert_eq!(n["rarities"].as_array().unwrap().len(), 5);
+    let divine = n["elements"].as_array().unwrap().iter().find(|e| e["id"] == "divine").unwrap();
+    assert_eq!(divine["name"], "Éther");
+    let en = send(&app, get("/api/catalog", "")).await.body;
+    assert_eq!(en["rarities"][0], json!({ "id": "rarity-common", "order": 1, "name": "Common" }));
+    let ids = |key: &str| n[key].as_array().unwrap().iter().map(|e| e["id"].clone()).collect::<Vec<_>>();
+    let cards = send(&app, get("/api/cards", "")).await.body;
+    for card in cards.as_array().unwrap() {
+        assert!(ids("elements").contains(&card["element"]), "{}", card["id"]);
+        assert!(ids("rarities").contains(&card["rarity"]), "{}", card["id"]);
+    }
+    assert_eq!(n["enums"]["trigger"]["5"], "Activate");
+    assert_eq!(n["enums"]["target"]["30"], "SelectTarget");
+    assert_eq!(n["enums"]["displayType"]["10"], "Damage");
+    assert_eq!(n["enums"]["effect"]["50"], "CoeurVital");
+
+    let old = send(&app, get("/api/catalog?version=1.28.1&lang=fr", "")).await.body;
+    let empty = json!({ "trigger": {}, "target": {}, "displayType": {}, "effect": {} });
+    assert_eq!(old["version"], "1.28.1");
+    for key in ["ranks", "elements", "rarities", "gameTypes"] {
+        assert_eq!(old[key], json!([]), "{key}");
+    }
+    assert_eq!(old["enums"], empty);
+    assert_eq!(send(&app, get("/api/catalog?lang=xx", "")).await.status, StatusCode::BAD_REQUEST);
+    assert_eq!(send(&app, get("/api/catalog?version=9.9.9", "")).await.status, StatusCode::NOT_FOUND);
+}
+
 #[test]
 fn artist_link_kinds() {
     let kind = |url: &str| serde_json::to_value(artist_link(url).map(|l| l.kind)).unwrap();
@@ -400,6 +453,7 @@ async fn openapi_lists_routes() {
     let doc = send(&app, get("/api/openapi.json", "")).await.body;
     for path in [
         "/api/matches",
+        "/api/catalog",
         "/api/cards/{id}",
         "/api/artists",
         "/api/glossary",

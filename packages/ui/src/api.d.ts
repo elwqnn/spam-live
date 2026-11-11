@@ -260,6 +260,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["names"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/catalog/versions": {
         parameters: {
             query?: never;
@@ -788,6 +804,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/stats/cards/{id}/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["card_replay"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/stats/counters": {
         parameters: {
             query?: never;
@@ -876,6 +908,38 @@ export interface paths {
             cookie?: never;
         };
         get: operations["pace"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/steam/news": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["news"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/steam/players": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["players"];
         put?: never;
         post?: never;
         delete?: never;
@@ -992,6 +1056,13 @@ export interface components {
             /** Format: int64 */
             shortWins: number;
         };
+        CardReplayStats: {
+            damage: components["schemas"]["DamageStats"];
+            /** Format: int64 */
+            games: number;
+            talents: components["schemas"]["TalentStats"][];
+            tox: components["schemas"]["ToxStats"][];
+        };
         CardStats: {
             /** Format: double */
             adjustedWinRate?: number | null;
@@ -1015,6 +1086,14 @@ export interface components {
             abilities: components["schemas"]["AbilityRef"][];
             talents: string[];
             tox: string[];
+        };
+        CatalogNames: {
+            elements: components["schemas"]["Ordered"][];
+            enums: components["schemas"]["Enums"];
+            gameTypes: components["schemas"]["GameType"][];
+            ranks: components["schemas"]["Rank"][];
+            rarities: components["schemas"]["Ordered"][];
+            version: string;
         };
         CatalogVersion: {
             languages: string[];
@@ -1064,6 +1143,14 @@ export interface components {
             cards: components["schemas"]["Counter"][];
             /** Format: int64 */
             games: number;
+        };
+        DamageStats: {
+            /** Format: double */
+            done?: number | null;
+            /** Format: int64 */
+            games: number;
+            /** Format: double */
+            taken?: number | null;
         };
         DayMatches: {
             /** Format: date */
@@ -1215,6 +1302,24 @@ export interface components {
             reason?: string | null;
             status: components["schemas"]["Status"];
         };
+        Enums: {
+            /** @default {} */
+            displayType: {
+                [key: string]: string;
+            };
+            /** @default {} */
+            effect: {
+                [key: string]: string;
+            };
+            /** @default {} */
+            target: {
+                [key: string]: string;
+            };
+            /** @default {} */
+            trigger: {
+                [key: string]: string;
+            };
+        };
         ErrorBody: {
             error: string;
         };
@@ -1260,6 +1365,12 @@ export interface components {
         };
         /** @enum {string} */
         FeedbackKind: "bug" | "idea" | "other";
+        GameType: {
+            id: string;
+            name: string;
+            /** Format: int64 */
+            value: number;
+        };
         Glossary: {
             abilities: components["schemas"]["GlossaryEntry"][];
             effects: components["schemas"]["Term"][];
@@ -1305,6 +1416,14 @@ export interface components {
             webDistinct?: number | null;
             /** Format: int32 */
             webPeak?: number | null;
+        };
+        HpPoint: {
+            /** Format: int32 */
+            mine: number;
+            /** Format: int32 */
+            opponent: number;
+            /** Format: int32 */
+            turn: number;
         };
         ImportResult: {
             decks: components["schemas"]["ImportedDeck"][];
@@ -1367,6 +1486,7 @@ export interface components {
             /** Format: int32 */
             gameMode: number;
             gameUid: string;
+            hp: components["schemas"]["HpPoint"][];
             isAi: boolean;
             myCards: string[];
             /** Format: int32 */
@@ -1402,6 +1522,12 @@ export interface components {
             /** Format: int64 */
             webOnline: number;
         };
+        Ordered: {
+            id: string;
+            name: string;
+            /** Format: int64 */
+            order: number;
+        };
         Overview: {
             days: components["schemas"]["DayMatches"][];
             /** Format: int64 */
@@ -1422,6 +1548,18 @@ export interface components {
             /** Format: uuid */
             id: string;
         };
+        PlayerCount: {
+            /** Format: date-time */
+            at: string;
+            /** Format: int32 */
+            players: number;
+        };
+        PlayerHour: {
+            /** Format: date-time */
+            hour: string;
+            /** Format: int32 */
+            max?: number | null;
+        };
         Players: {
             /** Format: int64 */
             accounts: number;
@@ -1431,6 +1569,12 @@ export interface components {
             linkedAccounts: number;
             /** Format: int64 */
             signups7d: number;
+        };
+        Rank: {
+            id: string;
+            name: string;
+            /** Format: int64 */
+            threshold: number;
         };
         Release: {
             linux?: components["schemas"]["Asset"] | null;
@@ -1501,6 +1645,33 @@ export interface components {
         StatsSort: "winrate" | "games";
         /** @enum {string} */
         Status: "new" | "known" | "rejected";
+        SteamNews: {
+            feed: string;
+            gid: string;
+            /** Format: date-time */
+            publishedAt: string;
+            title: string;
+            url: string;
+            version?: string | null;
+        };
+        SteamPlayers: {
+            current?: components["schemas"]["PlayerCount"] | null;
+            hourly: components["schemas"]["PlayerHour"][];
+        };
+        TalentStats: {
+            /** Format: int64 */
+            games: number;
+            name?: string | null;
+            /** Format: double */
+            pickRate: number;
+            talent: string;
+            /** Format: double */
+            winRate?: number | null;
+            /** Format: double */
+            winScore?: number | null;
+            /** Format: int64 */
+            wins: number;
+        };
         /** @enum {string} */
         TargetType: "deck" | "comment";
         Term: {
@@ -1517,6 +1688,23 @@ export interface components {
             games: number;
             /** Format: double */
             winRate?: number | null;
+            /** Format: int64 */
+            wins: number;
+        };
+        ToxStats: {
+            /** Format: double */
+            buyRate: number;
+            /** Format: int64 */
+            games: number;
+            image: boolean;
+            name?: string | null;
+            rarity?: string | null;
+            /** Format: uuid */
+            tox: string;
+            /** Format: double */
+            winRate?: number | null;
+            /** Format: double */
+            winScore?: number | null;
             /** Format: int64 */
             wins: number;
         };
@@ -2125,6 +2313,45 @@ export interface operations {
             };
         };
     };
+    names: {
+        parameters: {
+            query?: {
+                version?: string;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Names of the ranks (sorted by threshold), elements and rarities (sorted by order) and game types (sorted by value). enums maps each integer of the ability fields trigger, target and displayType and of the Tox field effect to its game name. An older catalog version gives empty lists and maps. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogNames"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
     versions: {
         parameters: {
             query?: never;
@@ -2661,6 +2888,8 @@ export interface operations {
             query?: {
                 /** @example all */
                 version?: string;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path: {
@@ -3478,7 +3707,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Newest first */
+            /** @description Newest first. hp: the HP of each seat at the end of each turn, from the decoded replay, empty when the match has no replay events. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3601,6 +3830,8 @@ export interface operations {
                 /** @example all */
                 version?: string;
                 trend?: components["schemas"]["Trend"];
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path?: never;
@@ -3632,6 +3863,8 @@ export interface operations {
             query?: {
                 /** @example all */
                 version?: string;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path: {
@@ -3669,6 +3902,52 @@ export interface operations {
             };
         };
     };
+    card_replay: {
+        parameters: {
+            query?: {
+                /** @example all */
+                version?: string;
+                /** @example 30 */
+                minStars?: number;
+                /** @example en */
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Card UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description From the decoded replays of ranked human matches, not disputed, no mirror. Base: the seats whose deck has the card and that have replay events; games is their count. tox: each Tox bought on this card, games = the base seats with 1 buy or more, buyRate = games / base. talents: base = the seats with a replay of their own player; each talent id picked on this card, pickRate = games / base. name is in lang (default en). Both lists are sorted by winScore, games, descending, then id. damage: the mean damage done and taken by this card, null at 0 games. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardReplayStats"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
     counters: {
         parameters: {
             query?: {
@@ -3676,6 +3955,8 @@ export interface operations {
                 version?: string;
                 /** @example 0c8c383b-2207-4d18-b378-4f2a3795a58e,f16bc1f8-5cea-4acf-9e2a-0614062cb9b8 */
                 against?: string;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path?: never;
@@ -3709,6 +3990,8 @@ export interface operations {
                 version?: string;
                 sort?: components["schemas"]["StatsSort"];
                 limit?: number;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path?: never;
@@ -3740,6 +4023,8 @@ export interface operations {
             query?: {
                 /** @example all */
                 version?: string;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path?: never;
@@ -3791,6 +4076,8 @@ export interface operations {
             query?: {
                 /** @example all */
                 version?: string;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path?: never;
@@ -3822,6 +4109,8 @@ export interface operations {
             query?: {
                 /** @example all */
                 version?: string;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path?: never;
@@ -3844,6 +4133,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    news: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Steam news of the game, newest first, max 50. url is an https Steam page. version: a catalog version that is a token of the title; else the only catalog version that starts with a dotted token of the title and a dot (1.28 gives 1.28.1); else null. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SteamNews"][];
+                };
+            };
+        };
+    };
+    players: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Steam player count of the game. current: the last count of the last 30 minutes, else null. hourly: 1 item per UTC hour of the last 7 days, oldest first, the current hour last, with the highest count of the hour or null. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SteamPlayers"];
                 };
             };
         };

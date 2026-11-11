@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["UnityPy==1.25.4", "TypeTreeGeneratorAPI==0.0.10"]
+# dependencies = ["UnityPy==1.25.4", "TypeTreeGeneratorAPI==0.0.10", "dnfile==0.18.0"]
 # ///
 import csv
 import io
@@ -9,6 +9,7 @@ import os
 import struct
 import sys
 
+import dnfile
 import UnityPy
 from UnityPy.classes import PPtr
 from UnityPy.helpers.TypeTreeGenerator import TypeTreeGenerator
@@ -22,14 +23,16 @@ ID_FIELD = {
     "TcgEngine.ModificatorStatusData": "_UUID",
     "Spam.Data.ElementData": "_id",
     "Spam.Data.RarityData": "_id",
+    "Spam.Data.RankData": "_id",
+    "Spam.Data.GameTypeData": "_id",
     "TcgEngine.CardTypeData": "_id",
 }
 CARD, TOX = "Spam.Data.CardData", "TcgEngine.ModificatorStatusData"
 IGNORE = {
     "Spam.Data.AvatarData", "Spam.Data.BadgeData", "Spam.Data.BannerData", "Spam.Data.CardStyleData",
     "Spam.Data.CurrencyData", "Spam.Data.DeckSlotData", "Spam.Data.EffectFilterData", "Spam.Data.ElementalOrnamentData",
-    "Spam.Data.EmoteData", "Spam.Data.FinisherData", "Spam.Data.GameTypeData", "Spam.Data.InfoData", "Spam.Data.MoneyArticleData",
-    "Spam.Data.MonthlySubscriptionData", "Spam.Data.OrbData", "Spam.Data.RankData", "Spam.Data.RewardData", "Spam.Data.SideArenaData",
+    "Spam.Data.EmoteData", "Spam.Data.FinisherData", "Spam.Data.InfoData", "Spam.Data.MoneyArticleData",
+    "Spam.Data.MonthlySubscriptionData", "Spam.Data.OrbData", "Spam.Data.RewardData", "Spam.Data.SideArenaData",
     "Spam.Data.TrailData", "Spam.Data.TrailShapeSettings", "Spam.Data.TrailTipDeformSettings",
     "TcgEngine.ApiClient", "TcgEngine.AssetData", "TcgEngine.AudioTool", "TcgEngine.BootLoader", "TcgEngine.BuyRandomItem",
     "TcgEngine.ChangeCardElement", "TcgEngine.DataLoader", "TcgEngine.GamepadUiAssets", "TcgEngine.GameplayData",
@@ -55,6 +58,20 @@ TEXT_KEYS = {
     "tox": lambda r: ("Card.Passif." + r["title"].split("_")[0], "Card.PassifDesc." + r["title"].split("_")[0]),
 }
 GLOSSARY = {"keywords": ("Keyword.Title.", "Keyword.Desc."), "effects": ("Card.Effect.", "Card.EffectDesc.")}
+NAMES = {
+    "ranks": ("Spam.Data.RankData", lambda i: "Rank." + i.removeprefix("rank-"), "_threshold"),
+    "elements": ("Spam.Data.ElementData", lambda i: "Element.Name." + i, "_order"),
+    "rarities": ("Spam.Data.RarityData", lambda i: "Rarity.Name." + i.removeprefix("rarity-"), "_order"),
+    "gameTypes": ("Spam.Data.GameTypeData", lambda i: "GameType.Name." + i, None),
+}
+GAME_MODES = {"Friendly": "Friends"}
+ENUMS = {
+    "trigger": ("TcgEngine.AbilityData", "trigger"),
+    "target": ("TcgEngine.AbilityData", "target"),
+    "displayType": ("TcgEngine.AbilityData", "displayType"),
+    "effect": (TOX, "effect"),
+}
+CONSTANT = {0x04: "<b", 0x05: "<B", 0x06: "<h", 0x07: "<H", 0x08: "<i", 0x09: "<I", 0x0A: "<q", 0x0B: "<Q"}
 
 
 def camel(name):
@@ -71,6 +88,48 @@ def f32(x):
         if struct.unpack("f", struct.pack("f", y))[0] == x:
             return y
     return x
+
+
+def enums(path):
+    tables = dnfile.dnPE(path).net.mdtables
+    types = {f"{t.TypeNamespace}.{t.TypeName}": t for t in tables.TypeDef.rows}
+    constants = {
+        c.Parent.row_index: struct.unpack(CONSTANT[c.Type], c.Value.value)[0]
+        for c in tables.Constant.rows
+        if c.Parent.table and c.Parent.table.name == "Field" and c.Type in CONSTANT
+    }
+
+    def values(row):
+        base = row.Extends
+        if not base.table or base.table.name != "TypeRef" or f"{base.row.TypeNamespace}.{base.row.TypeName}" != "System.Enum":
+            sys.exit(f"{row.TypeNamespace}.{row.TypeName} is not an enum")
+        return {constants[f.row_index]: str(f.row.Name) for f in row.FieldList if f.row_index in constants}
+
+    def field_type(cls, name):
+        row = types[cls]
+        while True:
+            for f in row.FieldList:
+                if str(f.row.Name) == name:
+                    sig = f.row.Signature.value
+                    if sig[:2] != b"\x06\x11":
+                        sys.exit(f"{cls}.{name} is not a value type")
+                    b = sig[2:]
+                    if b[0] < 0x80:
+                        coded = b[0]
+                    elif b[0] < 0xC0:
+                        coded = (b[0] & 0x3F) << 8 | b[1]
+                    else:
+                        coded = int.from_bytes(b[:4]) & 0x1FFFFFFF
+                    if coded & 3:
+                        sys.exit(f"{cls}.{name} has a type of another assembly")
+                    return tables.TypeDef.rows[(coded >> 2) - 1]
+            base = row.Extends
+            if not base.table or base.table.name != "TypeDef":
+                sys.exit(f"{cls}.{name} not found")
+            row = base.row
+
+    modes = {name: value for value, name in values(types["TcgEngine.GameMode"]).items()}
+    return {key: values(field_type(cls, name)) for key, (cls, name) in ENUMS.items()}, modes
 
 
 def main(data_dir, out_dir):
@@ -231,6 +290,25 @@ def main(data_dir, out_dir):
         if "Talent.Name." + talent["id"] in texts and not named(talent):
             sys.exit(f"talent without en and fr name: {talent['id']}")
 
+    catalog["enums"], modes = enums(os.path.join(data_dir, "Managed", "Assembly-CSharp.dll"))
+    for name, (full, text_key, field) in NAMES.items():
+        catalog[name] = []
+        for kind, tree in trees.values():
+            if kind != full:
+                continue
+            record = {"id": tree["_id"], "name": localize(text_key(tree["_id"]))}
+            mode = GAME_MODES.get(record["id"], record["id"])
+            if field:
+                record[camel(field)] = tree[field]
+            elif mode in modes:
+                record["value"] = modes[mode]
+            else:
+                sys.exit(f"game type without GameMode value: {record['id']}")
+            if not named(record):
+                sys.exit(f"{name} {record['id']}: no en or fr name")
+            catalog[name].append(record)
+        catalog[name].sort(key=lambda r: r[camel(field) if field else "value"])
+
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, f"{version}.json")
     with open(path, "w", encoding="utf-8", newline="\n") as out:
@@ -239,6 +317,7 @@ def main(data_dir, out_dir):
     print("removed", *(f"{name}={count}" for name, count in removed.items()))
     print("null names", *(f"{name}={sum(1 for r in catalog[name] if not r['name'])}" for name in OUT.values()))
     print(*(f"{name}={len(catalog[name])}" for name in GLOSSARY), "skipped", *skipped)
+    print(*(f"{name}={len(catalog[name])}" for name in NAMES), "enums", *(f"{k}={len(v)}" for k, v in catalog["enums"].items()))
 
 
 if __name__ == "__main__":

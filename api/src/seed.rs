@@ -470,7 +470,65 @@ pub async fn run(db: &PgPool, catalog: &Catalog) -> Result<(), Box<dyn Error>> {
             .await?;
         }
     }
+    events(db, catalog).await?;
     analytics(db, &mut rng, now).await
+}
+
+async fn events(db: &PgPool, catalog: &Catalog) -> Result<(), Box<dyn Error>> {
+    let mut tox = catalog.tox_ids();
+    tox.sort();
+    let version = crate::replay::DECODER_VERSION;
+    sqlx::query(
+        "INSERT INTO match_event_sources (game_uid, seat, user_id, own, decoder_version)
+         SELECT m.game_uid, s.seat, coalesce(o.user_id, x.user_id), o.user_id IS NOT NULL, $2
+         FROM matches m CROSS JOIN (VALUES (0::smallint), (1::smallint)) AS s (seat)
+         LEFT JOIN uploads o ON o.game_uid = m.game_uid AND o.seat = s.seat
+         LEFT JOIN uploads x ON x.game_uid = m.game_uid AND x.seat <> s.seat
+         WHERE m.game_uid LIKE $1",
+    )
+    .bind(format!("{UID_PREFIX}%"))
+    .bind(version)
+    .execute(db)
+    .await?;
+    sqlx::query(
+        "WITH s AS (
+             SELECT e.game_uid, e.seat, e.own, m.turn_count, m.winner_seat = e.seat AS win,
+                 CASE e.seat WHEN 0 THEN m.seat0_cards ELSE m.seat1_cards END AS cards
+             FROM match_event_sources e JOIN matches m USING (game_uid) WHERE e.game_uid LIKE $1
+         ),
+         c AS (
+             SELECT s.*, card, hashtext(s.game_uid || s.seat || card) & 2147483647 AS h
+             FROM s, unnest(s.cards) AS card
+         ),
+         d AS (
+             INSERT INTO card_damage (game_uid, seat, card, done, taken, decoder_version)
+             SELECT game_uid, seat, card, 200 + h % 1300 + CASE WHEN win THEN 300 ELSE 0 END, 300 + h / 7 % 1100, $3
+             FROM c
+         ),
+         t AS (
+             INSERT INTO talent_picks (game_uid, seat, card, talent, decoder_version)
+             SELECT game_uid, seat, card, (h % 4)::smallint, $3 FROM c WHERE own AND h % 4 > 0
+         ),
+         b AS (
+             INSERT INTO shop_buys (game_uid, seat, idx, turn, card, tox, decoder_version)
+             SELECT s.game_uid, s.seat, i - 1, 1 + ((hashtext(s.game_uid) & 65535) + i * 3) % s.turn_count,
+                 s.cards[1 + (hashtext(s.game_uid || s.seat || i) & 2147483647) % 4],
+                 ($2::uuid[])[1 + (hashtext(s.game_uid || i || s.seat) & 2147483647) % greatest(1, cardinality($2) / 8)
+                     + CASE WHEN s.win THEN 0 ELSE cardinality($2) / 16 END], $3
+             FROM s, generate_series(1, (hashtext(s.game_uid || s.seat) & 2147483647) % 5) AS i
+         )
+         INSERT INTO hp_turns (game_uid, seat, turn, hp, decoder_version)
+         SELECT game_uid, seat, n, greatest(0, round(2600 * (1 - n::float8 / turn_count
+             * CASE WHEN win THEN 0.6 ELSE 1 END))
+             + (hashtext(game_uid || seat || n) & 2147483647) % 200 * (turn_count - n) / turn_count)::int, $3
+         FROM s, generate_series(1, turn_count) AS n",
+    )
+    .bind(format!("{UID_PREFIX}%"))
+    .bind(&tox)
+    .bind(version)
+    .execute(db)
+    .await?;
+    Ok(())
 }
 
 async fn analytics(db: &PgPool, rng: &mut Rng, now: DateTime<Utc>) -> Result<(), Box<dyn Error>> {
