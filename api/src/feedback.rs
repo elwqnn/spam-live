@@ -202,7 +202,10 @@ async fn create_issue(s: &AppState, token: &str, f: &Pending) -> Result<(i64, Op
 }
 
 async fn publish(s: &AppState, f: &Pending) {
-    let Some(token) = &s.config.github_feedback_token else { return };
+    let Some(token) = &s.config.github_feedback_token else {
+        tracing::warn!(feedback = f.id, "GITHUB_FEEDBACK_TOKEN is not set, so no GitHub issue");
+        return;
+    };
     let (number, url) = match create_issue(s, token, f).await {
         Ok(issue) => issue,
         Err(e) => {
