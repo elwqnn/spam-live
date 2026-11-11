@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { prefersReducedMotion } from 'svelte/motion';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { href, queryHref } from '$host';
@@ -25,6 +26,29 @@
 
 	const catalog = $derived(new Map(data.cards.map((c) => [c.id, c])));
 	const promoted = $derived(data.prev ? [] : promote(data.decks));
+	let list = $state<HTMLUListElement>();
+	let before = new Map<Element, DOMRect>();
+
+	$effect.pre(() => {
+		void data.decks;
+		before = new Map([...(list?.children ?? [])].map((el) => [el, el.getBoundingClientRect()]));
+	});
+
+	$effect(() => {
+		void data.decks;
+		if (!list || prefersReducedMotion.current) return;
+		for (const el of list.children) {
+			const from = before.get(el);
+			if (!from) continue;
+			const to = el.getBoundingClientRect();
+			const [x, y] = [from.left - to.left, from.top - to.top];
+			if (x || y)
+				el.animate([{ transform: `translate(${x}px, ${y}px)` }, { transform: 'none' }], {
+					duration: 250,
+					easing: 'cubic-bezier(0.33, 1, 0.68, 1)'
+				});
+		}
+	});
 	const reset = { offset: null, before: null };
 	const kept = $derived(
 		[...page.url.searchParams].filter(([key]) => !['q', 'offset', 'before'].includes(key))
@@ -110,7 +134,7 @@
 
 {#if data.decks.length}
 	<div>
-		<ul class="cells grid sm:grid-cols-2 lg:grid-cols-3">
+		<ul bind:this={list} class="cells grid sm:grid-cols-2 lg:grid-cols-3">
 			{#each data.decks as deck, i (deck.id)}
 				<DeckTile
 					{deck}

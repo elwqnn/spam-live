@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
-	import { page } from '$app/state';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 	import { entryName, percent, winRateColor } from '#ui';
@@ -23,6 +22,7 @@
 	import { Textarea } from '#ui/components/ui/textarea/index.js';
 	import TitleRow from '#ui/components/TitleRow.svelte';
 	import { text } from '#ui/deck.js';
+	import { pageUrl } from '#ui/modal.js';
 	import { comments as counts } from '#ui/live.js';
 	import { hydrated } from '#ui/ready.svelte.js';
 	import { submit, type Writes } from '#ui/writes.js';
@@ -322,7 +322,7 @@
 			</form>
 		{:else}
 			<p class="border-t row text-sm">
-				<a class="underline underline-offset-4" href={loginHref(page.url)} rel="external"
+				<a class="underline underline-offset-4" href={loginHref(pageUrl())} rel="external"
 					>{m.login_to_comment()}</a
 				>
 			</p>
