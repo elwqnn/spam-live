@@ -1,8 +1,9 @@
-import { redirect } from '@sveltejs/kit';
-import { start } from '#lib/app.js';
-import { href } from '#lib/host.js';
+import { client } from '#lib/host.js';
+import { dashboardData } from '@spam-live/ui/views/data.js';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ parent }) => {
-	redirect(307, href(start((await parent()).me)));
+export const load: PageLoad = async ({ url, parent, depends }) => {
+	depends('app:decks');
+	const { me } = await parent();
+	return dashboardData(client(), url, me);
 };

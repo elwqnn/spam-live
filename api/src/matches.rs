@@ -24,6 +24,7 @@ use crate::{
     ApiError, AppState, ErrorBody,
     auth::CurrentUser,
     catalog::{Catalog, parse_version},
+    decks::DeckStatus,
     public,
 };
 
@@ -576,6 +577,83 @@ pub async fn my_matches(
 
 #[derive(Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
+pub struct SavedDeck {
+    pub id: i64,
+    pub name: String,
+    pub status: DeckStatus,
+    pub cards: Vec<Uuid>,
+    pub talents: Vec<i16>,
+    pub guide: String,
+}
+
+#[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct TopDeck {
+    pub cards: Vec<Uuid>,
+    pub games: i64,
+    pub wins: i64,
+    pub win_rate: Option<f64>,
+    pub deck: Option<SavedDeck>,
+}
+
+#[derive(FromRow)]
+struct TopRow {
+    cards: Vec<Uuid>,
+    games: i64,
+    wins: i64,
+    win_rate: Option<f64>,
+    deck_id: Option<i64>,
+    deck_name: Option<String>,
+    deck_status: Option<DeckStatus>,
+    deck_cards: Option<Vec<Uuid>>,
+    deck_talents: Option<Vec<i16>>,
+    deck_guide: Option<String>,
+}
+
+#[utoipa::path(get, path = "/api/me/top-decks", tag = "matches",
+    responses((status = 200, body = Vec<TopDeck>, description = "Most played first, no AI or disputed match"),
+        (status = 401, body = ErrorBody)))]
+pub async fn my_top_decks(State(s): State<AppState>, user: CurrentUser) -> Result<Json<Vec<TopDeck>>, ApiError> {
+    let rows: Vec<TopRow> = sqlx::query_as(
+        "SELECT g.cards, g.games, g.wins, win_rate(g.games, g.wins) AS win_rate,
+             d.id AS deck_id, d.name AS deck_name, d.status AS deck_status, d.cards AS deck_cards,
+             d.talents AS deck_talents, d.guide AS deck_guide
+         FROM (SELECT cards, count(*) AS games, count(*) FILTER (WHERE win) AS wins, max(start_utc) AS last
+               FROM (SELECT array_sort(CASE u.seat WHEN 0 THEN m.seat0_cards ELSE m.seat1_cards END) AS cards,
+                         m.winner_seat = u.seat AS win, m.start_utc
+                     FROM uploads u JOIN matches m USING (game_uid)
+                     WHERE u.user_id = $1 AND NOT m.is_ai AND NOT m.disputed) mine
+               GROUP BY cards
+               ORDER BY games DESC, last DESC
+               LIMIT 3) g
+         LEFT JOIN LATERAL (SELECT id, name, status, cards, talents, guide FROM decks
+                            WHERE author_id = $1 AND deck_key = g.cards
+                            ORDER BY updated_at DESC, id DESC LIMIT 1) d ON true
+         ORDER BY g.games DESC, g.last DESC",
+    )
+    .bind(user.id)
+    .fetch_all(&s.db)
+    .await?;
+    let top = rows
+        .into_iter()
+        .map(|r| TopDeck {
+            deck: match (r.deck_id, r.deck_name, r.deck_status, r.deck_cards, r.deck_talents, r.deck_guide) {
+                (Some(id), Some(name), Some(status), Some(cards), Some(talents), Some(guide)) => {
+                    Some(SavedDeck { id, name, status, cards, talents, guide })
+                }
+                _ => None,
+            },
+            cards: r.cards,
+            games: r.games,
+            wins: r.wins,
+            win_rate: r.win_rate,
+        })
+        .collect();
+    Ok(Json(top))
+}
+
+#[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct MinVersion {
     pub min_version: String,
 }
@@ -591,5 +669,6 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/api/matches", post(upload).layer(DefaultBodyLimit::max(body_limit)))
         .route("/api/me/matches", get(my_matches))
+        .route("/api/me/top-decks", get(my_top_decks))
         .route("/api/desktop/min-version", get(min_version))
 }

@@ -406,6 +406,7 @@ async fn openapi_lists_routes() {
         "/api/glossary/keywords",
         "/api/device/token",
         "/api/me/matches",
+        "/api/me/top-decks",
         "/api/decks/import",
         "/api/decks/preview",
         "/api/decks/{id}/vote",

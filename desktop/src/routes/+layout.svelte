@@ -2,10 +2,16 @@
 	import { onMount } from 'svelte';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import {
+		Analytics01Icon,
 		ArrowUpRight01Icon,
+		BookOpen01Icon,
+		Cards01Icon,
 		CloudUploadIcon,
+		DashboardSquare01Icon,
+		Layers01Icon,
 		Message01Icon,
-		RefreshIcon
+		RefreshIcon,
+		Settings01Icon
 	} from '@hugeicons/core-free-icons';
 	import { invoke } from '@tauri-apps/api/core';
 	import { goto, invalidateAll } from '$app/navigation';
@@ -33,10 +39,11 @@
 	let { children, data }: LayoutProps = $props();
 
 	const nav = [
-		['/decks', m.nav_decks],
-		['/cards', m.nav_cards],
-		['/stats', m.nav_stats],
-		['/glossary', m.nav_glossary]
+		['/', m.dashboard_title, DashboardSquare01Icon],
+		['/decks', m.nav_decks, Layers01Icon],
+		['/cards', m.nav_cards, Cards01Icon],
+		['/stats', m.nav_stats, Analytics01Icon],
+		['/glossary', m.nav_glossary, BookOpen01Icon]
 	] as const;
 	const STATES = {
 		watching: m.desktop_state_watching,
@@ -51,10 +58,17 @@
 	let single = $state(true);
 	let palette = $state<ReturnType<typeof CommandPalette>>();
 	let feedback = $state<ReturnType<typeof FeedbackDialog>>();
-	let head = $state(0);
 	const upload = $derived(uploaderState(uploader.status));
 	const settings = href('/settings');
 	const retry = $derived(!data.me && data.meFailed && !!uploader.status?.linked);
+	const item =
+		'flex items-center gap-2.5 rounded-sm px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:text-foreground [&_svg]:size-4';
+
+	function current(path: string) {
+		const at = page.url.pathname;
+		const to = href(path);
+		return at === to || (path !== '/' && at.startsWith(`${to}/`)) ? 'page' : undefined;
+	}
 
 	function reload() {
 		if (retry) invalidateAll();
@@ -165,47 +179,44 @@
 </svelte:head>
 
 <div class="contents" style={masks()}>
-	<div
-		class="sides flex min-h-dvh flex-col overflow-x-clip lg:px-8"
-		style:--head={head ? `${head}px` : undefined}
-	>
-		<header
-			bind:offsetHeight={head}
-			class="head mx-auto flex w-full max-w-300 flex-wrap items-center gap-x-8 gap-y-3 px-(--gutter) py-4 sm:py-5 lg:border-x"
-		>
-			<a href={href('/')} class="text-[17px] font-semibold tracking-wide"
+	<div class="flex min-h-dvh overflow-x-clip">
+		<aside class="sticky top-0 flex h-dvh w-56 flex-none flex-col overflow-y-auto border-r">
+			<a href={href('/')} class="px-5 pt-5 pb-4 text-[17px] font-semibold tracking-wide"
 				>SPAM<span class="text-muted-foreground">.live</span></a
 			>
-			<nav class="flex flex-wrap gap-x-6 gap-y-2">
-				{#each nav as [path, label] (path)}
-					<a
-						class="eyebrow text-xs text-muted-foreground transition-colors hover:text-foreground"
-						href={href(path)}>{label()}</a
+			<nav class="grid gap-0.5 px-3">
+				{#each nav as [path, label, icon] (path)}
+					<a class={item} href={href(path)} aria-current={current(path)}
+						><HugeiconsIcon {icon} aria-hidden="true" />{label()}</a
 					>
 				{/each}
 			</nav>
-			<div class="ml-auto flex min-w-0 flex-wrap items-center gap-3">
-				<CommandPalette
-					bind:this={palette}
-					{mac}
-					download={false}
-					onlanguage={setLocale}
-					onfeedback={() => feedback?.open()}
-				/>
-				<Tooltip content={m.feedback_title()}>
-					{#snippet children(tip)}
-						<Button
-							variant="ghost"
-							size="icon-sm"
-							class="text-muted-foreground"
-							aria-label={m.feedback_title()}
-							aria-haspopup="dialog"
-							aria-keyshortcuts={single ? 'f' : undefined}
-							onclick={() => feedback?.open()}
-							{...tip}><HugeiconsIcon icon={Message01Icon} /></Button
-						>
-					{/snippet}
-				</Tooltip>
+			<div class="mt-auto grid gap-2 border-t px-3 py-4">
+				<div
+					class="flex items-center gap-1 [&>button:first-child]:min-w-0 [&>button:first-child]:flex-1 [&>button:first-child]:justify-start [&>button:first-child_kbd]:ml-auto"
+				>
+					<CommandPalette
+						bind:this={palette}
+						{mac}
+						download={false}
+						onlanguage={setLocale}
+						onfeedback={() => feedback?.open()}
+					/>
+					<Tooltip content={m.feedback_title()}>
+						{#snippet children(tip)}
+							<Button
+								variant="ghost"
+								size="icon-sm"
+								class="text-muted-foreground"
+								aria-label={m.feedback_title()}
+								aria-haspopup="dialog"
+								aria-keyshortcuts={single ? 'f' : undefined}
+								onclick={() => feedback?.open()}
+								{...tip}><HugeiconsIcon icon={Message01Icon} /></Button
+							>
+						{/snippet}
+					</Tooltip>
+				</div>
 				{#if upload}
 					<Button
 						variant="ghost"
@@ -213,14 +224,23 @@
 						href={upload === 'ready' ? undefined : settings}
 						onclick={upload === 'ready' ? restart : undefined}
 						aria-current={page.url.pathname === settings ? 'page' : undefined}
-						class={upload === 'watching' ? 'text-muted-foreground' : undefined}
+						class={[
+							'h-auto min-h-8 justify-start py-1.5 text-left whitespace-normal',
+							upload === 'watching' && 'text-muted-foreground'
+						]}
 						><HugeiconsIcon icon={CloudUploadIcon} /><span class="sr-only"
 							>{m.desktop_uploader()}:</span
 						>{STATES[upload]()}</Button
 					>
 				{/if}
+				<a class={item} href={settings} aria-current={current('/settings')}
+					><HugeiconsIcon icon={Settings01Icon} aria-hidden="true" />{m.desktop_settings()}</a
+				>
 				{#if data.me}
-					<AccountMenu me={data.me} {logout} />
+					<div class="flex min-w-0 items-center gap-2.5 px-1 pt-1">
+						<AccountMenu me={data.me} {logout} />
+						<span class="truncate text-sm" data-private>{data.me.displayName}</span>
+					</div>
 				{:else if retry}
 					<Tooltip content={m.desktop_account_failed()}>
 						{#snippet children(tip)}
@@ -233,9 +253,9 @@
 					<Button variant="outline" size="sm" onclick={login}>{m.desktop_login()}</Button>
 				{/if}
 			</div>
-		</header>
+		</aside>
 
-		<div class="rows mx-auto flex w-full max-w-300 flex-1 flex-col lg:border-x">
+		<div class="rows flex min-w-0 flex-1 flex-col">
 			<main class="rows flex flex-1 flex-col">
 				{@render children()}
 			</main>

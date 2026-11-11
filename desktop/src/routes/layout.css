@@ -1,1 +1,7 @@
 @import '@spam-live/ui/layout.css';
+
+:root {
+	--head: 0px;
+	--reach: 0px;
+	scroll-padding-top: 0;
+}
