@@ -1,10 +1,12 @@
 import { api } from '#lib';
+import { namesData } from '@spam-live/ui/views/data.js';
 import type { LayoutLoad } from './$types';
 
 export const load: LayoutLoad = async ({ fetch, url, untrack }) => {
-	const { data: me } = await api(
+	const client = api(
 		fetch,
 		untrack(() => url.origin)
-	).GET('/api/me');
-	return { me: me ?? null };
+	);
+	const [{ data: me }, names] = await Promise.all([client.GET('/api/me'), namesData(client)]);
+	return { me: me ?? null, names };
 };

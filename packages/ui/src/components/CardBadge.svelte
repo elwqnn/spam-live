@@ -1,22 +1,27 @@
 <script lang="ts" module>
+	import { page } from '$app/state';
+	import type { PageData } from '$host';
 	import { m } from '$paraglide/messages.js';
 
+	const named = (kind: 'elements' | 'rarities', id: string, message: () => string) => () =>
+		(page.data as PageData).names?.[kind].find((e) => e.id === id)?.name ?? message();
+
 	export const ELEMENTS: Record<string, () => string> = {
-		fire: m.element_fire,
-		water: m.element_water,
-		earth: m.element_earth,
-		nature: m.element_nature,
-		light: m.element_light,
-		shadow: m.element_shadow,
-		divine: m.element_divine
+		fire: named('elements', 'fire', m.element_fire),
+		water: named('elements', 'water', m.element_water),
+		earth: named('elements', 'earth', m.element_earth),
+		nature: named('elements', 'nature', m.element_nature),
+		light: named('elements', 'light', m.element_light),
+		shadow: named('elements', 'shadow', m.element_shadow),
+		divine: named('elements', 'divine', m.element_divine)
 	};
 
 	export const RARITIES: Record<string, () => string> = {
-		'rarity-common': m.rarity_common,
-		'rarity-rare': m.rarity_rare,
-		'rarity-epic': m.rarity_epic,
-		'rarity-legendary': m.rarity_legendary,
-		'rarity-divine': m.rarity_divine
+		'rarity-common': named('rarities', 'rarity-common', m.rarity_common),
+		'rarity-rare': named('rarities', 'rarity-rare', m.rarity_rare),
+		'rarity-epic': named('rarities', 'rarity-epic', m.rarity_epic),
+		'rarity-legendary': named('rarities', 'rarity-legendary', m.rarity_legendary),
+		'rarity-divine': named('rarities', 'rarity-divine', m.rarity_divine)
 	};
 </script>
 

@@ -27,6 +27,12 @@ async function cardDetails(client: Client, ids: string[], lang: string) {
 	);
 }
 
+export const namesData = (client: Client) =>
+	client.GET('/api/catalog', { params: { query: { lang: getLocale() } } }).then(
+		(r) => r.data ?? null,
+		() => null
+	);
+
 export async function cardsData(client: Client, url: URL) {
 	const trend = url.searchParams.get('trend') === 'version' ? 'version' : 'week';
 	const [cards, stats] = await Promise.all([

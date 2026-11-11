@@ -260,6 +260,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["names"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/catalog/versions": {
         parameters: {
             query?: never;
@@ -1016,6 +1032,14 @@ export interface components {
             talents: string[];
             tox: string[];
         };
+        CatalogNames: {
+            elements: components["schemas"]["Ordered"][];
+            enums: components["schemas"]["Enums"];
+            gameTypes: components["schemas"]["GameType"][];
+            ranks: components["schemas"]["Rank"][];
+            rarities: components["schemas"]["Ordered"][];
+            version: string;
+        };
         CatalogVersion: {
             languages: string[];
             version: string;
@@ -1215,6 +1239,24 @@ export interface components {
             reason?: string | null;
             status: components["schemas"]["Status"];
         };
+        Enums: {
+            /** @default {} */
+            displayType: {
+                [key: string]: string;
+            };
+            /** @default {} */
+            effect: {
+                [key: string]: string;
+            };
+            /** @default {} */
+            target: {
+                [key: string]: string;
+            };
+            /** @default {} */
+            trigger: {
+                [key: string]: string;
+            };
+        };
         ErrorBody: {
             error: string;
         };
@@ -1260,6 +1302,12 @@ export interface components {
         };
         /** @enum {string} */
         FeedbackKind: "bug" | "idea" | "other";
+        GameType: {
+            id: string;
+            name: string;
+            /** Format: int64 */
+            value: number;
+        };
         Glossary: {
             abilities: components["schemas"]["GlossaryEntry"][];
             effects: components["schemas"]["Term"][];
@@ -1402,6 +1450,12 @@ export interface components {
             /** Format: int64 */
             webOnline: number;
         };
+        Ordered: {
+            id: string;
+            name: string;
+            /** Format: int64 */
+            order: number;
+        };
         Overview: {
             days: components["schemas"]["DayMatches"][];
             /** Format: int64 */
@@ -1431,6 +1485,12 @@ export interface components {
             linkedAccounts: number;
             /** Format: int64 */
             signups7d: number;
+        };
+        Rank: {
+            id: string;
+            name: string;
+            /** Format: int64 */
+            threshold: number;
         };
         Release: {
             linux?: components["schemas"]["Asset"] | null;
@@ -2105,6 +2165,45 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CardDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    names: {
+        parameters: {
+            query?: {
+                version?: string;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Names of the ranks (sorted by threshold), elements and rarities (sorted by order) and game types (sorted by value). enums maps each integer of the ability fields trigger, target and displayType and of the Tox field effect to its game name. An older catalog version gives empty lists and maps. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogNames"];
                 };
             };
             400: {

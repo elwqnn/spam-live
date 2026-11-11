@@ -1,11 +1,14 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { page } from '$app/state';
+	import { abilityLabels } from '#ui/enums.js';
 	import { pageUrl } from '#ui/modal.js';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { ArrowLeft02Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
 	import { entryName, percent, winRateColor, type CardDetail, type Schemas } from '#ui';
-	import { art, href } from '$host';
+	import { art, href, type PageData } from '$host';
 	import { m } from '$paraglide/messages.js';
+	import { Badge } from './ui/badge/index.js';
 	import ArtistCredit from './ArtistCredit.svelte';
 	import CardBadge, { ELEMENTS } from './CardBadge.svelte';
 	import CardBadgeStack from './CardBadgeStack.svelte';
@@ -43,6 +46,7 @@
 	} = $props();
 
 	const resistances = $derived(Object.entries(card.resistances));
+	const enums = $derived((page.data as PageData).names?.enums);
 	const version = $derived(pageUrl().searchParams.get('version'));
 	const tierHref = $derived(
 		href(`/stats${version ? `?version=${encodeURIComponent(version)}` : ''}#tiers`)
@@ -231,11 +235,17 @@
 				{@render label(m.abilities())}
 				<ul class="divide-y border bg-card text-sm">
 					{#each card.abilities as { ability, cooldown } (ability.id)}
+						{@const tags = abilityLabels(enums, ability.data)}
 						<li class="grid gap-1.5 px-3 py-2.5">
 							<div class="flex items-start justify-between gap-2">
 								{@render name(entryName(ability))}
 								<CardBadge type="cooldown" value={cooldown} display="compact" />
 							</div>
+							{#if tags.length}
+								<CardBadgeStack>
+									{#each tags as tag (tag)}<Badge variant="outline">{tag}</Badge>{/each}
+								</CardBadgeStack>
+							{/if}
 							<Description text={ability.description} entry={ability} {keywords} />
 						</li>
 					{/each}

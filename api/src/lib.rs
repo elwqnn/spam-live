@@ -117,6 +117,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         auth::device_token,
         auth::list_devices,
         auth::delete_device,
+        catalog::names,
         catalog::versions,
         catalog::list_cards,
         catalog::get_card,
