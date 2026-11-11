@@ -4,6 +4,7 @@
 
 	const SCALE = 360;
 	const LEVELS = 9;
+	const INTERVAL = 1000 / 20;
 	const FRAGMENT = `#extension GL_OES_standard_derivatives : enable
 ${FIELD}uniform vec2 o;
 uniform float d;
@@ -40,6 +41,7 @@ void main(){
 	let shared: Shared | null = null;
 	let broken = false;
 	let frame = 0;
+	let last = 0;
 
 	const hide = (canvas: HTMLCanvasElement) => {
 		const index = shown.indexOf(canvas);
@@ -76,10 +78,13 @@ void main(){
 		ctx.drawImage(source, 0, source.height - height, width, height, 0, 0, width, height);
 	};
 
-	const loop = () => {
+	const loop = (now: number) => {
 		frame = 0;
 		if (!shared || !shown.length) return;
-		for (const canvas of shown) draw(shared, canvas);
+		if (now - last >= INTERVAL) {
+			last = now;
+			for (const canvas of shown) draw(shared, canvas);
+		}
 		frame = requestAnimationFrame(loop);
 	};
 
