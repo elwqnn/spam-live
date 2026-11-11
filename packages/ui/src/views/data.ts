@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { ok, type Client, type Schemas } from '#ui';
 import { selection } from '#ui/filter.js';
+import { minStars as starsParam } from '#ui/stars.js';
 import { getLocale } from '$paraglide/runtime.js';
 
 type Query = Record<string, string | null>;
@@ -176,7 +177,8 @@ export async function editDeckData(client: Client, id: number, me: Me) {
 export async function statsData(client: Client, url: URL) {
 	const tab = STATS_TABS.find((t) => t === url.searchParams.get('tab')) ?? 'meta';
 	const version = url.searchParams.get('version') ?? undefined;
-	const query = { params: { query: { version } } };
+	const minStars = starsParam(url.searchParams.get('minStars'));
+	const query = { params: { query: { version, minStars } } };
 	const against = [
 		...new Set(
 			selection(url.searchParams.get('against'))
@@ -195,7 +197,7 @@ export async function statsData(client: Client, url: URL) {
 		tab === 'counters' && against.length
 			? client
 					.GET('/api/stats/counters', {
-						params: { query: { version, against: against.join(',') } }
+						params: { query: { version, against: against.join(','), minStars } }
 					})
 					.then(ok)
 			: null,
@@ -207,6 +209,7 @@ export async function statsData(client: Client, url: URL) {
 		tab,
 		cards,
 		versions: versions.map((v) => v.version),
+		minStars,
 		overview,
 		stats,
 		against,

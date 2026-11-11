@@ -46,6 +46,13 @@ fn version(s: &AppState, v: Option<&str>) -> Result<Option<String>, ApiError> {
     }
 }
 
+pub(crate) fn min_stars(v: Option<i32>) -> Result<Option<i32>, ApiError> {
+    match v {
+        Some(n) if n < 0 => Err(ApiError::new(StatusCode::BAD_REQUEST, "minStars must be 0 or more")),
+        v => Ok(v),
+    }
+}
+
 #[derive(Deserialize, ToSchema, Clone, Copy, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum StatsSort {
@@ -61,6 +68,9 @@ pub struct DeckStatsQuery {
     pub version: Option<String>,
     pub sort: Option<StatsSort>,
     pub limit: Option<i64>,
+    #[serde(rename = "minStars")]
+    #[param(minimum = 0, example = 30)]
+    pub min_stars: Option<i32>,
 }
 
 #[derive(Deserialize, ToSchema, Clone, Copy, Default)]
@@ -77,6 +87,9 @@ pub struct CardStatsQuery {
     #[param(example = "all")]
     pub version: Option<String>,
     pub trend: Option<Trend>,
+    #[serde(rename = "minStars")]
+    #[param(minimum = 0, example = 30)]
+    pub min_stars: Option<i32>,
 }
 
 #[derive(Serialize, ToSchema, FromRow)]
@@ -151,6 +164,7 @@ pub fn rank(cards: &mut [CardStats]) {
         (status = 400, body = ErrorBody)))]
 pub async fn deck_stats(State(s): State<AppState>, Query(q): Query<DeckStatsQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
+    let stars = min_stars(q.min_stars)?;
     let order = match q.sort.unwrap_or_default() {
         StatsSort::Winrate => "win_score DESC NULLS LAST, win_rate DESC NULLS LAST, games DESC, cards",
         StatsSort::Games => "games DESC, wins DESC, cards",
@@ -159,11 +173,12 @@ pub async fn deck_stats(State(s): State<AppState>, Query(q): Query<DeckStatsQuer
         "SELECT deck_key AS cards, count(*) AS games, count(*) FILTER (WHERE win) AS wins,
              win_rate(count(*), count(*) FILTER (WHERE win)) AS win_rate,
              win_score(count(*), count(*) FILTER (WHERE win)) AS win_score
-         FROM deck_results WHERE ($1::text IS NULL OR app_version = $1)
+         FROM deck_results WHERE ($1::text IS NULL OR app_version = $1) AND ($3::int IS NULL OR stars >= $3)
          GROUP BY deck_key ORDER BY {order} LIMIT $2"
     )))
     .bind(version)
     .bind(q.limit.unwrap_or(100).clamp(1, 1000))
+    .bind(stars)
     .fetch_all(&s.db)
     .await?;
     Ok(public(rows))
@@ -182,6 +197,7 @@ pub async fn deck_stats(State(s): State<AppState>, Query(q): Query<DeckStatsQuer
         (status = 400, body = ErrorBody)))]
 pub async fn card_stats(State(s): State<AppState>, Query(q): Query<CardStatsQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
+    let stars = min_stars(q.min_stars)?;
     let week = matches!(q.trend.unwrap_or_default(), Trend::Week);
     let previous = if week { None } else { version.as_deref().and_then(|v| s.catalog.previous(v)) };
     let mut rows: Vec<CardStats> = sqlx::query_as(
@@ -191,7 +207,8 @@ pub async fn card_stats(State(s): State<AppState>, Query(q): Query<CardStatsQuer
                      WHEN end_utc >= now() - interval '7 days' AND end_utc < now() THEN 1
                      WHEN end_utc >= now() - interval '14 days' AND end_utc < now() - interval '7 days' THEN 2
                  END AS p
-             FROM deck_results WHERE $1::text IS NULL OR app_version IN ($1, $2)
+             FROM deck_results
+             WHERE ($1::text IS NULL OR app_version IN ($1, $2)) AND ($4::int IS NULL OR stars >= $4)
          ),
          t AS (SELECT count(*) FILTER (WHERE cur) AS n, count(*) FILTER (WHERE p = 1) AS na,
              count(*) FILTER (WHERE p = 2) AS nb FROM r),
@@ -209,6 +226,7 @@ pub async fn card_stats(State(s): State<AppState>, Query(q): Query<CardStatsQuer
     .bind(version)
     .bind(previous)
     .bind(week)
+    .bind(stars)
     .fetch_all(&s.db)
     .await?;
     rank(&mut rows);
@@ -220,6 +238,9 @@ pub async fn card_stats(State(s): State<AppState>, Query(q): Query<CardStatsQuer
 pub struct VersionQuery {
     #[param(example = "all")]
     pub version: Option<String>,
+    #[serde(rename = "minStars")]
+    #[param(minimum = 0, example = 30)]
+    pub min_stars: Option<i32>,
 }
 
 #[derive(Serialize, ToSchema)]
@@ -244,13 +265,18 @@ pub struct DayMatches {
         (status = 400, body = ErrorBody)))]
 pub async fn overview(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
+    let stars = min_stars(q.min_stars)?;
     let (matches, players, decks): (i64, i64, i64) = sqlx::query_as(
-        "WITH r AS (SELECT game_uid, deck_key FROM deck_results WHERE $1::text IS NULL OR app_version = $1)
+        "WITH r AS (
+             SELECT game_uid, deck_key FROM deck_results
+             WHERE ($1::text IS NULL OR app_version = $1) AND ($2::int IS NULL OR stars >= $2)
+         )
          SELECT (SELECT count(DISTINCT game_uid) FROM r),
              (SELECT count(DISTINCT user_id) FROM uploads WHERE game_uid IN (SELECT game_uid FROM r)),
              (SELECT count(DISTINCT deck_key) FROM r)",
     )
     .bind(&version)
+    .bind(stars)
     .fetch_one(&s.db)
     .await?;
     let days: Vec<DayMatches> = sqlx::query_as(
@@ -258,12 +284,14 @@ pub async fn overview(State(s): State<AppState>, Query(q): Query<VersionQuery>) 
          d AS (SELECT generate_series(today - 29, today, interval '1 day')::date AS day FROM t),
          m AS (
              SELECT (end_utc AT TIME ZONE 'UTC')::date AS day, count(DISTINCT game_uid) AS n FROM deck_results, t
-             WHERE ($1::text IS NULL OR app_version = $1) AND (end_utc AT TIME ZONE 'UTC')::date >= today - 29
+             WHERE ($1::text IS NULL OR app_version = $1) AND ($2::int IS NULL OR stars >= $2)
+                 AND (end_utc AT TIME ZONE 'UTC')::date >= today - 29
              GROUP BY 1
          )
          SELECT d.day, coalesce(m.n, 0) AS matches FROM d LEFT JOIN m USING (day) ORDER BY d.day",
     )
     .bind(&version)
+    .bind(stars)
     .fetch_all(&s.db)
     .await?;
     Ok(public(Overview { matches, players, decks, days }))
@@ -286,6 +314,7 @@ pub struct Duo {
         (status = 400, body = ErrorBody)))]
 pub async fn duos(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
+    let stars = min_stars(q.min_stars)?;
     let rows: Vec<Duo> = sqlx::query_as(
         "SELECT ARRAY[a.card, b.card] AS cards, count(*) AS games, count(*) FILTER (WHERE r.win) AS wins,
              win_rate(count(*), count(*) FILTER (WHERE r.win)) AS win_rate,
@@ -293,11 +322,12 @@ pub async fn duos(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> R
          FROM deck_results r
          CROSS JOIN LATERAL unnest(r.deck_key) AS a (card)
          CROSS JOIN LATERAL unnest(r.deck_key) AS b (card)
-         WHERE ($1::text IS NULL OR r.app_version = $1) AND a.card < b.card
+         WHERE ($1::text IS NULL OR r.app_version = $1) AND ($2::int IS NULL OR r.stars >= $2) AND a.card < b.card
          GROUP BY a.card, b.card
          ORDER BY win_score DESC, win_rate DESC, games DESC, a.card, b.card LIMIT 24",
     )
     .bind(&version)
+    .bind(stars)
     .fetch_all(&s.db)
     .await?;
     Ok(public(rows))
@@ -310,6 +340,9 @@ pub struct CountersQuery {
     pub version: Option<String>,
     #[param(example = "0c8c383b-2207-4d18-b378-4f2a3795a58e,f16bc1f8-5cea-4acf-9e2a-0614062cb9b8")]
     pub against: Option<String>,
+    #[serde(rename = "minStars")]
+    #[param(minimum = 0, example = 30)]
+    pub min_stars: Option<i32>,
 }
 
 #[derive(Serialize, ToSchema)]
@@ -349,11 +382,14 @@ fn against(v: Option<&str>) -> Result<Vec<Uuid>, ApiError> {
 pub async fn counters(State(s): State<AppState>, Query(q): Query<CountersQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
     let against = against(q.against.as_deref())?;
+    let stars = min_stars(q.min_stars)?;
     let games: i64 = sqlx::query_scalar(
-        "SELECT count(*) FROM deck_results WHERE ($1::text IS NULL OR app_version = $1) AND deck_key @> $2",
+        "SELECT count(*) FROM deck_results
+         WHERE ($1::text IS NULL OR app_version = $1) AND ($3::int IS NULL OR stars >= $3) AND deck_key @> $2",
     )
     .bind(&version)
     .bind(&against)
+    .bind(stars)
     .fetch_one(&s.db)
     .await?;
     let cards: Vec<Counter> = sqlx::query_as(
@@ -363,12 +399,14 @@ pub async fn counters(State(s): State<AppState>, Query(q): Query<CountersQuery>)
          FROM deck_results r
          JOIN deck_results o ON o.game_uid = r.game_uid AND o.deck_key <> r.deck_key
          CROSS JOIN LATERAL unnest(o.deck_key) AS c (card)
-         WHERE ($1::text IS NULL OR r.app_version = $1) AND r.deck_key @> $2 AND NOT c.card = ANY($2)
+         WHERE ($1::text IS NULL OR r.app_version = $1) AND ($3::int IS NULL OR r.stars >= $3)
+             AND r.deck_key @> $2 AND NOT c.card = ANY($2)
          GROUP BY c.card
          ORDER BY win_score DESC, win_rate DESC, games DESC, c.card LIMIT 24",
     )
     .bind(&version)
     .bind(&against)
+    .bind(stars)
     .fetch_all(&s.db)
     .await?;
     Ok(public(Counters { games, cards }))
@@ -459,7 +497,8 @@ fn pace_lists(rows: Vec<PaceRow>) -> (Vec<CardPace>, Vec<CardPace>) {
 }
 
 const PACE_MATCHES: &str = "SELECT DISTINCT r.game_uid, r.app_version, m.turn_count FROM deck_results r
-    JOIN matches m ON m.game_uid = r.game_uid WHERE $1::text IS NULL OR r.app_version = $1";
+    JOIN matches m ON m.game_uid = r.game_uid
+    WHERE ($1::text IS NULL OR r.app_version = $1) AND ($2::int IS NULL OR r.stars >= $2)";
 
 #[utoipa::path(get, path = "/api/stats/pace", tag = "stats", params(VersionQuery),
     responses((status = 200, body = PaceStats,
@@ -473,10 +512,12 @@ const PACE_MATCHES: &str = "SELECT DISTINCT r.game_uid, r.app_version, m.turn_co
         (status = 400, body = ErrorBody)))]
 pub async fn pace(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> Result<Response, ApiError> {
     let version = version(&s, q.version.as_deref())?;
+    let stars = min_stars(q.min_stars)?;
     let turns: Vec<TurnBucket> = sqlx::query_as(AssertSqlSafe(format!(
         "SELECT turn_count AS turns, count(*) AS matches FROM ({PACE_MATCHES}) g GROUP BY turn_count ORDER BY turn_count"
     )))
     .bind(&version)
+    .bind(stars)
     .fetch_all(&s.db)
     .await?;
     let median: Option<i32> = match &version {
@@ -485,6 +526,7 @@ pub async fn pace(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> R
                 "SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY turn_count) FROM ({PACE_MATCHES}) g"
             )))
             .bind(&version)
+            .bind(stars)
             .fetch_one(&s.db)
             .await?
         }
@@ -504,6 +546,7 @@ pub async fn pace(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> R
          GROUP BY c.card"
     )))
     .bind(&version)
+    .bind(stars)
     .fetch_all(&s.db)
     .await?;
     let (mut short, mut long) = pace_lists(rows);
@@ -513,11 +556,12 @@ pub async fn pace(State(s): State<AppState>, Query(q): Query<VersionQuery>) -> R
              count(*) FILTER (WHERE r.win) AS wins
          FROM deck_results r JOIN matches m ON m.game_uid = r.game_uid
          CROSS JOIN LATERAL unnest(r.deck_key) AS c (card)
-         WHERE ($1::text IS NULL OR r.app_version = $1) AND c.card = ANY($2)
+         WHERE ($1::text IS NULL OR r.app_version = $1) AND ($3::int IS NULL OR r.stars >= $3) AND c.card = ANY($2)
          GROUP BY 1, 2 ORDER BY 2",
     )
     .bind(&version)
     .bind(&listed)
+    .bind(stars)
     .fetch_all(&s.db)
     .await?;
     for card in short.iter_mut().chain(long.iter_mut()) {

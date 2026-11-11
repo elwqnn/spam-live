@@ -2,9 +2,11 @@
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import { queryHref } from '$host';
-	import FilterBar from '#ui/components/FilterBar.svelte';
+	import FilterMenu from '#ui/components/FilterMenu.svelte';
 	import TitleRow from '#ui/components/TitleRow.svelte';
-	import { versionFilter } from '#ui/components/VersionSelect.svelte';
+	import VersionSelect from '#ui/components/VersionSelect.svelte';
+	import type { Filter } from '#ui/filter.js';
+	import { STAR_BRACKETS } from '#ui/stars.js';
 	import { buttonVariants } from '#ui/components/ui/button/index.js';
 	import { m } from '$paraglide/messages.js';
 	import Counters from './stats/Counters.svelte';
@@ -30,6 +32,15 @@
 		['length', m.stats_tab_length],
 		['trends', m.stats_tab_trends]
 	] as const;
+	const stars: Filter = {
+		id: 'minStars',
+		label: m.stars_filter(),
+		default: 'all',
+		options: [
+			{ value: 'all', label: m.stars_all() },
+			...STAR_BRACKETS.map((b) => ({ value: String(b), label: m.stars_min({ stars: b }) }))
+		]
+	};
 	const label = $derived(tabs.find(([key]) => key === data.tab)?.[1]() ?? '');
 	const link = (active: boolean) =>
 		buttonVariants({ variant: active ? 'secondary' : 'ghost', size: 'sm' });
@@ -60,7 +71,10 @@
 		{#if data.tab === 'trends'}
 			<span class="text-sm text-muted-foreground">{m.all_versions()}</span>
 		{:else}
-			<FilterBar filters={[versionFilter(data.versions)]} />
+			<div role="group" aria-label={m.filters()} class="flex flex-wrap items-center gap-2">
+				<VersionSelect versions={data.versions} />
+				<FilterMenu filter={stars} selected={data.minStars?.toString() ?? null} />
+			</div>
 		{/if}
 	</div>
 </div>

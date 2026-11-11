@@ -2661,6 +2661,8 @@ export interface operations {
             query?: {
                 /** @example all */
                 version?: string;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path: {
@@ -3601,6 +3603,8 @@ export interface operations {
                 /** @example all */
                 version?: string;
                 trend?: components["schemas"]["Trend"];
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path?: never;
@@ -3632,6 +3636,8 @@ export interface operations {
             query?: {
                 /** @example all */
                 version?: string;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path: {
@@ -3676,6 +3682,8 @@ export interface operations {
                 version?: string;
                 /** @example 0c8c383b-2207-4d18-b378-4f2a3795a58e,f16bc1f8-5cea-4acf-9e2a-0614062cb9b8 */
                 against?: string;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path?: never;
@@ -3709,6 +3717,8 @@ export interface operations {
                 version?: string;
                 sort?: components["schemas"]["StatsSort"];
                 limit?: number;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path?: never;
@@ -3740,6 +3750,8 @@ export interface operations {
             query?: {
                 /** @example all */
                 version?: string;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path?: never;
@@ -3791,6 +3803,8 @@ export interface operations {
             query?: {
                 /** @example all */
                 version?: string;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path?: never;
@@ -3822,6 +3836,8 @@ export interface operations {
             query?: {
                 /** @example all */
                 version?: string;
+                /** @example 30 */
+                minStars?: number;
             };
             header?: never;
             path?: never;

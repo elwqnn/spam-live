@@ -24,6 +24,7 @@ struct M {
     days: i32,
     turns: i32,
     end: Option<String>,
+    stars: [Option<i32>; 2],
 }
 
 fn m(seat0: &[Uuid], seat1: &[Uuid], winner: Option<i16>) -> M {
@@ -38,6 +39,7 @@ fn m(seat0: &[Uuid], seat1: &[Uuid], winner: Option<i16>) -> M {
         days: 0,
         turns: 10,
         end: None,
+        stars: [None, None],
     }
 }
 
@@ -46,8 +48,8 @@ async fn add(pool: &PgPool, n: &mut u64, m: M, times: usize) {
         *n += 1;
         sqlx::query(
             "INSERT INTO matches (game_uid, app_version, game_mode, is_ai, start_utc, end_utc, duration_ms,
-                 turn_count, seat0_cards, seat1_cards, winner_seat, is_draw, disputed)
-             SELECT $1, $2, $3, $4, e - interval '10 minutes', e, 600000, $11, $5, $6, $7, $8, $9
+                 turn_count, seat0_cards, seat1_cards, winner_seat, is_draw, disputed, seat0_stars, seat1_stars)
+             SELECT $1, $2, $3, $4, e - interval '10 minutes', e, 600000, $11, $5, $6, $7, $8, $9, $13, $14
              FROM (SELECT coalesce($12::timestamptz, now() - make_interval(days => $10)) AS e) t",
         )
         .bind(format!("match-{n}"))
@@ -62,6 +64,8 @@ async fn add(pool: &PgPool, n: &mut u64, m: M, times: usize) {
         .bind(m.days)
         .bind(m.turns)
         .bind(&m.end)
+        .bind(m.stars[0])
+        .bind(m.stars[1])
         .execute(pool)
         .await
         .unwrap();
@@ -824,4 +828,140 @@ async fn list_limits(pool: PgPool) {
     let counters = send(&app, get(&format!("/api/stats/counters?against={}", k(201)), "")).await.body;
     assert_eq!(counters["games"], 70);
     assert_eq!(counters["cards"].as_array().unwrap().len(), 24);
+}
+
+fn starred(seat0: &[Uuid], seat1: &[Uuid], winner: i16, stars: [Option<i32>; 2]) -> M {
+    M { stars, ..m(seat0, seat1, Some(winner)) }
+}
+
+fn games_of(body: &Value, key: &str, value: Value) -> (i64, i64) {
+    let row = body.as_array().unwrap().iter().find(|r| r[key] == value).unwrap();
+    (row["games"].as_i64().unwrap(), row["wins"].as_i64().unwrap())
+}
+
+#[sqlx::test]
+async fn min_stars_filter(pool: PgPool) {
+    let (a, b) = (ids(SEAT0_CARDS), ids(SEAT1_CARDS));
+    let n = &mut 0;
+    add(&pool, n, starred(&a, &b, 0, [Some(40), Some(50)]), 3).await;
+    add(&pool, n, starred(&a, &b, 1, [Some(10), None]), 2).await;
+    add(&pool, n, starred(&a, &b, 0, [None, None]), 1).await;
+    add(&pool, n, starred(&a, &b, 1, [Some(70), Some(20)]), 1).await;
+    let app = app(pool.clone());
+    let (_, cookie) = user(&pool, "76561190000000001").await;
+    let body = json!({ "name": "D", "cards": SEAT0_CARDS, "talents": [0, 0, 0, 0] });
+    let deck = send(&app, req("POST", "/api/decks", &cookie, Some(body))).await.body["id"].as_i64().unwrap();
+    send(&app, req("POST", &format!("/api/decks/{deck}/publish"), &cookie, None)).await;
+    let body = async |path: &str, stars: &str| {
+        let sep = if path.contains('?') { '&' } else { '?' };
+        let uri = if stars.is_empty() { path.to_string() } else { format!("{path}{sep}minStars={stars}") };
+        let res = send(&app, get(&uri, "")).await;
+        assert_eq!(res.status, StatusCode::OK, "{uri}");
+        res.body
+    };
+
+    let stars: Vec<Option<i32>> =
+        sqlx::query_scalar("SELECT DISTINCT stars FROM deck_results ORDER BY 1").fetch_all(&pool).await.unwrap();
+    assert_eq!(stars, [Some(10), Some(20), Some(40), None]);
+
+    let decks = body("/api/stats/decks", "").await;
+    assert_eq!(decks, send(&app, get("/api/stats/decks?version=1.29", "")).await.body);
+    for (stars, a_games, b_games) in
+        [("", (7, 4), (7, 3)), ("0", (6, 3), (6, 3)), ("20", (4, 3), (4, 1)), ("21", (3, 3), (3, 0))]
+    {
+        let decks = body("/api/stats/decks", stars).await;
+        assert_eq!(games_of(&decks, "cards", key(&a)), a_games, "{stars}");
+        assert_eq!(games_of(&decks, "cards", key(&b)), b_games, "{stars}");
+    }
+    assert_eq!(body("/api/stats/decks", "41").await, json!([]));
+
+    for (stars, matches, decks) in [("", 7, 2), ("0", 6, 2), ("21", 3, 2), ("41", 0, 0)] {
+        let overview = body("/api/stats/overview", stars).await;
+        assert_eq!((&overview["matches"], &overview["decks"]), (&json!(matches), &json!(decks)), "{stars}");
+        let days: i64 = overview["days"].as_array().unwrap().iter().map(|d| d["matches"].as_i64().unwrap()).sum();
+        assert_eq!(days, matches, "{stars}");
+    }
+
+    let cards = body("/api/stats/cards", "21").await;
+    assert_eq!(games_of(&cards, "card", json!(a[0])), (3, 3));
+    assert_eq!(games_of(&cards, "card", json!(b[0])), (3, 0));
+    assert_eq!(cards[0]["playRate"], 0.5);
+    assert_eq!(games_of(&body("/api/stats/cards", "").await, "card", json!(a[0])), (7, 4));
+
+    let duos = body("/api/stats/duos", "").await;
+    assert_eq!(games_of(&duos, "cards", json!(sorted_pair(a[0], a[1]))), (7, 4));
+    let duos = body("/api/stats/duos", "0").await;
+    assert_eq!(games_of(&duos, "cards", json!(sorted_pair(a[0], a[1]))), (6, 3));
+
+    let against = format!("/api/stats/counters?against={}", a[0]);
+    for (stars, games) in [("", 7), ("0", 6), ("21", 3), ("41", 0)] {
+        assert_eq!(body(&against, stars).await["games"], games, "{stars}");
+    }
+    let counters = body(&against, "21").await;
+    assert_eq!(games_of(&counters["cards"], "card", json!(b[0])), (3, 0));
+
+    for (stars, matches) in [("", 7), ("0", 6), ("21", 3)] {
+        assert_eq!(body("/api/stats/pace", stars).await["turns"], json!([{ "turns": 10, "matches": matches }]));
+    }
+    assert_eq!(body("/api/stats/pace", "41").await["turns"], json!([]));
+
+    for path in [format!("/api/stats/cards/{}/matchups", a[0]), format!("/api/decks/{deck}/matchups")] {
+        assert_eq!(games_of(&body(&path, "").await["strong"], "card", json!(b[0])), (7, 4));
+        assert_eq!(games_of(&body(&path, "15").await["strong"], "card", json!(b[0])), (4, 3));
+        assert_eq!(body(&path, "0").await, json!({ "strong": [], "weak": [] }));
+    }
+
+    for path in [
+        "/api/stats/decks".to_string(),
+        "/api/stats/cards".into(),
+        "/api/stats/overview".into(),
+        "/api/stats/duos".into(),
+        against.clone(),
+        "/api/stats/pace".into(),
+        format!("/api/stats/cards/{}/matchups", a[0]),
+        format!("/api/decks/{deck}/matchups"),
+    ] {
+        let sep = if path.contains('?') { '&' } else { '?' };
+        let res = send(&app, get(&format!("{path}{sep}minStars=-1"), "")).await;
+        assert_eq!(res.status, StatusCode::BAD_REQUEST, "{path}");
+        assert_eq!(res.body, json!({ "error": "minStars must be 0 or more" }), "{path}");
+    }
+}
+
+fn sorted_pair(x: Uuid, y: Uuid) -> [Uuid; 2] {
+    if x < y { [x, y] } else { [y, x] }
+}
+
+fn key(deck: &[Uuid]) -> Value {
+    let mut deck = deck.to_vec();
+    deck.sort();
+    json!(deck)
+}
+
+#[sqlx::test]
+async fn min_stars_card_trend(pool: PgPool) {
+    let deck = |s: u32| (s..s + 4).map(k).collect::<Vec<_>>();
+    let (a, b, c) = (deck(1), deck(5), deck(9));
+    let n = &mut 0;
+    let star = Some(40);
+    add(&pool, n, starred(&a, &b, 0, [star, star]), 3).await;
+    add(&pool, n, starred(&c, &b, 0, [None, None]), 2).await;
+    add(&pool, n, M { days: 8, ..starred(&a, &b, 1, [star, star]) }, 1).await;
+    add(&pool, n, M { days: 8, ..starred(&c, &b, 1, [star, star]) }, 1).await;
+    let app = app(pool.clone());
+
+    let all = send(&app, get("/api/stats/cards", "")).await.body;
+    assert_eq!(changes(&all, a[0]), pts(1.0, 3.0 / 10.0 - 1.0 / 4.0));
+    assert_eq!(changes(&all, c[0]), pts(1.0, 2.0 / 10.0 - 1.0 / 4.0));
+    let play = |body: &Value, id: Uuid| {
+        body.as_array().unwrap().iter().find(|r| r["card"] == json!(id)).unwrap()["playRate"].clone()
+    };
+    assert_eq!(play(&all, a[0]), json!(4.0 / 14.0));
+
+    let filtered = send(&app, get("/api/stats/cards?minStars=0", "")).await.body;
+    assert_eq!(changes(&filtered, a[0]), pts(1.0, 3.0 / 6.0 - 1.0 / 4.0));
+    assert_eq!(changes(&filtered, c[0]), [None, None]);
+    assert_eq!(changes(&filtered, b[0]), pts(-1.0, 0.0));
+    assert_eq!(play(&filtered, a[0]), json!(4.0 / 10.0));
+    assert_eq!(games_of(&filtered, "card", json!(c[0])), (1, 0));
 }
