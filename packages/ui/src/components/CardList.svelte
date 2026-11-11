@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
+	import { flip } from 'svelte/animate';
+	import { cubicOut } from 'svelte/easing';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import { page } from '$app/state';
 	import { GridViewIcon, ListViewIcon } from '@hugeicons/core-free-icons';
 	import type { Schemas } from '#ui';
@@ -41,6 +44,7 @@
 		]
 	});
 	const empty = { games: 0, playRate: 0, winRate: null };
+	const move = $derived({ duration: prefersReducedMotion.current ? 0 : 250, easing: cubicOut });
 
 	let shown = $state(true);
 
@@ -90,14 +94,14 @@
 {:else if mode === 'rows'}
 	<CardStack>
 		{#each cards as card (card.id)}
-			<CardRow {card} stats={stats?.get(card.id)} />
+			<li animate:flip={move}><CardRow {card} stats={stats?.get(card.id)} /></li>
 		{/each}
 	</CardStack>
 {:else}
 	<div>
 		<CardGrid {columns}>
 			{#each cards as card (card.id)}
-				<li>
+				<li animate:flip={move}>
 					<CardTile {card} stats={shown && stats ? (stats.get(card.id) ?? empty) : undefined} />
 				</li>
 			{/each}

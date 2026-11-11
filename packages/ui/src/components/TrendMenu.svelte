@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/state';
+	import { pageUrl } from '#ui/modal.js';
 	import type { Filter } from '#ui/filter.js';
 	import { m } from '$paraglide/messages.js';
 	import FilterChips from './FilterChips.svelte';
@@ -7,7 +7,7 @@
 
 	let { flat = false }: { flat?: boolean } = $props();
 
-	const all = $derived(page.url.searchParams.get('version') === 'all');
+	const all = $derived(pageUrl().searchParams.get('version') === 'all');
 	const filter: Filter = $derived({
 		id: 'trend',
 		label: m.trend(),

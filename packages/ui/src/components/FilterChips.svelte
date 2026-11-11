@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ClassValue } from 'svelte/elements';
-	import { page } from '$app/state';
+	import { pageUrl } from '#ui/modal.js';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { queryHref } from '$host';
 	import { buttonVariants } from '#ui/components/ui/button/index.js';
@@ -22,11 +22,11 @@
 	} = $props();
 
 	const current = $derived(
-		selection(selected === undefined ? page.url.searchParams.get(filter.id) : selected)
+		selection(selected === undefined ? pageUrl().searchParams.get(filter.id) : selected)
 	);
 	const chosen = $derived(filter.multiple ? current : [current[0] ?? filter.default]);
 	const link = (value: string | null, extra?: Record<string, null>) =>
-		queryHref(page.url, { ...reset, ...extra, [filter.id]: value });
+		queryHref(pageUrl(), { ...reset, ...extra, [filter.id]: value });
 	const chip = (on: boolean) =>
 		filter.multiple
 			? buttonVariants({ variant: on ? 'secondary' : 'outline', size: 'sm' })

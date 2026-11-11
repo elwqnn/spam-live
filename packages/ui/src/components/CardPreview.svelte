@@ -18,7 +18,7 @@
 		Object.assign(preview, next);
 	}
 
-	function close() {
+	export function close() {
 		clearTimeout(timer);
 		preview.card = null;
 		preview.owner = null;
@@ -137,7 +137,7 @@
 	bind:this={popup}
 	popover="manual"
 	aria-hidden="true"
-	class="pointer-events-none inset-auto m-0 rounded-sm border bg-popover p-0 text-sm text-popover-foreground shadow-2xl backdrop:pointer-events-none backdrop:bg-black/20 backdrop:transition-opacity backdrop:duration-200 open:flex starting:open:backdrop:opacity-0"
+	class="pointer-events-none inset-auto m-0 items-start rounded-sm border bg-popover p-0 text-sm text-popover-foreground shadow-2xl backdrop:pointer-events-none backdrop:bg-black/20 backdrop:transition-opacity backdrop:duration-200 open:flex starting:open:backdrop:opacity-0"
 >
 	{#if card}
 		<span

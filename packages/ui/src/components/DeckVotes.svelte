@@ -6,6 +6,7 @@
 	import type { Schemas } from '#ui';
 	import { loginHref, type PageData } from '$host';
 	import { live, votes } from '#ui/live.js';
+	import { pageUrl } from '#ui/modal.js';
 	import { hydrated } from '#ui/ready.svelte.js';
 	import type { Writes } from '#ui/writes.js';
 	import { m } from '$paraglide/messages.js';
@@ -99,7 +100,7 @@
 {#if !me && open}
 	<div class={row}>
 		{#each SIDES as side (side)}
-			<a class={control} href={loginHref(page.url)} rel="external">{@render arrow(side, true)}</a>
+			<a class={control} href={loginHref(pageUrl())} rel="external">{@render arrow(side, true)}</a>
 		{/each}
 	</div>
 {:else if me && open && deck.authorId !== me.id}

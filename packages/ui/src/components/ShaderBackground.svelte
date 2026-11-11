@@ -25,6 +25,7 @@ void main(){
 
 		const start = performance.now();
 		let frame = 0;
+		let last = 0;
 
 		const draw = () => {
 			gl.viewport(0, 0, canvas.width, canvas.height);
@@ -32,8 +33,11 @@ void main(){
 			gl.uniform1f(time, 20 + (still ? 0 : (performance.now() - start) / 1000));
 			gl.drawArrays(gl.TRIANGLES, 0, 3);
 		};
-		const loop = () => {
-			draw();
+		const loop = (now: number) => {
+			if (now - last >= 1000 / 30) {
+				last = now;
+				draw();
+			}
 			frame = requestAnimationFrame(loop);
 		};
 		const stop = () => {
@@ -42,13 +46,13 @@ void main(){
 		};
 
 		const resize = new ResizeObserver(() => {
-			canvas.width = Math.max(1, canvas.clientWidth);
-			canvas.height = Math.max(1, canvas.clientHeight);
+			canvas.width = Math.max(1, Math.round(canvas.clientWidth / 2));
+			canvas.height = Math.max(1, Math.round(canvas.clientHeight / 2));
 			draw();
 		});
 		const view = new IntersectionObserver(([entry]) => {
 			stop();
-			if (entry.isIntersecting && !still) loop();
+			if (entry.isIntersecting && !still) frame = requestAnimationFrame(loop);
 		});
 		resize.observe(canvas);
 		view.observe(canvas);

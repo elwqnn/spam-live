@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { page } from '$app/state';
+	import { pageUrl } from '#ui/modal.js';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { ArrowLeft02Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
 	import { entryName, percent, winRateColor, type CardDetail, type Schemas } from '#ui';
@@ -43,7 +43,7 @@
 	} = $props();
 
 	const resistances = $derived(Object.entries(card.resistances));
-	const version = $derived(page.url.searchParams.get('version'));
+	const version = $derived(pageUrl().searchParams.get('version'));
 	const tierHref = $derived(
 		href(`/stats${version ? `?version=${encodeURIComponent(version)}` : ''}#tiers`)
 	);
