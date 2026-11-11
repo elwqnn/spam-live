@@ -85,6 +85,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     };
     let state = AppState::new(db, config, catalog);
 
+    let replays_db = state.db.clone();
+    tokio::spawn(async move {
+        match api::matches::clean_stored_replays(&replays_db).await {
+            Ok((cleaned, deleted)) => tracing::info!(cleaned, deleted, "stored replays are clean"),
+            Err(e) => tracing::error!(error = %e, "stored replay cleanup failed"),
+        }
+    });
+
     let cleanup_db = state.db.clone();
     tokio::spawn(async move {
         let mut interval = tokio::time::interval(Duration::from_secs(24 * 3600));

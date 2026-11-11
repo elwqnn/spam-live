@@ -498,6 +498,209 @@ async fn cleanup_deletes_expired_replays(pool: PgPool) {
     assert_eq!(count(&pool, "matches").await, 2);
 }
 
+const ALLY: &str = "FakeAllyé";
+const SECRETS: [&str; 4] = ["FakeMe", "FakeOpponent", ALLY, "fake-ticket"];
+const PERSONAL: [&str; 5] = [
+    "/OpponentName",
+    "/Loading/ticket",
+    "/Loading/me/username",
+    "/Loading/opponent/username",
+    "/Loading/ally/username",
+];
+
+fn leb128(mut n: usize) -> Vec<u8> {
+    let mut out = Vec::new();
+    while n >= 0x80 {
+        out.push((n & 0x7f) as u8 | 0x80);
+        n >>= 7;
+    }
+    out.push(n as u8);
+    out
+}
+
+fn utf16(s: &str) -> Vec<u8> {
+    s.encode_utf16().flat_map(u16::to_le_bytes).collect()
+}
+
+fn contains(data: &[u8], s: &str) -> bool {
+    [s.as_bytes().to_vec(), utf16(s)].iter().any(|n| data.windows(n.len()).any(|w| w == n))
+}
+
+fn gunzip(gz: &[u8]) -> Vec<u8> {
+    use std::io::Read;
+    let mut out = Vec::new();
+    flate2::read::GzDecoder::new(gz).read_to_end(&mut out).unwrap();
+    out
+}
+
+fn take<'a>(rest: &mut &'a [u8], n: usize) -> &'a [u8] {
+    let (head, tail) = rest.split_at(n);
+    *rest = tail;
+    head
+}
+
+fn u32_le(rest: &mut &[u8]) -> u32 {
+    u32::from_le_bytes(take(rest, 4).try_into().unwrap())
+}
+
+fn parse_srpl(raw: &[u8]) -> (Value, Vec<(u32, Vec<u8>)>) {
+    let mut rest = raw.strip_prefix(b"SRPL").expect("magic");
+    assert!(u32_le(&mut rest) == 2, "version");
+    let (mut len, mut shift) = (0, 0);
+    loop {
+        let b = take(&mut rest, 1)[0];
+        len |= usize::from(b & 0x7f) << shift;
+        shift += 7;
+        if b & 0x80 == 0 {
+            break;
+        }
+    }
+    let header = serde_json::from_slice(take(&mut rest, len)).expect("header");
+    let count = u32_le(&mut rest);
+    let messages = (0..count)
+        .map(|_| {
+            let time = u32_le(&mut rest);
+            let len = u32_le(&mut rest) as usize;
+            (time, take(&mut rest, len).to_vec())
+        })
+        .collect();
+    assert!(rest.is_empty(), "bytes after the last message");
+    (header, messages)
+}
+
+fn personal_entry(n: u64) -> Value {
+    let mut e = entry(n, 0, ACCOUNT_A, OPP, Some(ACCOUNT_A));
+    e["Loading"]["ally"] = json!({ "username": ALLY, "stars": 3 });
+    e
+}
+
+fn messages(clean: bool) -> Vec<(u32, Vec<u8>)> {
+    let name = |s: &str, units: usize| if clean { "_".repeat(units) } else { s.to_string() };
+    let u8n = |s: &str| {
+        let s = name(s, s.len());
+        [leb128(2 * (s.len() + 1)), s.into_bytes()].concat()
+    };
+    let u16n = |s: &str| {
+        let s = name(s, s.encode_utf16().count());
+        [(s.encode_utf16().count() as u32).to_le_bytes().to_vec(), utf16(&s)].concat()
+    };
+    let msg = |kind: u16, parts: Vec<Vec<u8>>| [kind.to_le_bytes().to_vec(), parts.concat()].concat();
+    [
+        msg(2000, vec![vec![7, 0, 0, 0], u8n("FakeMe"), u8n("FakeOpponent")]),
+        msg(2001, vec![vec![1], u16n("FakeMe"), vec![2], u16n("FakeOpponent"), u16n(ALLY)]),
+        msg(2004, vec![u8n("FakeOpponent"), vec![0xff; 3]]),
+        msg(2010, vec![u8n(ALLY), u8n("FakeMe")]),
+        msg(2015, vec![u8n("FakeMe")]),
+        msg(2204, vec![vec![5], u8n("FakeOpponent"), vec![6]]),
+        msg(3000, vec![b"\x01FakeOpp\x0cFakeM\x02FakeMe\x03".to_vec()]),
+    ]
+    .into_iter()
+    .enumerate()
+    .map(|(i, p)| (i as u32 * 250, p))
+    .collect()
+}
+
+fn personal_srpl(header: &Value) -> Vec<u8> {
+    let mut raw = srpl_raw(header, 0);
+    let messages = messages(false);
+    raw.extend((messages.len() as u32).to_le_bytes());
+    for (time, payload) in messages {
+        raw.extend(time.to_le_bytes());
+        raw.extend((payload.len() as u32).to_le_bytes());
+        raw.extend(payload);
+    }
+    gzip(&raw)
+}
+
+fn assert_clean(gz: &[u8], original: &Value) {
+    let raw = gunzip(gz);
+    let (header, stored) = parse_srpl(&raw);
+    let before_last = &raw[..raw.len() - stored.last().unwrap().1.len()];
+    for secret in SECRETS {
+        assert!(!contains(before_last, secret), "{secret} is in the replay");
+    }
+    let mut expected = original.clone();
+    for path in PERSONAL {
+        let (parent, key) = path.rsplit_once('/').unwrap();
+        expected.pointer_mut(parent).unwrap().as_object_mut().unwrap().remove(key).unwrap();
+        assert!(header.pointer(path).is_none(), "{path}");
+    }
+    assert_eq!(header, expected);
+    let dirty = messages(false);
+    assert_eq!(stored.len(), dirty.len());
+    for ((_, a), (_, b)) in stored.iter().zip(&dirty) {
+        assert_eq!(a.len(), b.len());
+    }
+    assert_eq!(stored, messages(true));
+}
+
+#[sqlx::test]
+async fn upload_removes_personal_data_from_replay(pool: PgPool) {
+    let app = app(pool.clone());
+    let (_, cookie) = user(&pool, "76561190000000001").await;
+    let e = personal_entry(1);
+    let res = upload(&app, &cookie, std::slice::from_ref(&e), &[("match-1.srpl".into(), personal_srpl(&e))]).await;
+    assert_eq!(statuses(&res.body, "replays"), ["new"]);
+    let (data, clean): (Vec<u8>, bool) =
+        sqlx::query_as("SELECT data, clean FROM replays").fetch_one(&pool).await.unwrap();
+    assert!(clean);
+    assert_clean(&data, &e);
+}
+
+#[sqlx::test]
+async fn replay_without_loading(pool: PgPool) {
+    let app = app(pool.clone());
+    let (_, cookie) = user(&pool, "76561190000000001").await;
+    let mut absent = entry(1, 0, ACCOUNT_A, OPP, Some(ACCOUNT_A));
+    absent.as_object_mut().unwrap().remove("Loading");
+    let mut null = entry(2, 0, ACCOUNT_A, OPP, Some(ACCOUNT_A));
+    null["Loading"] = Value::Null;
+    let entries = [absent, null];
+    let replays: Vec<_> = entries.iter().map(|e| (replay(e).0, personal_srpl(e))).collect();
+    let res = upload(&app, &cookie, &entries, &replays).await;
+    assert_eq!(statuses(&res.body, "entries"), ["new", "new"]);
+    assert_eq!(statuses(&res.body, "replays"), ["new", "new"]);
+    let stored: Vec<Vec<u8>> =
+        sqlx::query_scalar("SELECT data FROM replays ORDER BY game_uid").fetch_all(&pool).await.unwrap();
+    assert_eq!(stored.len(), 2);
+    for (data, e) in stored.iter().zip(&entries) {
+        let raw = gunzip(data);
+        let (header, _) = parse_srpl(&raw);
+        assert!(header.get("OpponentName").is_none());
+        assert_eq!(header.get("Loading"), e.get("Loading"));
+        assert!(!contains(&raw, "FakeOpponent"));
+    }
+}
+
+#[sqlx::test]
+async fn stored_replays_are_cleaned_once(pool: PgPool) {
+    let app = app(pool.clone());
+    let (user_id, cookie) = user(&pool, "76561190000000001").await;
+    let entries = [personal_entry(1), personal_entry(2)];
+    upload(&app, &cookie, &entries, &[]).await;
+    for (uid, data) in [("match-1", personal_srpl(&entries[0])), ("match-2", b"not gzip".to_vec())] {
+        sqlx::query(
+            "INSERT INTO replays (game_uid, user_id, data, clean, expires_at)
+             VALUES ($1, $2, $3, false, now() + interval '1 day')",
+        )
+        .bind(uid)
+        .bind(user_id)
+        .bind(data)
+        .execute(&pool)
+        .await
+        .unwrap();
+    }
+    assert_eq!(api::matches::clean_stored_replays(&pool).await.unwrap(), (1, 1));
+    let rows: Vec<(String, Vec<u8>, bool)> =
+        sqlx::query_as("SELECT game_uid, data, clean FROM replays").fetch_all(&pool).await.unwrap();
+    assert_eq!(rows.len(), 1);
+    let (uid, data, clean) = &rows[0];
+    assert_eq!((uid.as_str(), *clean), ("match-1", true));
+    assert_clean(data, &entries[0]);
+    assert_eq!(count(&pool, "uploads").await, 2);
+    assert_eq!(api::matches::clean_stored_replays(&pool).await.unwrap(), (0, 0));
+}
+
 #[sqlx::test]
 async fn min_version(pool: PgPool) {
     let res = send(&app(pool), get("/api/desktop/min-version", "")).await;
@@ -531,6 +734,27 @@ async fn real_sample_folder(pool: PgPool) {
     let second = send(&app, upload_req(&cookie, &index, &replays)).await;
     assert_eq!(statuses(&second.body, "entries"), ["known"; 10]);
     assert_eq!(statuses(&second.body, "replays"), ["known"; 10]);
+    let stored: Vec<(String, Vec<u8>, bool)> =
+        sqlx::query_as("SELECT game_uid, data, clean FROM replays").fetch_all(&pool).await.unwrap();
+    assert_eq!(stored.len(), 10);
+    for (game_uid, data, clean) in stored {
+        assert!(clean, "{game_uid}");
+        let raw = gunzip(&data);
+        let (header, messages) = parse_srpl(&raw);
+        assert!(header["MessageCount"].as_u64() == Some(messages.len() as u64), "count in {game_uid}");
+        let (original, original_messages) =
+            parse_srpl(&gunzip(&std::fs::read(dir.join(format!("{game_uid}.srpl"))).unwrap()));
+        let same_framing = original_messages.len() == messages.len()
+            && original_messages.iter().zip(&messages).all(|((t1, p1), (t2, p2))| t1 == t2 && p1.len() == p2.len());
+        assert!(same_framing, "framing in {game_uid}");
+        for path in PERSONAL {
+            assert!(header.pointer(path).is_none(), "{path} in {game_uid}");
+            if let Some(secret) = original.pointer(path).and_then(Value::as_str).filter(|s| !s.is_empty()) {
+                let found = contains(&raw, secret);
+                assert!(!found, "name in {game_uid}");
+            }
+        }
+    }
     let h = history(&app, &cookie).await;
     assert_eq!(h.len(), 10);
     let ranked: Vec<_> = h.iter().filter(|m| m["gameMode"] == 10 && m["isAi"] == false).collect();

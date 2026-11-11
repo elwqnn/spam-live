@@ -1,6 +1,6 @@
 use std::{
     collections::{HashMap, HashSet, VecDeque},
-    io::Read,
+    io::{Read, Write},
     sync::Mutex,
     time::{Duration, Instant},
 };
@@ -13,7 +13,7 @@ use axum::{
     routing::{get, post},
 };
 use chrono::{DateTime, TimeDelta, Utc};
-use flate2::read::GzDecoder;
+use flate2::{Compression, read::GzDecoder, write::GzEncoder};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{FromRow, PgPool};
@@ -204,7 +204,28 @@ fn varint(bytes: &[u8]) -> Option<(usize, &[u8])> {
     None
 }
 
-pub fn replay_game_uid(gz: &[u8]) -> Result<String, String> {
+fn push_varint(out: &mut Vec<u8>, mut n: usize) {
+    while n >= 0x80 {
+        out.push((n & 0x7f) as u8 | 0x80);
+        n >>= 7;
+    }
+    out.push(n as u8);
+}
+
+fn blank(body: &mut [u8], prefix: &[u8], name: &[u8], filler: &[u8]) {
+    let needle = [prefix, name].concat();
+    let mut i = 0;
+    while let Some(p) = body[i..].windows(needle.len()).position(|w| w == needle) {
+        let at = i + p + prefix.len();
+        body[at..at + name.len()].copy_from_slice(filler);
+        i = at + name.len();
+    }
+}
+
+const NAMES: [&str; 4] =
+    ["/OpponentName", "/Loading/me/username", "/Loading/opponent/username", "/Loading/ally/username"];
+
+pub fn clean_replay(gz: &[u8]) -> Result<(String, Vec<u8>), String> {
     let mut out = Vec::new();
     GzDecoder::new(gz).take(MAX_REPLAY_OUTPUT + 1).read_to_end(&mut out).map_err(|_| "replay is not valid gzip")?;
     if out.len() as u64 > MAX_REPLAY_OUTPUT {
@@ -216,13 +237,36 @@ pub fn replay_game_uid(gz: &[u8]) -> Result<String, String> {
     }
     let (len, rest) = varint(&rest[4..]).ok_or("invalid replay header length")?;
     let header = rest.get(..len).ok_or("replay header is truncated")?;
-    #[derive(Deserialize)]
-    struct Header {
-        #[serde(rename = "GameUid")]
-        game_uid: String,
+    let mut header: Value = serde_json::from_slice(header).map_err(|_| "invalid replay header")?;
+    let game_uid = header.get("GameUid").and_then(Value::as_str).ok_or("invalid replay header")?.to_owned();
+    let names: Vec<String> =
+        NAMES.iter().filter_map(|p| header.pointer(p)?.as_str()).filter(|n| !n.is_empty()).map(str::to_owned).collect();
+    for path in NAMES.iter().chain(&["/Loading/ticket"]) {
+        if let Some((parent, key)) = path.rsplit_once('/')
+            && let Some(o) = header.pointer_mut(parent).and_then(Value::as_object_mut)
+        {
+            o.remove(key);
+        }
     }
-    let header: Header = serde_json::from_slice(header).map_err(|_| "invalid replay header")?;
-    Ok(header.game_uid)
+    let header = serde_json::to_vec(&header).map_err(|_| "invalid replay header")?;
+    let mut raw = b"SRPL".to_vec();
+    raw.extend(2u32.to_le_bytes());
+    push_varint(&mut raw, header.len());
+    raw.extend(header);
+    let start = raw.len();
+    raw.extend(&rest[len..]);
+    let body = &mut raw[start..];
+    for name in &names {
+        let mut prefix = Vec::new();
+        push_varint(&mut prefix, 2 * (name.len() + 1));
+        blank(body, &prefix, name.as_bytes(), &vec![b'_'; name.len()]);
+        let units: Vec<u16> = name.encode_utf16().collect();
+        let utf16: Vec<u8> = units.iter().flat_map(|u| u.to_le_bytes()).collect();
+        blank(body, &(units.len() as u32).to_le_bytes(), &utf16, &b"_\0".repeat(units.len()));
+    }
+    let mut enc = GzEncoder::new(Vec::new(), Compression::default());
+    let gz = enc.write_all(&raw).and_then(|()| enc.finish()).map_err(|e| e.to_string())?;
+    Ok((game_uid, gz))
 }
 
 #[derive(Serialize, ToSchema, Clone, Copy, PartialEq, Eq)]
@@ -452,9 +496,8 @@ pub async fn upload(
         files
             .into_iter()
             .map(|(name, data)| {
-                let parsed = data
-                    .ok_or_else(|| "replay is larger than 512 KB".to_string())
-                    .and_then(|d| replay_game_uid(&d).map(|uid| (uid, d)));
+                let parsed =
+                    data.ok_or_else(|| "replay is larger than 512 KB".to_string()).and_then(|d| clean_replay(&d));
                 (name, parsed)
             })
             .collect()
@@ -498,8 +541,8 @@ pub async fn upload(
             }
             Ok((uid, data)) => {
                 let inserted = sqlx::query(
-                    "INSERT INTO replays (game_uid, user_id, data, expires_at)
-                     VALUES ($1, $2, $3, now() + interval '12 months') ON CONFLICT DO NOTHING",
+                    "INSERT INTO replays (game_uid, user_id, data, clean, expires_at)
+                     VALUES ($1, $2, $3, true, now() + interval '12 months') ON CONFLICT DO NOTHING",
                 )
                 .bind(&uid)
                 .bind(user.id)
@@ -513,6 +556,42 @@ pub async fn upload(
         replay_results.push(ReplayResult { file_name, game_uid, status, reason });
     }
     Ok(Json(UploadResult { entries: entry_results, replays: replay_results }))
+}
+
+pub async fn clean_stored_replays(db: &PgPool) -> Result<(u64, u64), Box<dyn std::error::Error + Send + Sync>> {
+    let (mut cleaned, mut deleted) = (0, 0);
+    loop {
+        let rows: Vec<(String, i64, Vec<u8>)> =
+            sqlx::query_as("SELECT game_uid, user_id, data FROM replays WHERE NOT clean LIMIT 50")
+                .fetch_all(db)
+                .await?;
+        if rows.is_empty() {
+            return Ok((cleaned, deleted));
+        }
+        let rows = tokio::task::spawn_blocking(move || {
+            rows.into_iter().map(|(uid, user_id, data)| (uid, user_id, clean_replay(&data))).collect::<Vec<_>>()
+        })
+        .await?;
+        for (uid, user_id, result) in rows {
+            if let Ok((_, data)) = result {
+                sqlx::query("UPDATE replays SET data = $3, clean = true WHERE game_uid = $1 AND user_id = $2")
+                    .bind(&uid)
+                    .bind(user_id)
+                    .bind(data)
+                    .execute(db)
+                    .await?;
+                cleaned += 1;
+            } else {
+                sqlx::query("DELETE FROM replays WHERE game_uid = $1 AND user_id = $2")
+                    .bind(&uid)
+                    .bind(user_id)
+                    .execute(db)
+                    .await?;
+                tracing::warn!(game_uid = uid, "deleted a stored replay that cannot be cleaned");
+                deleted += 1;
+            }
+        }
+    }
 }
 
 #[derive(Serialize, ToSchema, sqlx::Type)]
