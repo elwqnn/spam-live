@@ -12,6 +12,7 @@
 	import Switch from '@spam-live/ui/components/Switch.svelte';
 	import Tooltip from '@spam-live/ui/components/Tooltip.svelte';
 	import FeedbackDialog from '@spam-live/ui/components/feedback/FeedbackDialog.svelte';
+	import Logo from '@spam-live/ui/components/Logo.svelte';
 	import PageModal from '@spam-live/ui/components/PageModal.svelte';
 	import { Button } from '@spam-live/ui/components/ui/button/index.js';
 	import { m } from '#lib/paraglide/messages.js';
@@ -19,7 +20,6 @@
 	import { masks } from '@spam-live/ui/art.js';
 	import { isMac, shortcut } from '@spam-live/ui/shortcut.js';
 	import { viewTransition } from '@spam-live/ui/transition.js';
-	import favicon from '#lib/assets/favicon.svg';
 	import './layout.css';
 	import CardPage from './cards/[id]/+page.svelte';
 	import DeckPage from './decks/[id]/+page.svelte';
@@ -125,7 +125,6 @@
 <svelte:document {onvisibilitychange} />
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
 	<title>{m.site_name()}</title>
 </svelte:head>
 
@@ -138,8 +137,8 @@
 			bind:offsetHeight={head}
 			class="head mx-auto flex w-full max-w-300 flex-wrap items-center gap-x-8 gap-y-3 px-(--gutter) py-4 [view-transition-name:site-header] sm:py-5 lg:border-x"
 		>
-			<a href={href('/')} class="text-[17px] font-semibold tracking-wide"
-				>SPAM<span class="text-muted-foreground">.live</span></a
+			<a href={href('/')} class="flex items-center gap-2.5 text-[17px] font-semibold tracking-wide"
+				><Logo class="size-6" /><span>SPAM<span class="text-muted-foreground">.live</span></span></a
 			>
 			<nav class="flex flex-wrap gap-x-6 gap-y-2">
 				{#each nav as [path, label] (path)}

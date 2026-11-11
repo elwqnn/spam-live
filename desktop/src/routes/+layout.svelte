@@ -25,6 +25,7 @@
 	import Switch from '@spam-live/ui/components/Switch.svelte';
 	import Tooltip from '@spam-live/ui/components/Tooltip.svelte';
 	import FeedbackDialog from '@spam-live/ui/components/feedback/FeedbackDialog.svelte';
+	import Logo from '@spam-live/ui/components/Logo.svelte';
 	import PageModal from '@spam-live/ui/components/PageModal.svelte';
 	import { Button } from '@spam-live/ui/components/ui/button/index.js';
 	import { masks } from '@spam-live/ui/art.js';
@@ -191,8 +192,10 @@
 		<aside
 			class="sticky top-0 flex h-dvh w-56 flex-none flex-col overflow-y-auto border-r [view-transition-name:site-header]"
 		>
-			<a href={href('/')} class="px-5 pt-5 pb-4 text-[17px] font-semibold tracking-wide"
-				>SPAM<span class="text-muted-foreground">.live</span></a
+			<a
+				href={href('/')}
+				class="flex items-center gap-2.5 px-5 pt-5 pb-4 text-[17px] font-semibold tracking-wide"
+				><Logo class="size-6" /><span>SPAM<span class="text-muted-foreground">.live</span></span></a
 			>
 			<nav class="grid gap-0.5 px-3">
 				{#each nav as [path, label, icon] (path)}
