@@ -6,7 +6,6 @@ import {
 	keyMove,
 	mouseMove,
 	siteUrl,
-	start,
 	target,
 	uploaderState,
 	type Status
@@ -69,11 +68,6 @@ describe('routes', () => {
 			'/fr'
 		])
 			expect(appRoute(path), path).toBe(false);
-	});
-
-	it('starts on /me when logged in', () => {
-		expect(start({ id: 1 })).toBe('/me');
-		expect(start(null)).toBe('/decks');
 	});
 
 	it('makes site links with the locale prefix', () => {

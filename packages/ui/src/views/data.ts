@@ -8,6 +8,7 @@ export type Me = Schemas['Me'];
 
 const DECKS_PAGE = 24;
 const MATCHES_PAGE = 24;
+const HISTORY_PAGE = 10;
 const MAX_OFFSET = 10_000;
 const SORTS = ['votes', 'recent', 'winrate'] as const;
 const STATS_TABS = ['meta', 'counters', 'duos', 'length', 'trends'] as const;
@@ -243,6 +244,32 @@ export async function meData(client: Client, url: URL, me: Me) {
 		decks: ok(decks),
 		devices: ok(devices)
 	};
+}
+
+export async function dashboardData(client: Client, url: URL, me: Me | null) {
+	const before = url.searchParams.get('before') || undefined;
+	const [cards, stats, matches, top] = await Promise.all([
+		client.GET('/api/cards', { params: { query: { lang: getLocale() } } }).then(ok),
+		client.GET('/api/stats/cards').then((r) => r.data ?? []),
+		me
+			? client
+					.GET('/api/me/matches', { params: { query: { before, limit: HISTORY_PAGE + 1 } } })
+					.then(ok)
+			: [],
+		me ? client.GET('/api/me/top-decks').then(ok) : []
+	]);
+	return {
+		cards,
+		stats,
+		matches: matches.slice(0, HISTORY_PAGE),
+		next: matches.length > HISTORY_PAGE ? matches[HISTORY_PAGE - 1].startUtc : null,
+		first: !before,
+		top
+	};
+}
+
+export async function accountData(client: Client, me: Me) {
+	return { me, devices: ok(await client.GET('/api/me/devices')) };
 }
 
 export async function creditsData(client: Client) {

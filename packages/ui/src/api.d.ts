@@ -708,6 +708,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/top-decks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["my_top_decks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/presence": {
         parameters: {
             query?: never;
@@ -1472,6 +1488,15 @@ export interface components {
         };
         /** @enum {string} */
         ResolveAction: "dismiss" | "delete";
+        SavedDeck: {
+            cards: string[];
+            guide: string;
+            /** Format: int64 */
+            id: number;
+            name: string;
+            status: components["schemas"]["DeckStatus"];
+            talents: number[];
+        };
         /** @enum {string} */
         StatsSort: "winrate" | "games";
         /** @enum {string} */
@@ -1485,6 +1510,16 @@ export interface components {
         };
         /** @enum {string} */
         Tier: "S" | "A" | "B" | "C" | "D";
+        TopDeck: {
+            cards: string[];
+            deck?: components["schemas"]["SavedDeck"] | null;
+            /** Format: int64 */
+            games: number;
+            /** Format: double */
+            winRate?: number | null;
+            /** Format: int64 */
+            wins: number;
+        };
         /** @enum {string} */
         Trend: "week" | "version";
         TurnBucket: {
@@ -3450,6 +3485,34 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MyMatch"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    my_top_decks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Most played first, no AI or disputed match */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopDeck"][];
                 };
             };
             401: {

@@ -58,8 +58,6 @@ export function target(link: URL, app: URL, locale: string, blank = false): Targ
 	return web ? { open: link.href } : null;
 }
 
-export const start = (me: unknown) => (me ? '/me' : '/decks');
-
 export const account = (method: string, path: string) =>
 	(method !== 'GET' && method !== 'HEAD') || /^\/api\/(me|decks)(\/|$)/.test(path);
 

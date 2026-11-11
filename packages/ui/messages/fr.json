@@ -684,5 +684,16 @@
 	"desktop_status_skipped": "Ignoré",
 	"desktop_retry": "Réessayer",
 	"desktop_account_retry": "Charger le compte",
-	"desktop_account_failed": "L'application ne peut pas charger votre compte. Elle réessaie quand la fenêtre reprend le focus ou quand le réseau revient."
+	"desktop_account_failed": "L'application ne peut pas charger votre compte. Elle réessaie quand la fenêtre reprend le focus ou quand le réseau revient.",
+	"dashboard_title": "Tableau de bord",
+	"dashboard_top_title": "Mes decks les plus joués",
+	"dashboard_top_text": "D'après vos matchs contre des joueurs, dans tous les modes. Les matchs contre l'IA et les matchs contestés ne comptent pas.",
+	"dashboard_top_empty": "Aucun match contre un joueur pour l'instant.",
+	"dashboard_deck_played": "Deck joué",
+	"dashboard_deck_unsaved": "Aucun deck enregistré n'a ces cartes.",
+	"dashboard_published": "Publié",
+	"dashboard_publish_title": "Publier ce deck",
+	"dashboard_guide_hint": "Facultatif. Écrivez un court guide qui explique comment bien jouer le deck. Le Markdown est accepté.",
+	"dashboard_all_stats": "Voir toutes les stats",
+	"dashboard_login_text": "Connectez-vous pour voir vos decks les plus joués et votre historique des matchs."
 }

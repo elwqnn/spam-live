@@ -125,6 +125,7 @@ pub fn public<T: Serialize>(body: T) -> Response {
         catalog::glossary_keywords,
         matches::upload,
         matches::my_matches,
+        matches::my_top_decks,
         matches::min_version,
         release::release,
         release::update,

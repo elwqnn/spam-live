@@ -684,5 +684,16 @@
 	"desktop_status_skipped": "Skipped",
 	"desktop_retry": "Retry",
 	"desktop_account_retry": "Load account",
-	"desktop_account_failed": "The app cannot load your account. It tries again when the window gets the focus or the network comes back."
+	"desktop_account_failed": "The app cannot load your account. It tries again when the window gets the focus or the network comes back.",
+	"dashboard_title": "Dashboard",
+	"dashboard_top_title": "My most played decks",
+	"dashboard_top_text": "From your matches against players, in all modes. AI matches and disputed matches do not count.",
+	"dashboard_top_empty": "No match against a player yet.",
+	"dashboard_deck_played": "Played deck",
+	"dashboard_deck_unsaved": "No saved deck has these cards.",
+	"dashboard_published": "Published",
+	"dashboard_publish_title": "Publish this deck",
+	"dashboard_guide_hint": "Optional. Write a short guide that tells how to play the deck well. You can use Markdown.",
+	"dashboard_all_stats": "See all stats",
+	"dashboard_login_text": "Log in to see your most played decks and your match history."
 }
