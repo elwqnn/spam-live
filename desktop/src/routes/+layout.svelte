@@ -14,7 +14,7 @@
 		Settings01Icon
 	} from '@hugeicons/core-free-icons';
 	import { invoke } from '@tauri-apps/api/core';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, invalidateAll, onNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import type { Path } from '$app/types';
@@ -25,15 +25,21 @@
 	import Switch from '@spam-live/ui/components/Switch.svelte';
 	import Tooltip from '@spam-live/ui/components/Tooltip.svelte';
 	import FeedbackDialog from '@spam-live/ui/components/feedback/FeedbackDialog.svelte';
+	import PageModal from '@spam-live/ui/components/PageModal.svelte';
 	import { Button } from '@spam-live/ui/components/ui/button/index.js';
 	import { masks } from '@spam-live/ui/art.js';
 	import { isMac, shortcut } from '@spam-live/ui/shortcut.js';
+	import { viewTransition } from '@spam-live/ui/transition.js';
 	import { keyMove, mouseMove, siteUrl, target, uploaderState, type Move } from '#lib/app.js';
 	import { href, writes } from '#lib/host.js';
 	import { uploader, watch } from '#lib/uploader.svelte.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale, locales, setLocale } from '#lib/paraglide/runtime.js';
 	import './layout.css';
+	import CardPage from './cards/[id]/+page.svelte';
+	import DeckPage from './decks/[id]/+page.svelte';
+	import type { PageData as CardData } from './cards/[id]/$types';
+	import type { PageData as DeckData } from './decks/[id]/$types';
 	import type { LayoutProps } from './$types';
 
 	let { children, data }: LayoutProps = $props();
@@ -73,6 +79,8 @@
 	function reload() {
 		if (retry) invalidateAll();
 	}
+
+	onNavigate(viewTransition);
 
 	onMount(() => {
 		mac = isMac();
@@ -180,7 +188,9 @@
 
 <div class="contents" style={masks()}>
 	<div class="flex min-h-dvh overflow-x-clip">
-		<aside class="sticky top-0 flex h-dvh w-56 flex-none flex-col overflow-y-auto border-r">
+		<aside
+			class="sticky top-0 flex h-dvh w-56 flex-none flex-col overflow-y-auto border-r [view-transition-name:site-header]"
+		>
 			<a href={href('/')} class="px-5 pt-5 pb-4 text-[17px] font-semibold tracking-wide"
 				>SPAM<span class="text-muted-foreground">.live</span></a
 			>
@@ -327,6 +337,16 @@
 		</div>
 	</Dialog>
 	<FeedbackDialog bind:this={feedback} me={data.me} post={writes.feedback} />
+	<PageModal>
+		{#snippet children(modal)}
+			{@const params = { id: page.shallow?.params?.id ?? '' }}
+			{#if modal.kind === 'card'}
+				<CardPage data={modal.data as CardData} {params} />
+			{:else}
+				<DeckPage data={modal.data as DeckData} {params} />
+			{/if}
+		{/snippet}
+	</PageModal>
 	<CardPreview />
 	<div
 		class="grain fixed inset-0 z-50 opacity-(--grain) mix-blend-overlay"
