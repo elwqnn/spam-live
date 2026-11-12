@@ -12,6 +12,7 @@ const STICKY = 'data-shot-sticky';
 const BOX = 'data-shot-box';
 const MARGIN = 100;
 const QUALITIES = [0.9, 0.75, 0.6, 0.45];
+const REDRAWS = 3;
 
 export const frame = () => new Promise((resolve) => requestAnimationFrame(resolve));
 
@@ -118,7 +119,14 @@ export function pixelateRect(
 
 export async function render(node: Node, options: Options, wait = 300) {
 	const { createContext, domToCanvas } = await import('modern-screenshot');
-	const context = await createContext(node, { ...options, timeout: wait, autoDestruct: true });
+	const context = await createContext(node, {
+		...options,
+		timeout: wait,
+		autoDestruct: true,
+		onCreateForeignObjectSvg: () => {
+			context.drawImageCount = Math.min(context.drawImageCount, REDRAWS);
+		}
+	});
 	context.timeout = 5000;
 	return domToCanvas(context);
 }

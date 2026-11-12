@@ -601,6 +601,7 @@
 	"feedback_screenshot": "Screenshot",
 	"feedback_no_screenshot": "No screenshot",
 	"feedback_capturing": "Capturing the page…",
+	"feedback_capture_error": "The screenshot failed.",
 	"feedback_marks": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

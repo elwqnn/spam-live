@@ -55,6 +55,7 @@
 	let status = $state<Status>('idle');
 	let mode = $state<'annotate' | 'pick' | null>(null);
 	let capturing = $state(false);
+	let failed = $state(false);
 	let busy = false;
 	let run = 0;
 	let closing: ReturnType<typeof setTimeout> | undefined;
@@ -93,7 +94,7 @@
 			base = source;
 			keep(result);
 		} catch {
-			return;
+			if (id === run) failed = true;
 		} finally {
 			clearTimeout(timer);
 			if (id === run) capturing = false;
@@ -112,6 +113,7 @@
 	}
 
 	function remove() {
+		failed = false;
 		base = null;
 		marks = [];
 		setShot(null);
@@ -133,7 +135,10 @@
 				const result = await encode(flatten(source, next));
 				if (id === run) keep(result);
 			} catch {
-				if (id === run) remove();
+				if (id === run) {
+					remove();
+					failed = true;
+				}
 			} finally {
 				busy = false;
 			}
@@ -267,17 +272,24 @@
 					{/if}
 					<div class="grid min-w-0 flex-1 gap-0.5">
 						<span class="font-medium">{m.feedback_screenshot()}</span>
-						<span class="text-xs text-muted-foreground tabular-nums">
-							{#if shot}{shot.width} × {shot.height} · {m.feedback_marks({
-									count: marks.length
-								})}{:else if capturing}{m.feedback_capturing()}{:else}{m.feedback_no_screenshot()}{/if}
-						</span>
+						{#if failed}
+							<span role="alert" class="text-xs text-destructive">{m.feedback_capture_error()}</span
+							>
+						{:else}
+							<span class="text-xs text-muted-foreground tabular-nums">
+								{#if shot}{shot.width} × {shot.height} · {m.feedback_marks({
+										count: marks.length
+									})}{:else if capturing}{m.feedback_capturing()}{:else}{m.feedback_no_screenshot()}{/if}
+							</span>
+						{/if}
 					</div>
 					<div class="flex shrink-0">
 						{#if shot}
 							{@render action(PencilEdit02Icon, m.feedback_annotate(), annotate)}
 							{@render action(RefreshIcon, m.feedback_retake(), take)}
 							{@render action(Cancel01Icon, m.feedback_remove(), remove)}
+						{:else if failed}
+							{@render action(RefreshIcon, m.feedback_retake(), take)}
 						{:else if !capturing}
 							{@render action(Camera01Icon, m.feedback_capture(), take)}
 						{/if}
