@@ -22,8 +22,9 @@ export type Status = {
 	ready: string | null;
 	manual: boolean;
 	autostart: boolean;
+	health: 'ok' | 'offline' | 'error';
 };
-export type UploaderState = 'linking' | 'ready' | 'update' | 'unlinked' | 'folder' | 'watching';
+export type UploaderState = 'linking' | 'unlinked' | 'folder' | 'offline' | 'error' | 'watching';
 export type Move = 'back' | 'forward' | 'reload';
 export type Target = { go: string } | { open: string } | null;
 
@@ -61,13 +62,13 @@ export function target(link: URL, app: URL, locale: string, blank = false): Targ
 export const account = (method: string, path: string) =>
 	(method !== 'GET' && method !== 'HEAD') || /^\/api\/(me|decks)(\/|$)/.test(path);
 
-export function uploaderState(status: Status | null): UploaderState | null {
+export function uploaderState(status: Status | null, online = true): UploaderState | null {
 	if (!status) return null;
 	if (status.code) return 'linking';
-	if (status.ready) return 'ready';
-	if (status.update || status.manual) return 'update';
 	if (!status.linked) return 'unlinked';
-	return status.found ? 'watching' : 'folder';
+	if (!status.found) return 'folder';
+	if (!online || status.health === 'offline') return 'offline';
+	return status.health === 'error' || status.last?.error ? 'error' : 'watching';
 }
 
 export function keyMove(e: {

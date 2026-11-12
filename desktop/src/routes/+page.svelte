@@ -36,5 +36,9 @@
 			</section>
 		{/if}
 	</div>
-	<TierPanel data={data.stats} {catalog} class="xl:sticky xl:top-0 xl:self-start" />
+	<TierPanel
+		data={data.stats}
+		{catalog}
+		class="xl:sticky xl:top-(--head) xl:max-h-[calc(100dvh-var(--head))] xl:self-start"
+	/>
 </div>

@@ -1235,6 +1235,7 @@ export interface components {
             id: number;
             /** Format: date-time */
             lastUsedAt?: string | null;
+            online: boolean;
         };
         DeviceCode: {
             deviceCode: string;

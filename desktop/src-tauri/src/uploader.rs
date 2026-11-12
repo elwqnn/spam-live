@@ -339,6 +339,14 @@ impl Uploader {
         }
     }
 
+    pub fn wake(&mut self, now: Instant) {
+        let soon = now + STABLE;
+        for account in self.accounts.values_mut() {
+            account.watch.due = account.watch.due.map(|due| due.min(soon));
+        }
+        self.decks_due = self.decks_due.map(|due| due.min(soon));
+    }
+
     pub fn step(&mut self, api: &Api, token: &str, now: Instant) -> Vec<Report> {
         let mut reports = Vec::new();
         for dir in account_dirs(&self.folder) {
@@ -585,6 +593,23 @@ mod tests {
         assert!(!fail(Some(400)).retry());
         assert!(!fail(Some(401)).retry());
         assert!(!fail(Some(403)).retry());
+    }
+
+    #[test]
+    fn wakes_pending_retries() {
+        let t0 = Instant::now();
+        let account = |due| Account { watch: Watch { seen: None, due }, sent: None };
+        let mut uploader = Uploader::new(PathBuf::new());
+        uploader.accounts.insert("a".into(), account(Some(t0 + RETRY)));
+        uploader.accounts.insert("b".into(), account(Some(t0 + Duration::from_secs(1))));
+        uploader.accounts.insert("c".into(), account(None));
+        uploader.decks_due = Some(t0 + RETRY);
+        uploader.wake(t0);
+        let due = |name: &str| uploader.accounts[Path::new(name)].watch.due;
+        assert_eq!(due("a"), Some(t0 + STABLE));
+        assert_eq!(due("b"), Some(t0 + Duration::from_secs(1)));
+        assert_eq!(due("c"), None);
+        assert_eq!(uploader.decks_due, Some(t0 + STABLE));
     }
 
     fn copy(from: &Path, to: &Path) {

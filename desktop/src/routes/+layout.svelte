@@ -6,14 +6,13 @@
 		ArrowUpRight01Icon,
 		BookOpen01Icon,
 		Cards01Icon,
-		CloudUploadIcon,
 		DashboardSquare01Icon,
 		Layers01Icon,
 		Message01Icon,
 		RefreshIcon,
 		Settings01Icon
 	} from '@hugeicons/core-free-icons';
-	import { invoke } from '@tauri-apps/api/core';
+	import { invoke, isTauri } from '@tauri-apps/api/core';
 	import { goto, invalidateAll, onNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -31,6 +30,7 @@
 	import { masks } from '@spam-live/ui/art.js';
 	import { isMac, shortcut } from '@spam-live/ui/shortcut.js';
 	import { viewTransition } from '@spam-live/ui/transition.js';
+	import TitleBar from '#lib/TitleBar.svelte';
 	import { keyMove, mouseMove, siteUrl, target, uploaderState, type Move } from '#lib/app.js';
 	import { href, writes } from '#lib/host.js';
 	import { uploader, watch } from '#lib/uploader.svelte.js';
@@ -57,16 +57,30 @@
 		unlinked: m.desktop_state_unlinked,
 		linking: m.desktop_state_linking,
 		folder: m.desktop_state_folder,
-		update: m.desktop_state_update,
-		ready: m.desktop_state_ready
+		offline: m.desktop_state_offline,
+		error: m.desktop_state_error
 	};
 
+	const tauri = isTauri();
 	let mac = $state(false);
 	let single = $state(true);
+	let online = $state(true);
 	let palette = $state<ReturnType<typeof CommandPalette>>();
 	let feedback = $state<ReturnType<typeof FeedbackDialog>>();
-	const upload = $derived(uploaderState(uploader.status));
 	const settings = href('/settings');
+	const upload = $derived(uploaderState(uploader.status, online));
+	const status = $derived(
+		upload
+			? {
+					live: upload === 'watching',
+					label: `${m.desktop_uploader()}: ${STATES[upload]()}`,
+					href: settings
+				}
+			: undefined
+	);
+	const update = $derived(
+		!uploader.status?.ready && (uploader.status?.update || uploader.status?.manual)
+	);
 	const retry = $derived(!data.me && data.meFailed && !!uploader.status?.linked);
 	const item =
 		'flex items-center gap-2.5 rounded-sm px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:text-foreground [&_svg]:size-4';
@@ -78,6 +92,7 @@
 	}
 
 	function reload() {
+		online = navigator.onLine;
 		if (retry) invalidateAll();
 	}
 
@@ -85,6 +100,7 @@
 
 	onMount(() => {
 		mac = isMac();
+		online = navigator.onLine;
 		single = !document.documentElement.classList.contains('keys-off');
 		document.documentElement.lang = getLocale();
 		invoke('tray_labels', {
@@ -181,22 +197,42 @@
 	onauxclick={onclick}
 	onfocus={reload}
 	ononline={reload}
+	onoffline={() => (online = false)}
 />
 
 <svelte:head>
 	<title>{m.site_name()}</title>
 </svelte:head>
 
+{#snippet updateItem(menuItem: string, close: () => void)}
+	<a class={menuItem} href={settings} onclick={close}>{m.desktop_state_update()}</a>
+{/snippet}
+
 <div class="contents" style={masks()}>
-	<div class="flex min-h-dvh overflow-x-clip">
+	{#if tauri}
+		<TitleBar />
+	{/if}
+	<div class="flex min-h-[calc(100dvh-var(--head))] overflow-x-clip">
 		<aside
-			class="sticky top-0 flex h-dvh w-56 flex-none flex-col overflow-y-auto border-r [view-transition-name:site-header]"
+			class="sticky top-(--head) flex h-[calc(100dvh-var(--head))] w-56 flex-none flex-col overflow-y-auto border-r [view-transition-name:site-header]"
 		>
-			<a
-				href={href('/')}
-				class="flex items-center gap-2.5 px-5 pt-5 pb-4 text-[17px] font-semibold tracking-wide"
-				><Logo class="size-6" /><span>SPAM<span class="text-muted-foreground">.live</span></span></a
-			>
+			{#if !tauri}
+				<a
+					href={href('/')}
+					class="flex items-center gap-2.5 px-5 pt-5 pb-2 text-[17px] font-semibold tracking-wide"
+					><Logo class="size-6" /><span>SPAM<span class="text-muted-foreground">.live</span></span
+					></a
+				>
+			{/if}
+			<div class="grid px-3 pt-3 pb-3 [&>button]:justify-start [&>button_kbd]:ml-auto">
+				<CommandPalette
+					bind:this={palette}
+					{mac}
+					download={false}
+					onlanguage={setLocale}
+					onfeedback={() => feedback?.open()}
+				/>
+			</div>
 			<nav class="grid gap-0.5 px-3">
 				{#each nav as [path, label, icon] (path)}
 					<a class={item} href={href(path)} aria-current={current(path)}
@@ -205,53 +241,34 @@
 				{/each}
 			</nav>
 			<div class="mt-auto grid gap-2 border-t px-3 py-4">
-				<div
-					class="flex items-center gap-1 [&>button:first-child]:min-w-0 [&>button:first-child]:flex-1 [&>button:first-child]:justify-start [&>button:first-child_kbd]:ml-auto"
-				>
-					<CommandPalette
-						bind:this={palette}
-						{mac}
-						download={false}
-						onlanguage={setLocale}
-						onfeedback={() => feedback?.open()}
-					/>
-					<Tooltip content={m.feedback_title()}>
-						{#snippet children(tip)}
-							<Button
-								variant="ghost"
-								size="icon-sm"
-								class="text-muted-foreground"
-								aria-label={m.feedback_title()}
-								aria-haspopup="dialog"
-								aria-keyshortcuts={single ? 'f' : undefined}
-								onclick={() => feedback?.open()}
-								{...tip}><HugeiconsIcon icon={Message01Icon} /></Button
-							>
-						{/snippet}
-					</Tooltip>
-				</div>
-				{#if upload}
-					<Button
-						variant="ghost"
-						size="sm"
-						href={upload === 'ready' ? undefined : settings}
-						onclick={upload === 'ready' ? restart : undefined}
-						aria-current={page.url.pathname === settings ? 'page' : undefined}
-						class={[
-							'h-auto min-h-8 justify-start py-1.5 text-left whitespace-normal',
-							upload === 'watching' && 'text-muted-foreground'
-						]}
-						><HugeiconsIcon icon={CloudUploadIcon} /><span class="sr-only"
-							>{m.desktop_uploader()}:</span
-						>{STATES[upload]()}</Button
+				{#if uploader.status?.ready}
+					<Button variant="outline" size="sm" class="justify-start" onclick={restart}
+						><HugeiconsIcon icon={RefreshIcon} />{m.desktop_state_ready()}</Button
 					>
 				{/if}
+				<Button
+					variant="outline"
+					size="sm"
+					class="justify-start text-muted-foreground hover:text-foreground"
+					aria-haspopup="dialog"
+					aria-keyshortcuts={single ? 'f' : undefined}
+					onclick={() => feedback?.open()}
+					><HugeiconsIcon icon={Message01Icon} />{m.feedback_title()}<kbd
+						aria-hidden="true"
+						class="key-hint ml-auto in-[.keys-off]:hidden">F</kbd
+					></Button
+				>
 				<a class={item} href={settings} aria-current={current('/settings')}
 					><HugeiconsIcon icon={Settings01Icon} aria-hidden="true" />{m.desktop_settings()}</a
 				>
 				{#if data.me}
 					<div class="flex min-w-0 items-center gap-2.5 px-1 pt-1">
-						<AccountMenu me={data.me} {logout} />
+						<AccountMenu
+							me={data.me}
+							{logout}
+							{status}
+							children={update ? updateItem : undefined}
+						/>
 						<span class="truncate text-sm" data-private>{data.me.displayName}</span>
 					</div>
 				{:else if retry}

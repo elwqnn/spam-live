@@ -125,6 +125,8 @@ async fn desktop_presence(pool: PgPool) {
     let (id, cookie) = user(&pool, "76561190000000001").await;
     let token = device(&pool, id).await;
     let app_online = async |app: &Router| analytics(app, &admin, "").await["now"]["appOnline"].clone();
+    let listed = async |app: &Router| send(app, get("/api/me/devices", &cookie)).await.body[0]["online"].clone();
+    assert_eq!(listed(&app).await, false);
 
     let res = send(&app, app_ping(Some(&token), json!({ "event": "open", "version": "0.1.0" }))).await;
     assert_eq!(res.status, StatusCode::OK);
@@ -138,6 +140,7 @@ async fn desktop_presence(pool: PgPool) {
     .unwrap();
     assert_eq!((version.as_deref(), online, used), (Some("0.1.0"), true, true));
     assert_eq!(app_online(&app).await, 1);
+    assert_eq!(listed(&app).await, true);
 
     let res = send(&app, app_ping(Some(&token), json!({ "event": "close", "version": "0.1.1" }))).await;
     assert_eq!(res.status, StatusCode::OK);
@@ -145,11 +148,14 @@ async fn desktop_presence(pool: PgPool) {
         sqlx::query_as("SELECT app_version, online_until FROM devices").fetch_one(&pool).await.unwrap();
     assert_eq!((version.as_deref(), until), (Some("0.1.1"), None));
     assert_eq!(app_online(&app).await, 0);
+    assert_eq!(listed(&app).await, false);
 
     send(&app, app_ping(Some(&token), json!({ "event": "check", "version": "0.1.1" }))).await;
     assert_eq!(app_online(&app).await, 1);
+    assert_eq!(listed(&app).await, true);
     sqlx::query("UPDATE devices SET online_until = now() - interval '1 second'").execute(&pool).await.unwrap();
     assert_eq!(app_online(&app).await, 0);
+    assert_eq!(listed(&app).await, false);
 
     let mut with_cookie = post_json("/api/desktop/presence", &cookie, json!({ "event": "open", "version": "0.1.0" }));
     with_cookie.headers_mut().insert(header::ORIGIN, PUBLIC_URL.parse().unwrap());

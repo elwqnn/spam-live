@@ -5,3 +5,7 @@
 	--reach: 0px;
 	scroll-padding-top: 0;
 }
+
+:root.framed {
+	--head: 2.25rem;
+}

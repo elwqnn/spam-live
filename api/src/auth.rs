@@ -542,15 +542,19 @@ pub struct Device {
     pub id: i64,
     pub created_at: DateTime<Utc>,
     pub last_used_at: Option<DateTime<Utc>>,
+    pub online: bool,
 }
 
 #[utoipa::path(get, path = "/api/me/devices", tag = "device",
     responses((status = 200, body = Vec<Device>), (status = 401, body = ErrorBody)))]
 pub async fn list_devices(State(s): State<AppState>, user: CurrentUser) -> Result<Json<Vec<Device>>, ApiError> {
-    let devices = sqlx::query_as("SELECT id, created_at, last_used_at FROM devices WHERE user_id = $1 ORDER BY id")
-        .bind(user.id)
-        .fetch_all(&s.db)
-        .await?;
+    let devices = sqlx::query_as(
+        "SELECT id, created_at, last_used_at, coalesce(online_until > now(), false) AS online
+         FROM devices WHERE user_id = $1 ORDER BY id",
+    )
+    .bind(user.id)
+    .fetch_all(&s.db)
+    .await?;
     Ok(Json(devices))
 }
 

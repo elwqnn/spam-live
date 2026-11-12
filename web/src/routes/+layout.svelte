@@ -51,9 +51,40 @@
 	let feedback = $state<ReturnType<typeof FeedbackDialog>>();
 	let head = $state(0);
 	let presence = $state<Schemas['Online']>();
+	let live = $state<boolean>();
 	let presenceId = '';
 	let presenceTimer: ReturnType<typeof setInterval> | undefined;
 	const count = (n: number) => new Intl.NumberFormat(getLocale()).format(n);
+	const status = $derived(
+		live === undefined
+			? undefined
+			: {
+					live,
+					label: live ? m.account_app_online() : m.account_app_offline(),
+					href: href('/me')
+				}
+	);
+
+	$effect(() => {
+		if (!data.me) return;
+		let active = true;
+		const read = async () => {
+			const list = await client()
+				.GET('/api/me/devices')
+				.then(
+					(res) => res.data,
+					() => undefined
+				);
+			if (active) live = list?.length ? list.some((d) => d.online) : undefined;
+		};
+		read();
+		const timer = setInterval(read, 60_000);
+		return () => {
+			active = false;
+			clearInterval(timer);
+			live = undefined;
+		};
+	});
 
 	onNavigate(viewTransition);
 
@@ -165,7 +196,7 @@
 					{/snippet}
 				</Tooltip>
 				{#if data.me}
-					<AccountMenu me={data.me} {logout} />
+					<AccountMenu me={data.me} {logout} {status} />
 				{:else}
 					<Button variant="outline" size="sm" href={login} rel="external">{m.login_steam()}</Button>
 				{/if}

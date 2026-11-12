@@ -26,6 +26,7 @@ const status = (patch: Partial<Status>): Status => ({
 	ready: null,
 	manual: false,
 	autostart: false,
+	health: 'ok',
 	...patch
 });
 
@@ -159,15 +160,18 @@ describe('account', () => {
 
 describe('uploader state', () => {
 	it('follows the status', () => {
+		const report = { kind: 'matches' as const, at: 1, counts: {}, reasons: [] };
 		expect(uploaderState(null)).toBeNull();
 		expect(uploaderState(status({}))).toBe('watching');
-		expect(uploaderState(status({ found: false }))).toBe('folder');
+		expect(uploaderState(status({ ready: '0.2.0', update: true, manual: true }))).toBe('watching');
+		expect(uploaderState(status({ last: { ...report, error: null } }))).toBe('watching');
+		expect(uploaderState(status({ last: { ...report, error: 'HTTP 500' } }))).toBe('error');
+		expect(uploaderState(status({ health: 'offline' }))).toBe('offline');
+		expect(uploaderState(status({ health: 'error' }))).toBe('error');
+		expect(uploaderState(status({}), false)).toBe('offline');
+		expect(uploaderState(status({ found: false, health: 'offline' }))).toBe('folder');
 		expect(uploaderState(status({ linked: false, found: false }))).toBe('unlinked');
-		expect(uploaderState(status({ linked: false, update: true }))).toBe('update');
-		expect(uploaderState(status({ linked: false, code: 'ABCD', update: true }))).toBe('linking');
-		expect(uploaderState(status({ manual: true }))).toBe('update');
-		expect(uploaderState(status({ ready: '0.2.0', update: true, linked: false }))).toBe('ready');
-		expect(uploaderState(status({ ready: '0.2.0', code: 'ABCD' }))).toBe('linking');
+		expect(uploaderState(status({ linked: false, code: 'ABCD' }))).toBe('linking');
 	});
 });
 

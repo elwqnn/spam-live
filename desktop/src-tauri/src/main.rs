@@ -31,7 +31,7 @@ use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_updater::{Update, UpdaterExt};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
-use uploader::{Api, RETRY, Report, Uploader};
+use uploader::{Api, Fail, RETRY, Report, Uploader};
 
 const SITE: &str = match option_env!("SPAM_SITE_URL") {
     Some(url) => url,
@@ -44,6 +44,8 @@ const POLL: Duration = Duration::from_secs(2);
 const API_TIMEOUT: Duration = Duration::from_secs(60);
 const DEV_ORIGIN: &str = "http://localhost:1420";
 const UPDATE_CHECK: Duration = Duration::from_secs(6 * 60 * 60);
+const HEARTBEAT: Duration = Duration::from_secs(5 * 60);
+const RECONNECT: Duration = Duration::from_secs(60);
 const WINDOW_STATE: StateFlags = StateFlags::SIZE.union(StateFlags::POSITION).union(StateFlags::MAXIMIZED);
 const APPIMAGE_VARS: [&str; 11] = [
     "LD_LIBRARY_PATH",
@@ -79,6 +81,7 @@ struct Data {
     ready: Option<Update>,
     manual: bool,
     reset: bool,
+    health: Health,
 }
 
 struct Tray {
@@ -97,6 +100,15 @@ enum Notice {
     Error(String),
 }
 
+#[derive(Serialize, Clone, Copy, Default, PartialEq, Eq, Debug)]
+#[serde(rename_all = "lowercase")]
+enum Health {
+    #[default]
+    Ok,
+    Offline,
+    Error,
+}
+
 #[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 struct Status {
@@ -112,6 +124,7 @@ struct Status {
     ready: Option<String>,
     manual: bool,
     autostart: bool,
+    health: Health,
 }
 
 #[derive(Serialize)]
@@ -194,6 +207,7 @@ fn status(app: &AppHandle) -> Status {
         ready: d.ready.as_ref().map(|u| u.version.clone()),
         manual: d.manual,
         autostart,
+        health: d.health,
     }
 }
 
@@ -299,6 +313,7 @@ fn revoke(app: &AppHandle, token: &str) {
     if d.token.as_deref() == Some(token) {
         let _ = keyring().and_then(|entry| entry.delete_credential());
         d.token = None;
+        d.last = None;
         d.notice = Some(Notice::Revoked);
     }
 }
@@ -314,6 +329,7 @@ fn unlink(app: AppHandle) -> Result<(), String> {
     {
         let mut d = data(&app);
         d.token = None;
+        d.last = None;
         d.notice = Some(Notice::Unlinked);
     }
     emit(&app);
@@ -553,6 +569,7 @@ fn pairing(app: &AppHandle, id: u64) {
                     Ok(()) => {
                         let mut d = data(app);
                         d.token = Some(token);
+                        d.last = None;
                         d.reset = true;
                         None
                     }
@@ -571,6 +588,24 @@ fn pairing(app: &AppHandle, id: u64) {
     }
 }
 
+fn check_wait(offline: bool, linked: bool) -> Duration {
+    if offline {
+        RECONNECT
+    } else if linked {
+        HEARTBEAT
+    } else {
+        RETRY
+    }
+}
+
+fn health<T>(result: &Result<T, Fail>) -> Health {
+    match result {
+        Ok(_) => Health::Ok,
+        Err(Fail { status: None, .. }) => Health::Offline,
+        Err(_) => Health::Error,
+    }
+}
+
 fn worker(app: AppHandle) {
     match keyring().and_then(|entry| entry.get_password()) {
         Ok(token) => data(&app).token = Some(token),
@@ -580,14 +615,17 @@ fn worker(app: AppHandle) {
     emit(&app);
     let api = Api::new(site());
     let mut uploader: Option<Uploader> = None;
-    let mut version_check = Instant::now();
+    let mut checked_at: Option<Instant> = None;
     let mut checked: Option<String> = None;
     let mut online: Option<String> = None;
     loop {
         let now = Instant::now();
-        let token = data(&app).token.clone();
-        if now >= version_check || token != checked {
-            version_check = now + RETRY;
+        let (token, wait) = {
+            let d = data(&app);
+            (d.token.clone(), check_wait(d.health == Health::Offline, d.token.is_some()))
+        };
+        if checked_at.is_none_or(|at| now >= at + wait) || token != checked {
+            checked_at = Some(now);
             checked.clone_from(&token);
             let min = match &token {
                 Some(token) => {
@@ -595,20 +633,27 @@ fn worker(app: AppHandle) {
                     let result = api.presence(token, event, VERSION);
                     match &result {
                         Ok(_) => online = Some(token.clone()),
-                        Err(fail) if fail.status == Some(401) => {
-                            revoke(&app, token);
-                            emit(&app);
-                        }
+                        Err(fail) if fail.status == Some(401) => revoke(&app, token),
                         Err(_) => {}
                     }
                     result
                 }
                 None => api.min_version(),
             };
-            if let Ok(min) = min {
-                data(&app).update = uploader::older(VERSION, &min);
-                emit(&app);
+            let next = health(&min);
+            let recovered = {
+                let mut d = data(&app);
+                let recovered = d.health != Health::Ok && next == Health::Ok;
+                d.health = next;
+                if let Ok(min) = &min {
+                    d.update = uploader::older(VERSION, min);
+                }
+                recovered
+            };
+            if recovered && let Some(uploader) = uploader.as_mut() {
+                uploader.wake(now);
             }
+            emit(&app);
         }
         let (token, folder) = {
             let mut d = data(&app);
@@ -816,6 +861,22 @@ mod tests {
         fs::set_permissions(&dir, fs::Permissions::from_mode(0o755)).unwrap();
         fs::remove_dir_all(&dir).unwrap();
         assert!(!writable(&dir));
+    }
+
+    #[test]
+    fn check_waits() {
+        assert_eq!(check_wait(true, true), RECONNECT);
+        assert_eq!(check_wait(false, true), HEARTBEAT);
+        assert_eq!(check_wait(false, false), RETRY);
+    }
+
+    #[test]
+    fn maps_failures_to_health() {
+        let fail = |status| Err::<(), _>(Fail { status, message: String::new() });
+        assert_eq!(health(&Ok::<(), Fail>(())), Health::Ok);
+        assert_eq!(health(&fail(None)), Health::Offline);
+        assert_eq!(health(&fail(Some(429))), Health::Error);
+        assert_eq!(health(&fail(Some(503))), Health::Error);
     }
 
     #[test]
