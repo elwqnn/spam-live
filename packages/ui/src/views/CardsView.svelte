@@ -127,9 +127,11 @@
 
 <section
 	aria-labelledby="tiers-banner"
-	class="flex flex-wrap items-center gap-x-8 gap-y-3 px-(--gutter) py-4 hatch"
+	class="isolate flex flex-wrap items-center gap-x-8 gap-y-3 px-(--gutter) py-4 hatch"
 >
-	<div class="-mx-3 -my-1.5 grid gap-0.5 bg-background px-3 py-1.5">
+	<div
+		class="relative grid gap-0.5 before:absolute before:-inset-x-4 before:-inset-y-3 before:-z-10 before:bg-background before:mask-y-from-[calc(100%-0.75rem)] before:mask-x-from-[calc(100%-1rem)]"
+	>
 		<h2 id="tiers-banner" class="font-heading text-xl font-normal tracking-tight">
 			{m.tiers_title()}
 		</h2>
@@ -139,7 +141,7 @@
 		<div class="flex items-start gap-2">
 			<TierBadge tier="S" large />
 			<ul class="flex flex-wrap gap-2">
-				{#each top as card (card.id)}
+				{#each top.slice(0, 8) as card (card.id)}
 					<li>
 						<a
 							class="block rounded-xs focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
@@ -155,11 +157,20 @@
 						>
 					</li>
 				{/each}
+				{#if top.length > 8}
+					<li>
+						<a
+							class="grid size-10 place-items-center rounded-xs border-2 border-foreground/25 bg-background text-sm text-muted-foreground tabular-nums transition-colors hover:border-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+							href={href('/stats#tiers')}
+							>+{top.length - 8}<span class="sr-only"> {m.tiers_banner_link()}</span></a
+						>
+					</li>
+				{/if}
 			</ul>
 		</div>
 	{/if}
 	<a
-		class={[buttonVariants({ variant: 'outline', size: 'sm' }), 'ml-auto bg-background']}
+		class={[buttonVariants({ variant: 'outline', size: 'sm' }), 'ml-auto']}
 		href={href('/stats#tiers')}
 		>{m.tiers_banner_link()}
 		<HugeiconsIcon icon={ArrowRight02Icon} aria-hidden="true" /></a
